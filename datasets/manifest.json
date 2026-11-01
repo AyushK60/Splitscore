@@ -1,0 +1,730 @@
+{
+  "manifest_schema_version": "1.0.0",
+  "app_version": "1.0.0",
+  "generated_by": "scripts/generate_datasets.py",
+  "synthetic_only": true,
+  "datasets": [
+    {
+      "demo_id": "repeated_entity",
+      "title": "Repeated-entity subscription panel",
+      "subtitle": "Several months per customer, split at random across the boundary",
+      "filename": "repeated_entity.csv",
+      "synthetic": true,
+      "is_control": false,
+      "seed": 20240101,
+      "row_count": 240,
+      "column_count": 8,
+      "columns": [
+        "customer_id",
+        "month_index",
+        "tenure_months",
+        "monthly_spend",
+        "support_tickets",
+        "avg_session_minutes",
+        "churned",
+        "split"
+      ],
+      "sha256": "c4992126471b70fca4a3b0c87509410428bd7fd114fc1c80f7f25708f14b3365",
+      "teaching_point": "A random holdout on panel data puts most customers on both sides of the boundary. The test set then measures performance on customers the model has already seen, which is the wrong estimate if deployment must serve new customers. A group holdout on the same entity column removes the overlap.",
+      "generation_method": "Per-customer latent tenure, spend and ticket rate drawn from seeded NumPy distributions; six monthly rows per customer with per-row noise; churn drawn once per customer so the label is an entity-level property; split assigned by an independent seeded Bernoulli draw that ignores the customer.",
+      "expected_findings": [
+        {
+          "rule_id": "SS-ENT-001",
+          "severity": "high",
+          "why": "Most customers have rows in both splits, so a large share of the test split belongs to an entity present in training."
+        },
+        {
+          "rule_id": "SS-DUP-001",
+          "severity": "none",
+          "why": "Feature values are continuous with per-row noise, so no two rows share an exact feature signature."
+        }
+      ],
+      "recommended_audit": {
+        "features": [
+          "tenure_months",
+          "monthly_spend",
+          "support_tickets",
+          "avg_session_minutes"
+        ],
+        "target": "churned",
+        "entity": "customer_id",
+        "timestamp": null,
+        "split": "split",
+        "split_train_value": "train",
+        "split_test_value": "test",
+        "metadata_excluded": [
+          "month_index"
+        ],
+        "near_duplicates": false
+      },
+      "recommended_split": {
+        "kind": "group",
+        "test_fraction": 0.25,
+        "seed": 12345
+      },
+      "planted_cases": [
+        {
+          "kind": "shared_entity",
+          "description": "Customer appears in both the train and the test split.",
+          "entity_column": "customer_id",
+          "entities": [
+            "C-1000",
+            "C-1001",
+            "C-1002",
+            "C-1003",
+            "C-1004"
+          ]
+        }
+      ],
+      "summary_metrics": {
+        "shared_entities": 33,
+        "customers_total": 40,
+        "rows_per_customer": 6,
+        "test_rows": 61,
+        "train_rows": 179
+      },
+      "control_baseline": null,
+      "intended_pair_counts": {
+        "cross_split_duplicate_pairs": null,
+        "within_train_duplicate_pairs": null,
+        "within_test_duplicate_pairs": null,
+        "near_duplicate_pairs": null
+      },
+      "notes": [
+        "The label is constant within a customer. Whether that is a defect depends on the prediction task: for an entity-level target, a group holdout is the honest split."
+      ]
+    },
+    {
+      "demo_id": "exact_duplicates",
+      "title": "Order table with cross-split duplicate rows",
+      "subtitle": "Copies of the same order placed deliberately on both sides of the boundary",
+      "filename": "exact_duplicates.csv",
+      "synthetic": true,
+      "is_control": false,
+      "seed": 20240202,
+      "row_count": 120,
+      "column_count": 7,
+      "columns": [
+        "region",
+        "channel",
+        "units",
+        "unit_price",
+        "is_promo",
+        "converted",
+        "split"
+      ],
+      "sha256": "4150a751fa8c60ec689a06fe22ed81d1fcd37fd069eb4f4f367fdcc24a7218a8",
+      "teaching_point": "Exact duplicates that straddle the boundary make the test set partially remembered training data. The same file also contains duplicates that sit entirely inside one split; the report separates those two cases because only the first is cross-split leakage.",
+      "generation_method": "80 unique seeded order rows; 25 of them duplicated with one copy labelled train and the other test; 10 further rows duplicated inside train and 5 inside test; row order shuffled with a seeded permutation.",
+      "expected_findings": [
+        {
+          "rule_id": "SS-DUP-001",
+          "severity": "high",
+          "why": "25 test rows share an exact feature signature with a training row, which is both above 10 rows and far above 5% of the test split."
+        },
+        {
+          "rule_id": "SS-ENT-001",
+          "severity": "not_evaluated",
+          "why": "No entity column is selected for this audit."
+        }
+      ],
+      "recommended_audit": {
+        "features": [
+          "region",
+          "channel",
+          "units",
+          "unit_price",
+          "is_promo"
+        ],
+        "target": "converted",
+        "entity": null,
+        "timestamp": null,
+        "split": "split",
+        "split_train_value": "train",
+        "split_test_value": "test",
+        "metadata_excluded": [],
+        "near_duplicates": false
+      },
+      "recommended_split": {
+        "kind": "random",
+        "test_fraction": 0.25,
+        "seed": 12345
+      },
+      "planted_cases": [
+        {
+          "kind": "cross_split_duplicate_group",
+          "description": "A feature signature appears in both splits.",
+          "signature": "east|app|15|125.43|1",
+          "train_row_ids": [
+            "row-000079"
+          ],
+          "test_row_ids": [
+            "row-000085"
+          ]
+        },
+        {
+          "kind": "cross_split_duplicate_group",
+          "description": "A feature signature appears in both splits.",
+          "signature": "east|app|15|212.11|0",
+          "train_row_ids": [
+            "row-000049"
+          ],
+          "test_row_ids": [
+            "row-000056"
+          ]
+        },
+        {
+          "kind": "cross_split_duplicate_group",
+          "description": "A feature signature appears in both splits.",
+          "signature": "east|app|24|95.74|0",
+          "train_row_ids": [
+            "row-000057"
+          ],
+          "test_row_ids": [
+            "row-000064"
+          ]
+        },
+        {
+          "kind": "cross_split_duplicate_group",
+          "description": "A feature signature appears in both splits.",
+          "signature": "east|app|2|94.4|1",
+          "train_row_ids": [
+            "row-000047"
+          ],
+          "test_row_ids": [
+            "row-000051"
+          ]
+        },
+        {
+          "kind": "cross_split_duplicate_group",
+          "description": "A feature signature appears in both splits.",
+          "signature": "east|app|3|46.2|1",
+          "train_row_ids": [
+            "row-000104"
+          ],
+          "test_row_ids": [
+            "row-000090"
+          ]
+        },
+        {
+          "kind": "within_split_duplicate_groups",
+          "description": "Duplicated copies that both sit inside the test split, so they are not cross-split leakage.",
+          "groups": 30,
+          "rows": 60
+        }
+      ],
+      "summary_metrics": {
+        "cross_split_duplicate_groups": 25,
+        "cross_split_duplicate_test_rows": 25,
+        "cross_split_duplicate_train_rows": 25,
+        "within_test_duplicate_groups": 30,
+        "within_train_duplicate_groups": 10,
+        "intended_cross_pairs": 25,
+        "intended_within_train_pairs": 10,
+        "intended_within_test_pairs": 5
+      },
+      "control_baseline": null,
+      "intended_pair_counts": {
+        "cross_split_duplicate_pairs": 25,
+        "within_train_duplicate_pairs": 10,
+        "within_test_duplicate_pairs": 5,
+        "near_duplicate_pairs": null
+      },
+      "notes": []
+    },
+    {
+      "demo_id": "chronology_violation",
+      "title": "Drifting sensor stream split at random",
+      "subtitle": "A temporal process whose train/test split ignores time",
+      "filename": "chronology_violation.csv",
+      "synthetic": true,
+      "is_control": false,
+      "seed": 20240303,
+      "row_count": 360,
+      "column_count": 7,
+      "columns": [
+        "event_ts",
+        "device_id",
+        "sensor_a",
+        "sensor_b",
+        "throughput",
+        "defect",
+        "split"
+      ],
+      "sha256": "834ba4e30e8eda4df7869a3cedc33f95cf76284bd76d0ec0a99cd44b5c29aa73",
+      "teaching_point": "When the intended evaluation predicts forward in time, a random split trains on records from the future. The chronology check reports how far the training data extends past the earliest test record; a chronological holdout removes the violation.",
+      "generation_method": "360 daily observations with a linear drift, a six-cycle seasonal term and seeded noise; the defect rate rises with throughput; the split is an independent seeded Bernoulli draw that ignores the timestamp entirely.",
+      "expected_findings": [
+        {
+          "rule_id": "SS-CHR-001",
+          "severity": "high",
+          "why": "A random split leaves the great majority of training rows newer than the earliest test timestamp, far above the 2% high-severity threshold."
+        },
+        {
+          "rule_id": "SS-DUP-001",
+          "severity": "none",
+          "why": "Sensor readings are continuous with noise, so no feature signature repeats."
+        }
+      ],
+      "recommended_audit": {
+        "features": [
+          "sensor_a",
+          "sensor_b",
+          "throughput"
+        ],
+        "target": "defect",
+        "entity": null,
+        "timestamp": "event_ts",
+        "split": "split",
+        "split_train_value": "train",
+        "split_test_value": "test",
+        "metadata_excluded": [
+          "device_id"
+        ],
+        "near_duplicates": false
+      },
+      "recommended_split": {
+        "kind": "chronological",
+        "test_fraction": 0.25,
+        "seed": 12345
+      },
+      "planted_cases": [
+        {
+          "kind": "random_split_on_temporal_data",
+          "description": "A random holdout puts training records later than the earliest test record, so the split cannot estimate future performance.",
+          "earliest_test_timestamp": "2023-01-01T17:37:27+00:00",
+          "train_rows_after_earliest_test": 262,
+          "train_row_ids_example": [
+            "row-000002",
+            "row-000004",
+            "row-000005",
+            "row-000006",
+            "row-000009"
+          ]
+        }
+      ],
+      "summary_metrics": {
+        "earliest_test_timestamp": "2023-01-01T17:37:27+00:00",
+        "latest_train_timestamp": "2023-12-25T01:08:35+00:00",
+        "train_rows_after_earliest_test": 262,
+        "train_rows": 262,
+        "test_rows": 98,
+        "order_violation": true
+      },
+      "control_baseline": null,
+      "intended_pair_counts": {
+        "cross_split_duplicate_pairs": null,
+        "within_train_duplicate_pairs": null,
+        "within_test_duplicate_pairs": null,
+        "near_duplicate_pairs": null
+      },
+      "notes": [
+        "device_id is present in the file but is not assigned the entity role, so SS-ENT-001 reports itself as not evaluated. Assign it to see the group check in action."
+      ]
+    },
+    {
+      "demo_id": "target_copy",
+      "title": "Account table with a target-copy feature",
+      "subtitle": "One column is the label, another nearly is",
+      "filename": "target_copy.csv",
+      "synthetic": true,
+      "is_control": false,
+      "seed": 20240404,
+      "row_count": 240,
+      "column_count": 8,
+      "columns": [
+        "account_ref",
+        "account_age_days",
+        "logins_30d",
+        "avg_order_value",
+        "risk_score",
+        "risk_band",
+        "churn_flag",
+        "split"
+      ],
+      "sha256": "b54656b98a00e0ac7ebf69fac90f38c603760acf3ce8b05daa41edfe6e835efc",
+      "teaching_point": "A feature that reproduces the label turns the evaluation into a copy test. The check reports measured coverage rather than a verdict, and reports the counterexamples that bound the claim.",
+      "generation_method": "240 seeded accounts; churn drawn from a logistic function of logins and order value; risk_score set equal to the churn flag on every row; risk_band set equal to it on all but a seeded 7% of rows; split assigned by an independent seeded draw.",
+      "expected_findings": [
+        {
+          "rule_id": "SS-TGT-001",
+          "severity": "high",
+          "why": "risk_score equals churn_flag on 100% of comparable rows, above the 99% high-severity threshold."
+        },
+        {
+          "rule_id": "SS-TGT-001",
+          "severity": "medium",
+          "why": "risk_band matches the target on roughly 93% of rows: above the 90% reporting threshold and above the majority-class rate, but below 99%."
+        }
+      ],
+      "recommended_audit": {
+        "features": [
+          "account_age_days",
+          "logins_30d",
+          "avg_order_value",
+          "risk_score",
+          "risk_band"
+        ],
+        "target": "churn_flag",
+        "entity": null,
+        "timestamp": null,
+        "split": "split",
+        "split_train_value": "train",
+        "split_test_value": "test",
+        "metadata_excluded": [
+          "account_ref"
+        ],
+        "near_duplicates": false
+      },
+      "recommended_split": {
+        "kind": "stratified",
+        "test_fraction": 0.25,
+        "seed": 12345
+      },
+      "planted_cases": [
+        {
+          "kind": "target_copy_feature",
+          "description": "risk_score equals churn_flag on every row.",
+          "feature": "risk_score",
+          "coverage": 1.0
+        },
+        {
+          "kind": "partial_target_copy_feature",
+          "description": "risk_band equals churn_flag on all but the deliberately flipped rows.",
+          "feature": "risk_band",
+          "coverage": 0.945833,
+          "flipped_rows": 13
+        }
+      ],
+      "summary_metrics": {
+        "exact_copy_feature": "risk_score",
+        "exact_copy_coverage": 1.0,
+        "near_copy_feature": "risk_band",
+        "near_copy_coverage": 0.945833,
+        "target": "churn_flag",
+        "target_majority_rate": 0.558333
+      },
+      "control_baseline": null,
+      "intended_pair_counts": {
+        "cross_split_duplicate_pairs": null,
+        "within_train_duplicate_pairs": null,
+        "within_test_duplicate_pairs": null,
+        "near_duplicate_pairs": null
+      },
+      "notes": []
+    },
+    {
+      "demo_id": "near_duplicates",
+      "title": "Part measurements with re-measured parts",
+      "subtitle": "Some parts were measured twice with small jitter",
+      "filename": "near_duplicates.csv",
+      "synthetic": true,
+      "is_control": false,
+      "seed": 20240606,
+      "row_count": 260,
+      "column_count": 7,
+      "columns": [
+        "item_id",
+        "length_mm",
+        "width_mm",
+        "height_mm",
+        "mass_g",
+        "grade",
+        "split"
+      ],
+      "sha256": "a812df396ccfa9497d070e2462c6e6c288d1430696c6b6f0512ac5a064aca392",
+      "teaching_point": "Exact-duplicate detection misses near duplicates. The opt-in distance check finds them, but its output is a bounded list of candidates under a stated distance definition, not a finding of leakage: it is a screening step that needs a human decision.",
+      "generation_method": "280 unique seeded parts across four continuous measurements; 20 of them re-measured with uniform jitter of at most 1.5% of each column's interquartile range, with the original labelled test and the re-measurement labelled train; remaining rows split at random.",
+      "expected_findings": [
+        {
+          "rule_id": "SS-NEAR-001",
+          "severity": "medium",
+          "why": "Around 20 cross-split pairs fall within the default 0.05 threshold in robustly scaled units, matching the planted re-measurements."
+        },
+        {
+          "rule_id": "SS-DUP-001",
+          "severity": "none",
+          "why": "The jittered copies are not exactly equal, so no feature signature is shared."
+        }
+      ],
+      "recommended_audit": {
+        "features": [
+          "length_mm",
+          "width_mm",
+          "height_mm",
+          "mass_g"
+        ],
+        "target": "grade",
+        "entity": null,
+        "timestamp": null,
+        "split": "split",
+        "split_train_value": "train",
+        "split_test_value": "test",
+        "metadata_excluded": [
+          "item_id"
+        ],
+        "near_duplicates": true
+      },
+      "recommended_split": {
+        "kind": "random",
+        "test_fraction": 0.25,
+        "seed": 12345
+      },
+      "planted_cases": [
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000241",
+          "test_row_id": "row-000001",
+          "item_id": "P-3000"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000242",
+          "test_row_id": "row-000002",
+          "item_id": "P-3001"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000243",
+          "test_row_id": "row-000003",
+          "item_id": "P-3002"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000244",
+          "test_row_id": "row-000004",
+          "item_id": "P-3003"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000245",
+          "test_row_id": "row-000005",
+          "item_id": "P-3004"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000246",
+          "test_row_id": "row-000006",
+          "item_id": "P-3005"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000247",
+          "test_row_id": "row-000007",
+          "item_id": "P-3006"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000248",
+          "test_row_id": "row-000008",
+          "item_id": "P-3007"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000249",
+          "test_row_id": "row-000009",
+          "item_id": "P-3008"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000250",
+          "test_row_id": "row-000010",
+          "item_id": "P-3009"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000251",
+          "test_row_id": "row-000011",
+          "item_id": "P-3010"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000252",
+          "test_row_id": "row-000012",
+          "item_id": "P-3011"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000253",
+          "test_row_id": "row-000013",
+          "item_id": "P-3012"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000254",
+          "test_row_id": "row-000014",
+          "item_id": "P-3013"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000255",
+          "test_row_id": "row-000015",
+          "item_id": "P-3014"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000256",
+          "test_row_id": "row-000016",
+          "item_id": "P-3015"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000257",
+          "test_row_id": "row-000017",
+          "item_id": "P-3016"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000258",
+          "test_row_id": "row-000018",
+          "item_id": "P-3017"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000259",
+          "test_row_id": "row-000019",
+          "item_id": "P-3018"
+        },
+        {
+          "kind": "near_duplicate_pair",
+          "description": "One part measured twice with small jitter, one copy in train and one in test.",
+          "train_row_id": "row-000260",
+          "test_row_id": "row-000020",
+          "item_id": "P-3019"
+        }
+      ],
+      "summary_metrics": {
+        "near_duplicate_pairs": 20,
+        "jitter_fraction_of_iqr": 0.015,
+        "max_possible_scaled_distance": 0.09,
+        "recommended_threshold": 0.05,
+        "test_rows": 75,
+        "train_rows": 185
+      },
+      "control_baseline": null,
+      "intended_pair_counts": {
+        "cross_split_duplicate_pairs": null,
+        "within_train_duplicate_pairs": null,
+        "within_test_duplicate_pairs": null,
+        "near_duplicate_pairs": 20
+      },
+      "notes": [
+        "SS-NEAR-001 is opt-in. The recommended audit configuration for this demo enables it.",
+        "Near-duplicate output is candidate evidence. Raising the threshold widens the candidate list; it does not make the pairs more likely to be leakage."
+      ]
+    },
+    {
+      "demo_id": "clean_control",
+      "title": "Clean control dataset",
+      "subtitle": "No planted leakage under the shipped chronological split",
+      "filename": "clean_control.csv",
+      "synthetic": true,
+      "is_control": true,
+      "seed": 20240505,
+      "row_count": 240,
+      "column_count": 9,
+      "columns": [
+        "record_key",
+        "entity_id",
+        "created_at",
+        "x1",
+        "x2",
+        "x3",
+        "segment",
+        "label",
+        "split"
+      ],
+      "sha256": "16a49abe54b06b1b7846add461ea4c263efa586b89ae1301052652ad7ab9ac38",
+      "teaching_point": "A control that should produce nothing. It shows the difference between 'no findings' and 'not evaluated', and it shows that the checks fire when the same file is split inappropriately: a random holdout on this file raises the chronology check.",
+      "generation_method": "240 seeded rows with independent continuous features, a balanced label, unique record and entity identifiers, strictly increasing six-hourly timestamps, and a chronological 75/25 split.",
+      "expected_findings": [
+        {
+          "rule_id": "SS-DUP-001",
+          "severity": "none",
+          "why": "Every row has a distinct feature signature."
+        },
+        {
+          "rule_id": "SS-ENT-001",
+          "severity": "none",
+          "why": "Entity identifiers are unique per row, so no entity value appears in both splits. The check runs and reports nothing."
+        },
+        {
+          "rule_id": "SS-CHR-001",
+          "severity": "none",
+          "why": "The shipped split is chronological, so no training row is newer than the earliest test row."
+        },
+        {
+          "rule_id": "SS-TGT-001",
+          "severity": "none",
+          "why": "No feature reproduces the label."
+        }
+      ],
+      "recommended_audit": {
+        "features": [
+          "x1",
+          "x2",
+          "x3",
+          "segment"
+        ],
+        "target": "label",
+        "entity": "entity_id",
+        "timestamp": "created_at",
+        "split": "split",
+        "split_train_value": "train",
+        "split_test_value": "test",
+        "metadata_excluded": [
+          "record_key"
+        ],
+        "near_duplicates": false
+      },
+      "recommended_split": null,
+      "planted_cases": [],
+      "summary_metrics": {
+        "control": true,
+        "train_rows": 180,
+        "test_rows": 60,
+        "latest_train_timestamp": "2024-02-14T18:00:00+00:00",
+        "earliest_test_timestamp": "2024-02-15T00:00:00+00:00",
+        "chronology_ordered": true,
+        "distinct_entities": 240
+      },
+      "control_baseline": {
+        "expected": "No findings from any of the four enabled checks with the shipped chronological split.",
+        "check_expectations": {
+          "SS-DUP-001": "no findings: every row has a distinct feature signature",
+          "SS-ENT-001": "no findings: entity identifiers are unique, so no entity straddles the boundary",
+          "SS-CHR-001": "no findings: the shipped split is chronological",
+          "SS-TGT-001": "no findings: no feature reproduces the label"
+        }
+      },
+      "intended_pair_counts": {
+        "cross_split_duplicate_pairs": null,
+        "within_train_duplicate_pairs": null,
+        "within_test_duplicate_pairs": null,
+        "near_duplicate_pairs": null
+      },
+      "notes": [
+        "Entity identifiers are unique, so a group holdout on this file is equivalent to a random holdout. That is a property of the control, not of group splitting in general."
+      ]
+    }
+  ]
+}

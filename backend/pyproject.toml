@@ -1,0 +1,39 @@
+[project]
+name = "splitscope-backend"
+version = "1.0.0"
+description = "SplitScope: explainable ML data leakage auditor (backend)"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers --strict-config"
+filterwarnings = [
+    "error::DeprecationWarning:app.*",
+]
+markers = [
+    "slow: tests that exercise the row bounds or larger generated fixtures",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+src = ["."]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF"]
+ignore = [
+    "E501",    # long lines are handled by the formatter's line-length
+    "B008",    # FastAPI's Depends/Query defaults are call expressions by design
+    "SIM108",  # explicit if/else reads better in the rule implementations
+    # int(...) casts around NumPy scalars are intentional: they keep JSON payloads
+    # free of numpy int64/float64 and make the serialised report portable.
+    "RUF046",
+    # Typographic characters (em dash, multiplication sign, ellipsis) appear in
+    # user-facing prose and report text. They are intentional, not confusables.
+    "RUF001",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402"]   # test modules import after a sys.path bootstrap in conftest

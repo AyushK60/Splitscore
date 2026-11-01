@@ -1,0 +1,20 @@
+# SplitScope backend runtime dependencies.
+#
+# Pinned exactly: a reviewer should be able to reproduce the audit results and the
+# test suite without guessing which pandas or scikit-learn behaviour they get.
+# A full transitive freeze is in requirements.lock.txt.
+#
+# Verified on Python 3.11.9 (Windows 11) and exercised by the test suite.
+
+fastapi==0.143.2
+uvicorn[standard]==0.54.0
+pydantic==2.14.1
+python-multipart==0.0.32
+
+# Data and splitting
+pandas==3.0.6
+numpy==2.4.6
+scikit-learn==1.9.1
+
+# HTTP client used by the test suite (TestClient) and by scripts/evaluate_checks.py
+httpx==0.28.1
