@@ -124,7 +124,7 @@ test('happy path: load demo, audit, evidence, group comparison, report downloads
   ).toBe(true)
 
   // -- 1. Open the app ----------------------------------------------------- //
-  await page.goto('/')
+  await page.goto('/#/overview')
   await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible()
   await expect(page.getByRole('heading', { name: /Check whether your training and test data share information/, level: 1 })).toBeVisible()
   // The two entry actions of the first screen.

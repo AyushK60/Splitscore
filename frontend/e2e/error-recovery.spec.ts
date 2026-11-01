@@ -19,7 +19,7 @@ test('rejected upload shows an understandable error and the user can recover', a
 }) => {
   allowFailure(/HTTP 422 .*\/api\/datasets/)
 
-  await page.goto('/')
+  await page.goto('/#/overview')
   await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible()
 
   await page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: /Data/ }).click()

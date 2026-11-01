@@ -63,7 +63,7 @@ function noSplitCsv(): string {
 // --------------------------------------------------------------------------- //
 
 async function uploadCsv(page: Page, name: string, csv: string): Promise<void> {
-  await page.goto('/')
+  await page.goto('/#/overview')
   await page
     .getByRole('navigation', { name: 'Primary' })
     .getByRole('button', { name: /Data/ })

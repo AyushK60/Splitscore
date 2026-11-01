@@ -1,16 +1,19 @@
 import { StrictMode, useEffect, useRef } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import './styles/app.css'
+import './styles/v2.css'
+import './styles/landing.css'
+
 import { AppProvider, useApp } from './state/AppState'
 import { useHashRoute, type ViewId } from './lib/router'
+import { LandingView } from './views/LandingView'
 import { OverviewView } from './views/OverviewView'
 import { DatasetView } from './views/DatasetView'
 import { AuditView } from './views/AuditView'
 import { EvidenceView } from './views/EvidenceView'
 import { ComparisonView } from './views/ComparisonView'
 import { ExportView } from './views/ExportView'
-
-import './styles/app.css'
 
 function Shell() {
   const [view, navigate] = useHashRoute()
@@ -26,8 +29,17 @@ function Shell() {
       return
     }
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
-    mainRef.current?.focus({ preventScroll: true })
+    // The landing page renders its own <main id="main">; the workbench main is
+    // reached through the ref, so focus lands on the content of either route.
+    const target = mainRef.current ?? document.getElementById('main')
+    target?.focus({ preventScroll: true })
   }, [view])
+
+  // The landing page carries its own navigation and footer: the workbench
+  // chrome belongs to the workbench only.
+  if (view === 'home') {
+    return <LandingView onNavigate={navigate} />
+  }
 
   const body =
     view === 'overview' ? <OverviewView onNavigate={navigate} /> :
@@ -55,7 +67,12 @@ function Shell() {
       <div className="app-topbar">
         <header className="app-header">
           <div className="app-header__inner">
-            <div className="app-header__brand">
+            <button
+              type="button"
+              className="app-header__brand app-header__brand--home"
+              title="Back to the SplitScope home page"
+              onClick={() => navigate('home')}
+            >
               <span className="app-header__mark" aria-hidden="true">
                 {/* Train/test boundary: two panels split by a rule. */}
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
@@ -66,7 +83,7 @@ function Shell() {
               </span>
               <span className="app-header__title">SplitScope</span>
               <span className="app-header__tagline">— check a train/test split for data leakage</span>
-            </div>
+            </button>
             {busyLabel ? (
               <p className="app-header__meta" role="status" aria-live="polite">
                 <span className="spinner" aria-hidden="true" /> {busyLabel}…
@@ -107,11 +124,12 @@ function Shell() {
                   <pre
                     style={{
                       margin: 0,
-                      background: '#f5f5f5',
+                      background: 'var(--bg-sunken)',
                       padding: 8,
-                      borderRadius: 4,
-                      fontFamily: 'ui-monospace, monospace',
+                      borderRadius: 6,
+                      fontFamily: 'var(--mono)',
                       fontSize: 12,
+                      overflowX: 'auto',
                     }}
                   >
                     {JSON.stringify(status.details, null, 2)}

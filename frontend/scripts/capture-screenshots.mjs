@@ -27,7 +27,7 @@ async function newPage(width, height) {
 
 // --- desktop: landing ------------------------------------------------------ //
 const desktop = await newPage(1280, 900)
-await desktop.goto(BASE)
+await desktop.goto(`${BASE}/#/overview`)
 await desktop.waitForSelector('h1')
 await desktop.screenshot({ path: `${OUT}/landing-desktop.png`, fullPage: true })
 
@@ -54,7 +54,7 @@ await desktop.screenshot({ path: `${OUT}/results-technical.png` })
 
 // --- mobile: landing -------------------------------------------------------- //
 const mobile = await newPage(390, 844)
-await mobile.goto(BASE)
+await mobile.goto(`${BASE}/#/overview`)
 await mobile.waitForSelector('h1')
 await mobile.screenshot({ path: `${OUT}/landing-mobile.png`, fullPage: true })
 
