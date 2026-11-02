@@ -21,6 +21,12 @@ import type {
   PreviewResponse,
   RoleValidationResult,
   SplitConfig,
+  DictionaryResponse,
+  ManifestResponse,
+  ManifestValidation,
+  ProfileResponse,
+  RoleMapResponse,
+  StudyResponse,
 } from './types'
 
 export class ApiError extends Error {
@@ -175,4 +181,38 @@ export async function downloadExport(path: string, body?: unknown): Promise<void
   anchor.click()
   anchor.remove()
   URL.revokeObjectURL(url)
+}
+
+
+// --------------------------------------------------------------------------
+// S3 research workspace
+// --------------------------------------------------------------------------
+
+export const researchApi = {
+  study: (dataset_id: string) => request<StudyResponse>(`/api/datasets/${dataset_id}/study`),
+  saveStudy: (dataset_id: string, body: unknown) =>
+    request<StudyResponse>(`/api/datasets/${dataset_id}/study`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }),
+  profile: (dataset_id: string) => request<ProfileResponse>(`/api/datasets/${dataset_id}/profile`),
+  dictionary: (dataset_id: string) =>
+    request<DictionaryResponse>(`/api/datasets/${dataset_id}/dictionary`),
+  saveRoles: (dataset_id: string, body: unknown) =>
+    request<RoleMapResponse>(`/api/datasets/${dataset_id}/roles`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }),
+  manifest: (dataset_id: string) =>
+    request<ManifestResponse>(`/api/datasets/${dataset_id}/manifest`),
+  validateManifest: (dataset_id: string, manifest: unknown, apply: boolean) =>
+    request<ManifestValidation>(`/api/datasets/${dataset_id}/manifest/validate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ manifest, apply }),
+    }),
+  studyExportPath: (dataset_id: string) => `/api/datasets/${dataset_id}/study/export`,
+  manifestExportPath: (dataset_id: string) => `/api/datasets/${dataset_id}/manifest/export`,
 }

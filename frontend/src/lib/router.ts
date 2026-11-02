@@ -4,12 +4,22 @@ export type ViewId =
   | 'home'
   | 'overview'
   | 'dataset'
+  | 'study'
   | 'audit'
   | 'evidence'
   | 'comparison'
   | 'export'
 
-const KNOWN: ViewId[] = ['home', 'overview', 'dataset', 'audit', 'evidence', 'comparison', 'export']
+const KNOWN: ViewId[] = [
+  'home',
+  'overview',
+  'dataset',
+  'study',
+  'audit',
+  'evidence',
+  'comparison',
+  'export',
+]
 
 export function isViewId(value: string): value is ViewId {
   return (KNOWN as string[]).includes(value)

@@ -453,3 +453,226 @@ export interface ApiErrorBody {
     details: Record<string, unknown>
   }
 }
+
+
+// --------------------------------------------------------------------------
+// S3 research workspace
+// --------------------------------------------------------------------------
+
+export type ResearchRole =
+  | 'entity'
+  | 'timestamp'
+  | 'split'
+  | 'target'
+  | 'predictor'
+  | 'treatment'
+  | 'confounder'
+  | 'mediator'
+  | 'effect_modifier'
+  | 'instrument'
+  | 'sensitive'
+  | 'future_only'
+  | 'excluded'
+
+export interface StudyField {
+  name: string
+  label: string
+  section: string
+  required: boolean
+  help: string
+  kind: 'text' | 'longtext' | 'select'
+  value: string | string[] | null
+  declared: boolean
+  provenance: 'user_declared' | 'missing'
+}
+
+export interface StudyCompletion {
+  required: number
+  declared: number
+  ratio: number
+  missing: string[]
+  note: string
+}
+
+export interface StudyIssue {
+  code: string
+  severity: 'error' | 'warning' | 'info'
+  field?: string
+  column?: string | null
+  message: string
+  hint?: string | null
+}
+
+export interface StudyResponse {
+  study_id: string
+  dataset_id: string
+  dataset_name: string
+  schema_version: string
+  revision: number
+  created_at_utc: string
+  updated_at_utc: string
+  card: Record<string, unknown>
+  completion: StudyCompletion
+  fields: StudyField[]
+  issues: StudyIssue[]
+  provenance: {
+    declared: string[]
+    missing: string[]
+    computed: string[]
+    inferred: string[]
+    note: string
+  }
+  roles: {
+    assignments: Record<string, ResearchRole[]>
+    derived_roles: ColumnRoles
+    ok: boolean
+    issues: StudyIssue[]
+    errors: number
+    warnings: number
+    note: string
+  }
+  split_values: { train: string | null; test: string | null }
+  column_declarations: Record<string, Record<string, string | null>>
+  select_options: Record<string, Array<{ value: string; label: string }>>
+  storage_note: string
+  app: { name: string; version: string }
+  roles_seeded_from?: string | null
+}
+
+export interface ProfileNumeric {
+  count: number
+  min: number
+  max: number
+  mean: number
+  median: number
+  std: number
+  q1: number
+  q3: number
+  outlier_candidates: number
+  outlier_rule: string
+}
+
+export interface ProfileDatetime {
+  parsed: number
+  unparsed: number
+  parse_ratio: number
+  min_utc: string
+  max_utc: string
+  span_days: number
+}
+
+export interface ProfileColumn {
+  column: string
+  detected_type: string
+  detected_type_reason: string
+  declared_type: string | null
+  description: string | null
+  unit: string | null
+  measurement_scale: string | null
+  roles: ResearchRole[]
+  missing_count: number
+  missing_ratio: number
+  distinct_count: number
+  distinct_ratio: number
+  examples: string[]
+  numeric_parse_ratio: number
+  datetime_parse_ratio: number
+  unparsed_numeric_cells: number
+  numeric: ProfileNumeric | null
+  datetime: ProfileDatetime | null
+  flags: string[]
+}
+
+export interface ProfileResponse {
+  dataset: {
+    dataset_id: string
+    dataset_name?: string
+    name: string
+    row_count: number
+    column_count: number
+    fingerprint_sha256: string
+    is_synthetic: boolean
+    duplicate_rows: number
+    duplicate_row_groups: number
+    duplicate_example_row_ids: string[]
+    numeric_columns: number
+    datetime_columns: number
+  }
+  columns: ProfileColumn[]
+  summary: {
+    constant_columns: string[]
+    all_missing_columns: string[]
+    identifier_like_columns: string[]
+    mixed_type_columns: string[]
+    columns_with_outlier_candidates: string[]
+  }
+  warnings: string[]
+  conventions: string[]
+  notes: string[]
+}
+
+export interface DictionaryResponse {
+  dataset_id: string
+  dataset_name: string
+  columns: ProfileColumn[]
+  assignments: Record<string, ResearchRole[]>
+  summary: ProfileResponse['summary']
+  conventions: string[]
+  note: string
+}
+
+export interface RoleMapResponse {
+  ok: boolean
+  errors: number
+  warnings: number
+  issues: StudyIssue[]
+  derived_roles: ColumnRoles
+  assignments: Record<string, ResearchRole[]>
+  study: StudyResponse
+}
+
+export interface ManifestCheck {
+  name: string
+  ok: boolean
+  expected: string | null
+  actual: string | null
+  message: string
+}
+
+export interface ManifestValidation {
+  status: 'match' | 'dataset_mismatch' | 'schema_mismatch' | 'unsupported_version' | 'malformed'
+  ok: boolean
+  message: string
+  checks: ManifestCheck[]
+  study?: Record<string, unknown> | null
+  applied?: boolean
+  study_state?: StudyResponse
+}
+
+export interface ManifestResponse {
+  manifest_schema_version: string
+  study_schema_version: string
+  created_at_utc: string
+  application: { name: string; version: string }
+  study: Record<string, unknown>
+  dataset: {
+    name: string
+    source: string
+    is_synthetic: boolean
+    sha256: string
+    rows: number
+    columns: number
+    encoding: string
+    row_id_scheme: string
+    schema_fingerprint: string
+  }
+  roles: {
+    assignments: Record<string, ResearchRole[]>
+    derived_column_roles: ColumnRoles
+    role_validation: { ok: boolean; errors: number; warnings: number }
+  }
+  analysis: Record<string, unknown>
+  exclusions: Record<string, unknown>
+  warnings: string[]
+  integrity: { raw_data_embedded: boolean; cell_values_embedded: boolean }
+}

@@ -8,15 +8,20 @@
  * display serif is the voice of the page while monospace handles instrument
  * labels.
  *
- * Honesty is structural, not decorative: the hero field is labelled a synthetic
- * illustration, capability rows only point at screens that exist, and the V2
- * workspaces are named as not-yet-built in a single footnote.
+ * The hero is an instrument, not a decoration: four phases, each with a readout
+ * that explains what it is showing, plus pause / replay / phase controls. The
+ * records in it are a fixed illustration and say so in the plate.
+ *
+ * Honesty is structural, not decorative: the hero field is labelled, capability
+ * rows only point at screens that exist, and the V2 workspaces are named as
+ * not-yet-built in a single footnote.
  */
 import { useRef, type CSSProperties } from 'react'
 
 import type { ViewId } from '../lib/router'
 import { useApp } from '../state/AppState'
 import { HeroField } from '../components/HeroField'
+import { HERO_PHASES, useHeroSequence } from '../lib/useHeroSequence'
 import { useRevealOnScroll } from '../lib/useReveal'
 
 type LandingProps = { onNavigate: (view: ViewId) => void }
@@ -97,10 +102,10 @@ const STEPS = [
 ]
 
 const PROOF = [
-  { value: '218', label: 'backend tests', command: 'python -m pytest -q', span: 'span-5' },
+  { value: '252', label: 'backend tests', command: 'python -m pytest -q', span: 'span-5' },
   { value: '70', label: 'frontend tests', command: 'npm run test', span: 'span-3' },
   { value: '41 / 61', label: 'synthetic cases / checks', command: 'evaluate_synthetic.py', span: 'span-4' },
-  { value: '4', label: 'browser journeys', command: 'npm run test:e2e', span: 'span-4' },
+  { value: '5', label: 'browser journeys', command: 'npm run test:e2e', span: 'span-4' },
   { value: '6', label: 'bundled synthetic demos', command: 'labelled synthetic throughout', span: 'span-4' },
   { value: '3', label: 'export formats', command: 'JSON · HTML · CSV', span: 'span-4' },
 ]
@@ -117,11 +122,16 @@ export function LandingView({ onNavigate }: LandingProps) {
   const { demos, loadDemo, busyLabel, status } = useApp()
   const rootRef = useRef<HTMLDivElement>(null)
   useRevealOnScroll(rootRef)
+  const { phase, playing, cycle, reducedMotion, toggle, replay, jump, inspect } = useHeroSequence()
 
   const featured = demos?.featured_journey
   const featuredDemo = demos?.demos.find((demo) => demo.demo_id === featured?.demo_id)
   const demoReady = Boolean(featuredDemo?.file_present)
   const busy = busyLabel !== null
+
+  const currentPhase = HERO_PHASES.find((item) => item.id === phase) ?? HERO_PHASES[0]
+  const phaseNumber = String(HERO_PHASES.findIndex((item) => item.id === phase) + 1).padStart(2, '0')
+  const showEvidence = phase === 'evidence'
 
   const openDemo = async () => {
     if (!featuredDemo) return
@@ -150,7 +160,7 @@ export function LandingView({ onNavigate }: LandingProps) {
                   fill="currentColor"
                   opacity="0.22"
                 />
-                <path d="M10 1v18" stroke="#d9793f" strokeWidth="1" />
+                <path d="M10 1v18" stroke="#e07a3c" strokeWidth="1" />
               </svg>
             </span>
             <span className="lp-brand__name">SplitScope</span>
@@ -179,7 +189,7 @@ export function LandingView({ onNavigate }: LandingProps) {
         {/* ------------------------------- 01 hero ----------------------------- */}
         <section className="lp-hero" aria-labelledby="lp-title">
           <div className="lp-hero__field" aria-hidden="true">
-            <HeroField />
+            <HeroField phase={phase} paused={!playing || reducedMotion} cycle={cycle} />
           </div>
           <div className="lp-hero__scrim" aria-hidden="true" />
           <div className="lp-hero__grain" aria-hidden="true" />
@@ -236,6 +246,70 @@ export function LandingView({ onNavigate }: LandingProps) {
                 ))}
               </ul>
 
+              <div className="lp-console">
+                <div className="lp-console__controls" role="group" aria-label="Observatory controls">
+                  <button
+                    type="button"
+                    className="lp-console__btn"
+                    onClick={toggle}
+                    disabled={reducedMotion}
+                    aria-label={
+                      playing ? 'Pause the observatory sequence' : 'Resume the observatory sequence'
+                    }
+                  >
+                    <span aria-hidden="true">{playing ? '❙❙' : '▶'}</span>
+                    {playing ? 'Pause' : 'Play'}
+                  </button>
+                  <button
+                    type="button"
+                    className="lp-console__btn"
+                    onClick={replay}
+                    disabled={reducedMotion}
+                    aria-label="Replay the observatory sequence from the beginning"
+                  >
+                    <span aria-hidden="true">↻</span>
+                    Replay
+                  </button>
+                  <button
+                    type="button"
+                    className="lp-console__btn"
+                    onClick={inspect}
+                    aria-pressed={phase === 'evidence'}
+                    aria-label="Inspect the implicated pair of records"
+                  >
+                    <span aria-hidden="true">⌕</span>
+                    Inspect pair
+                  </button>
+                </div>
+
+                <ol className="lp-console__rail" aria-label="Observatory phases">
+                  {HERO_PHASES.map((item, index) => (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        className="lp-console__phase"
+                        data-active={phase === item.id}
+                        aria-current={phase === item.id ? 'step' : undefined}
+                        onClick={() => jump(item.id)}
+                      >
+                        <span className="lp-console__tick" aria-hidden="true" />
+                        <span className="lp-console__num">
+                          {String(index + 1).padStart(2, '0')}
+                        </span>
+                        <span className="lp-console__name">{item.short}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+
+                {reducedMotion ? (
+                  <p className="lp-console__note">
+                    Reduced motion is on: the instrument is shown as a single still frame of the
+                    evidence stage.
+                  </p>
+                ) : null}
+              </div>
+
               {status.kind === 'error' ? (
                 <p className="lp-hero__warn" role="status">
                   The catalogue has not loaded: {status.message} The workbench still opens —
@@ -244,23 +318,50 @@ export function LandingView({ onNavigate }: LandingProps) {
               ) : null}
             </div>
 
-            <aside className="lp-hero__plate">
-              <p className="lp-plate__label">Plate 01 · audit field</p>
-              <p className="lp-plate__body">
-                Two registers of synthetic records, one boundary between them, and a single pair of
-                rows carrying the same information across it.
-              </p>
-              <p className="lp-plate__note">
-                Conceptual illustration, not a computed result. The demo opens{' '}
-                {featuredDemo ? <strong>{featuredDemo.title}</strong> : 'a bundled synthetic dataset'}
-                {' — '}synthetic throughout. Your CSV stays in server memory, never on disk.
-              </p>
+            <aside className="lp-readout" aria-label="Observatory readout">
+              <div className="lp-readout__head">
+                <p className="lp-readout__label">Plate 01 · boundary observatory</p>
+                <p className="lp-readout__step">{phaseNumber} / 04</p>
+              </div>
+
+              <h2 className="lp-readout__title" aria-live="polite">
+                {currentPhase.title}
+              </h2>
+              <p className="lp-readout__body">{currentPhase.body}</p>
+
+              <div
+                className="lp-readout__evidence"
+                data-show={showEvidence ? 'true' : 'false'}
+                aria-hidden={showEvidence ? undefined : true}
+              >
+                <p className="lp-readout__evidence-label">Matched fields</p>
+                <ul className="lp-readout__matches">
+                  <li>customer_id</li>
+                  <li>signup_ts</li>
+                  <li>plan_tier</li>
+                  <li>region</li>
+                </ul>
+                <p className="lp-readout__evidence-note">
+                  Illustrative pair · row-000412 / row-000887 · not a computed result
+                </p>
+              </div>
+
+              <p className="lp-readout__note">{currentPhase.hint}</p>
+
+              <button
+                type="button"
+                className="lp-link lp-readout__cta"
+                disabled={busy || !demoReady}
+                onClick={() => void openDemo()}
+              >
+                Run this audit on the synthetic demo <span aria-hidden="true">↗</span>
+              </button>
             </aside>
           </div>
 
           <div className="lp-hero__index">
-            <span>01 — Audit field</span>
-            <span className="lp-hero__index-mid">Synthetic illustration</span>
+            <span>01 — Boundary observatory</span>
+            <span className="lp-hero__index-mid">Illustrative fixture · not a computed result</span>
             <span>Scroll ↓</span>
           </div>
         </section>
@@ -296,11 +397,7 @@ export function LandingView({ onNavigate }: LandingProps) {
                           ))}
                         </ul>
                       ) : null}
-                      <button
-                        type="button"
-                        className="lp-link"
-                        onClick={() => onNavigate(cap.view)}
-                      >
+                      <button type="button" className="lp-link" onClick={() => onNavigate(cap.view)}>
                         {cap.action}
                         <span aria-hidden="true">↗</span>
                       </button>

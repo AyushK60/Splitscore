@@ -25,6 +25,7 @@ from app.api.error_handlers import register_error_handlers
 from app.api.routes_audit import router as audit_router
 from app.api.routes_datasets import router as datasets_router
 from app.api.routes_reports import router as reports_router
+from app.api.routes_research import router as research_router
 from app.core.config import get_settings
 from app.core.logging_config import configure_logging, get_logger
 from app.core.version import APP_NAME, APP_VERSION, AUDIT_SCHEMA_VERSION
@@ -65,6 +66,7 @@ def create_app() -> FastAPI:
     app.include_router(datasets_router)
     app.include_router(audit_router)
     app.include_router(reports_router)
+    app.include_router(research_router)
 
     @app.get("/api", include_in_schema=False)
     def api_root() -> JSONResponse:

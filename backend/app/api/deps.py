@@ -11,17 +11,19 @@ from dataclasses import dataclass
 
 from app.core.config import Settings, get_settings
 from app.core.store import Store
+from app.research.studies import StudyRegistry
 
 
 @dataclass
 class AppContext:
     settings: Settings
     store: Store
+    studies: StudyRegistry
 
     @classmethod
     def create(cls, settings: Settings | None = None) -> AppContext:
         resolved = settings or get_settings()
-        return cls(settings=resolved, store=Store(resolved.store))
+        return cls(settings=resolved, store=Store(resolved.store), studies=StudyRegistry())
 
 
 _context: AppContext | None = None

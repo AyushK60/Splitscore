@@ -4,12 +4,15 @@ import { createRoot } from 'react-dom/client'
 import './styles/app.css'
 import './styles/v2.css'
 import './styles/landing.css'
+import './styles/s3.css'
+import './styles/research.css'
 
 import { AppProvider, useApp } from './state/AppState'
 import { useHashRoute, type ViewId } from './lib/router'
 import { LandingView } from './views/LandingView'
 import { OverviewView } from './views/OverviewView'
 import { DatasetView } from './views/DatasetView'
+import { StudyView } from './views/StudyView'
 import { AuditView } from './views/AuditView'
 import { EvidenceView } from './views/EvidenceView'
 import { ComparisonView } from './views/ComparisonView'
@@ -44,6 +47,7 @@ function Shell() {
   const body =
     view === 'overview' ? <OverviewView onNavigate={navigate} /> :
     view === 'dataset' ? <DatasetView onNavigate={navigate} /> :
+    view === 'study' ? <StudyView onNavigate={navigate} /> :
     view === 'audit' ? <AuditView onNavigate={navigate} /> :
     view === 'evidence' ? <EvidenceView onNavigate={navigate} /> :
     view === 'comparison' ? <ComparisonView onNavigate={navigate} /> :
@@ -57,9 +61,10 @@ function Shell() {
   const steps: Array<{ id: ViewId; label: string; step: number }> = [
     { id: 'overview', label: 'Start', step: 1 },
     { id: 'dataset', label: 'Data', step: 2 },
-    ...(dataset ? [{ id: 'audit' as ViewId, label: 'Results', step: 3 }] : []),
-    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 4 }] : []),
-    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 5 }] : []),
+    ...(dataset ? [{ id: 'study' as ViewId, label: 'Study', step: 3 }] : []),
+    ...(dataset ? [{ id: 'audit' as ViewId, label: 'Results', step: 4 }] : []),
+    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 5 }] : []),
+    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 6 }] : []),
   ]
 
   return (
