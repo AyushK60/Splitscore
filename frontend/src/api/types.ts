@@ -355,6 +355,7 @@ export interface ComparisonResult {
   per_strategy_findings: Record<string, Finding[]>
   selection_note: string
   limitations: string[]
+  plans: PlanComparison[]
 }
 
 export interface SplitConfig {
@@ -408,6 +409,30 @@ export interface DemoPayload {
 export interface DemoListResponse {
   demos: DemoPayload[]
   featured_journey: { demo_id: string; title: string; steps: string[] }
+}
+
+export interface SimilarityPair {
+  train_row_id: string
+  test_row_id: string
+  distance: number
+  top_diffs: Array<{ column: string; scaled_diff: string; train_value: string; test_value: string }>
+  train_values: Record<string, string>
+  test_values: Record<string, string>
+}
+
+export interface SimilarityResponse {
+  pairs: SimilarityPair[]
+  pairs_total_available: number
+  pairs_truncated: boolean
+  method: string
+  scaling: Record<string, string>
+  split: Record<string, string>
+  populations: Record<string, number>
+  nearest_neighbour_summary: Record<string, number>
+  nn_histogram: number[]
+  nn_histogram_edges: number[]
+  sampling: string
+  limitations: string[]
 }
 
 export interface DatasetLoadedResponse {
@@ -494,6 +519,53 @@ export interface ColumnValuesResponse {
   values: ColumnValueCount[]
   truncated: boolean
   note: string
+}
+
+export interface PlanConfig {
+  kind: 'repeated_stratified_cv' | 'group_cv' | 'rolling_origin'
+  label: string
+  n_folds: number
+  repeats: number
+  gap: number
+  plan_id?: string | null
+}
+
+export interface PlanFoldFacts {
+  fold_index: number
+  repeat: number
+  train_rows: number
+  test_rows: number
+  exact_duplicate_test_rows: number | null
+  entity_shared_groups: number | null
+  entity_overlap_test_share: number | null
+  chronology_status: string | null
+  findings_by_rule: Record<string, number>
+  findings_total: number
+  duration_ms: number
+}
+
+export interface PlanComparison {
+  plan_id: string
+  kind: string
+  label: string
+  n_folds: number
+  repeats: number
+  gap: number
+  seed: number | null
+  supported: boolean
+  unsupported_reason: string | null
+  notes: string[]
+  folds: PlanFoldFacts[]
+  aggregate: {
+    folds_audited?: number
+    folds_with_findings?: number
+    max_findings_in_one_fold?: number
+    findings_by_rule_total?: Record<string, number>
+    folds_with_chronology_violation?: number
+    mean_entity_overlap_test_share?: number | null
+    max_entity_overlap_test_share?: number | null
+    mean_test_fraction?: number | null
+  }
 }
 
 export interface CompareResponse {

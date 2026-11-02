@@ -674,6 +674,42 @@ class ComparisonResult(_Model):
     per_strategy_findings: dict[str, list[Finding]]
     selection_note: str
     limitations: list[str]
+    plans: list["PlanComparison"] = Field(default_factory=list)
+
+
+class PlanFoldFacts(_Model):
+    """What one fold of an evaluation plan actually achieved and revealed."""
+
+    fold_index: int
+    repeat: int
+    train_rows: int
+    test_rows: int
+    exact_duplicate_test_rows: int | None = None
+    entity_shared_groups: int | None = None
+    entity_overlap_test_share: float | None = None
+    chronology_status: str | None = None
+    findings_by_rule: dict[str, int] = Field(default_factory=dict)
+    findings_total: int = 0
+    duration_ms: float = 0.0
+
+
+class PlanComparison(_Model):
+    """An audited evaluation plan: per-fold facts plus honest aggregates."""
+
+    plan_id: str
+    kind: str
+    label: str
+    n_folds: int
+    repeats: int
+    gap: int
+    seed: int | None = None
+    supported: bool = True
+    unsupported_reason: str | None = None
+    notes: list[str] = Field(default_factory=list)
+    folds: list[PlanFoldFacts] = Field(default_factory=list)
+    #: Aggregates over folds: worst severity, folds with findings, mean/max
+    #: entity overlap share, folds with chronology violations. No ranking.
+    aggregate: dict[str, Any] = Field(default_factory=dict)
 
 
 class ReportEnvelope(_Model):
@@ -684,3 +720,4 @@ class ReportEnvelope(_Model):
 
 
 RoleValidationResult.model_rebuild()
+ComparisonResult.model_rebuild()

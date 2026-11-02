@@ -8,6 +8,8 @@
  */
 
 import type {
+  PlanConfig,
+  SimilarityResponse,
   ApiErrorBody,
   AuditConfig,
   AuditResponse,
@@ -149,6 +151,7 @@ export const api = {
     config: AuditConfig,
     strategies: SplitConfig[],
     includeExistingSplit: boolean,
+    plans: PlanConfig[] = [],
   ) =>
     request<CompareResponse>(
       '/api/splits/compare',
@@ -157,6 +160,7 @@ export const api = {
         roles,
         config,
         strategies,
+        plans,
         include_existing_split: includeExistingSplit,
       }),
     ),
@@ -257,6 +261,12 @@ export const exploreApi = {
 
   missingness: (datasetId: string, body: { columns?: string[]; group_by?: string | null; filters?: unknown[] }) =>
     request<MissingnessResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/missingness`, postInit(body)),
+
+  similarity: (datasetId: string, body: { max_pairs: number; columns?: string[] }) =>
+    request<SimilarityResponse>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/explore/similarity`,
+      postInit(body),
+    ),
 
   rows: (datasetId: string, ids: string[], columns?: string[]) =>
     request<RowsResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/rows`, postInit({ ids, columns })),

@@ -358,6 +358,7 @@ export function comparisonResponseFixture(overrides: Partial<CompareResponse> = 
       resolved_roles: resolvedRolesFixture(),
       audit_config: structuredClone(DEFAULT_AUDIT_CONFIG),
       strategies: [],
+      plans: [],
       rows: [
         {
           strategy_id: 'group',

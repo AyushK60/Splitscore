@@ -10,6 +10,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.splits.plans import PlanConfig
 from app.audit.types import (
     AuditConfig,
     AuditResult,
@@ -168,6 +169,8 @@ class CompareRequest(_Model):
     roles: ColumnRoles
     config: AuditConfig = Field(default_factory=AuditConfig)
     strategies: list[SplitConfig] = Field(default_factory=list, max_length=MAX_STRATEGIES_PER_COMPARISON)
+    #: F05 evaluation plans (CV / rolling origin), audited fold by fold.
+    plans: list[PlanConfig] = Field(default_factory=list, max_length=4)
     include_existing_split: bool = True
 
 

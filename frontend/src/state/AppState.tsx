@@ -21,6 +21,7 @@ import type {
   DemoListResponse,
   Finding,
   HealthResponse,
+  PlanConfig,
   PreviewResponse,
   RoleValidationResult,
   SplitConfig,
@@ -62,6 +63,8 @@ interface AppState {
   status: Status
   busyLabel: string | null
   strategies: SplitConfig[]
+  /** F05 evaluation plans included in the next comparison. */
+  plans: PlanConfig[]
   includeExistingSplit: boolean
   /** Which entry path the user chose: audit the file's split, or generate one. */
   splitMode: SplitMode | null
@@ -94,6 +97,7 @@ interface AppActions {
   patchRoles: (patch: Partial<ColumnRoles>) => void
   setConfig: (config: AuditConfig) => void
   setStrategies: (strategies: SplitConfig[]) => void
+  setPlans: (plans: PlanConfig[]) => void
   setIncludeExistingSplit: (value: boolean) => void
   /** Answers the entry question; `null` re-opens it. */
   setSplitMode: (mode: SplitMode | null) => void
@@ -156,6 +160,7 @@ function initialState(): AppState {
       { kind: 'random', label: 'Random holdout', test_fraction: 0.25, seed: 12345 },
       { kind: 'group', label: 'Group holdout', test_fraction: 0.25, seed: 12345 },
     ],
+    plans: [],
     includeExistingSplit: true,
     // Undecided until the entry-path question is answered; a dataset whose
     // suggestions include a split column pre-selects the existing-split path.
@@ -285,6 +290,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       comparison: null,
       selectedFinding: null,
       strategies: previous.strategies,
+      plans: previous.plans,
       // Only a demo's split column (manifest configuration) pre-selects the
       // existing-split path. An upload's split column is a name-based guess, so
       // an upload always starts at the entry-path question instead.
@@ -349,6 +355,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setStrategies = useCallback((strategies: SplitConfig[]) => {
     setState((previous) => ({ ...previous, strategies }))
+  }, [])
+
+  const setPlans = useCallback((plans: PlanConfig[]) => {
+    setState((previous) => ({ ...previous, plans }))
   }, [])
 
   const setIncludeExistingSplit = useCallback((value: boolean) => {
@@ -542,6 +552,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         state.config,
         state.strategies,
         includeExisting,
+        state.plans,
       ),
     )
     if (!result) return false
@@ -559,7 +570,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
     }))
     return true
-  }, [state.dataset, state.roles, state.config, state.strategies, state.includeExistingSplit, withBusy])
+  }, [state.dataset, state.roles, state.config, state.strategies, state.plans, state.includeExistingSplit, withBusy])
 
   const selectFinding = useCallback(
     (finding: Finding, origin: 'audit' | 'comparison', contextLabel: string) => {
@@ -610,6 +621,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       patchRoles,
       setConfig,
       setStrategies,
+      setPlans,
       setIncludeExistingSplit,
       setSplitMode,
       setGenerateSplit,
@@ -635,6 +647,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       patchRoles,
       setConfig,
       setStrategies,
+      setPlans,
       setIncludeExistingSplit,
       setSplitMode,
       setGenerateSplit,

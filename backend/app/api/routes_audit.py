@@ -144,6 +144,7 @@ def compare_splits_route(request: CompareRequest) -> CompareResponse:
         config=request.config,
         settings=context.settings,
         audit_existing=request.include_existing_split,
+        plans=request.plans,
     )
 
     handles: list[AssignmentHandle] = []

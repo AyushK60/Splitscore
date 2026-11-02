@@ -7,6 +7,7 @@ import { Distributions } from '../components/explore/Distributions'
 import { MissingnessView } from '../components/explore/MissingnessView'
 import { ParallelCoordinates } from '../components/explore/ParallelCoordinates'
 import { RowEvidence } from '../components/explore/RowEvidence'
+import { SimilarityExplorer } from '../components/explore/SimilarityExplorer'
 import { ScatterFocus } from '../components/explore/ScatterFocus'
 import { ScatterMatrix } from '../components/explore/ScatterMatrix'
 import { useExplore } from '../explore/ExploreState'
@@ -28,7 +29,7 @@ const MAX_AXES = 12
 const DEFAULT_AXIS_COUNT = 8
 const SERIES_DEBOUNCE_MS = 160
 
-type PlotTab = 'coordinates' | 'correlation' | 'scatter' | 'matrix' | 'distribution' | 'missingness'
+type PlotTab = 'coordinates' | 'correlation' | 'scatter' | 'matrix' | 'distribution' | 'missingness' | 'similarity'
 
 const TABS: Array<{ id: PlotTab; label: string }> = [
   { id: 'coordinates', label: 'Parallel coordinates' },
@@ -37,6 +38,7 @@ const TABS: Array<{ id: PlotTab; label: string }> = [
   { id: 'matrix', label: 'Scatter matrix' },
   { id: 'distribution', label: 'Distributions' },
   { id: 'missingness', label: 'Missingness' },
+  { id: 'similarity', label: 'Split similarity' },
 ]
 
 type Props = { onNavigate: (view: ViewId) => void }
@@ -351,6 +353,7 @@ export function ExploreView(_props: Props) {
               groupCandidates={schema.color_candidates}
             />
           )}
+          {tab === 'similarity' && schema && <SimilarityExplorer schema={schema} />}
         </div>
         {!focusMode && (
           <aside className="xw__inspector">

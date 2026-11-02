@@ -11,7 +11,8 @@ import { useState } from 'react'
 
 import { Badge, Callout, Card, EmptyState, Stat, Table } from '../components/ui'
 import { FindingCard } from '../components/FindingCard'
-import type { SplitConfig } from '../api/types'
+import { SplitVisual } from '../components/SplitVisual'
+import type { PlanConfig, SplitConfig } from '../api/types'
 import { humanDuration, integer, percent, pluralise } from '../lib/format'
 import type { ViewId } from '../lib/router'
 import { useApp } from '../state/AppState'
@@ -51,6 +52,35 @@ const KINDS: Array<{ kind: SplitConfig['kind']; label: string; needs: string | n
   },
 ]
 
+const PLAN_KINDS: Array<{
+  kind: PlanConfig['kind']
+  label: string
+  needs: string | null
+  blurb: string
+}> = [
+  {
+    kind: 'repeated_stratified_cv',
+    label: 'Stratified CV',
+    needs: 'target',
+    blurb:
+      'Repeated stratified k-fold. Every fold preserves class proportions; rows of one entity appear in several folds.',
+  },
+  {
+    kind: 'group_cv',
+    label: 'Group CV',
+    needs: 'entity',
+    blurb:
+      'Group k-fold on the entity column: every entity is tested in exactly one fold, so folds measure generalisation to unseen entities.',
+  },
+  {
+    kind: 'rolling_origin',
+    label: 'Rolling origin',
+    needs: 'timestamp',
+    blurb:
+      'Expanding-window time validation: each fold trains on the past and tests on the next block, with an optional purge gap.',
+  },
+]
+
 export function ComparisonView({ onNavigate }: { onNavigate: (view: ViewId) => void }) {
   const {
     comparison,
@@ -59,6 +89,8 @@ export function ComparisonView({ onNavigate }: { onNavigate: (view: ViewId) => v
     config,
     strategies,
     setStrategies,
+    plans,
+    setPlans,
     includeExistingSplit,
     setIncludeExistingSplit,
     runComparison,
@@ -69,6 +101,26 @@ export function ComparisonView({ onNavigate }: { onNavigate: (view: ViewId) => v
 
   const [testFraction, setTestFraction] = useState(0.25)
   const [seed, setSeed] = useState(12345)
+
+  function addPlan(kind: PlanConfig['kind']) {
+    const meta = PLAN_KINDS.find((item) => item.kind === kind)
+    if (!meta) return
+    if (plans.some((plan) => plan.kind === kind)) return
+    setPlans([
+      ...plans,
+      {
+        kind,
+        label: meta.label,
+        n_folds: 5,
+        repeats: kind === 'repeated_stratified_cv' ? 2 : 1,
+        gap: 0,
+      },
+    ])
+  }
+
+  function patchPlan(index: number, patch: Partial<PlanConfig>) {
+    setPlans(plans.map((plan, i) => (i === index ? { ...plan, ...patch } : plan)))
+  }
 
   if (!dataset) {
     return (
@@ -173,6 +225,42 @@ export function ComparisonView({ onNavigate }: { onNavigate: (view: ViewId) => v
               )
             })}
           </div>
+        </fieldset>
+
+        <fieldset style={{ marginBottom: 10 }}>
+          <legend>Add an evaluation plan (multi-fold)</legend>
+          <div className="row">
+            {PLAN_KINDS.map((meta) => {
+              const blocked =
+                (meta.needs === 'target' && !roles.target) ||
+                (meta.needs === 'entity' && !roles.entity) ||
+                (meta.needs === 'timestamp' && !roles.timestamp)
+              const already = plans.some((plan) => plan.kind === meta.kind)
+              return (
+                <button
+                  key={meta.kind}
+                  type="button"
+                  className="btn btn--small"
+                  disabled={blocked || already}
+                  title={
+                    blocked
+                      ? `Select a ${meta.needs} column in the dataset view to enable this plan.`
+                      : meta.blurb
+                  }
+                  onClick={() => addPlan(meta.kind)}
+                >
+                  + {meta.label}
+                  {blocked ? ` (needs a ${meta.needs})` : ''}
+                </button>
+              )
+            })}
+          </div>
+          {plans.length ? (
+            <p className="hint" style={{ marginBottom: 0 }}>
+              Each fold of a plan is audited with the same checks; the plan reports per-fold facts
+              and honest aggregates. A comparison audits at most 20 folds in total.
+            </p>
+          ) : null}
         </fieldset>
 
         <Table
@@ -280,7 +368,74 @@ export function ComparisonView({ onNavigate }: { onNavigate: (view: ViewId) => v
               </tr>
             )
           })}
+          {plans.map((plan, index) => {
+            const meta = PLAN_KINDS.find((item) => item.kind === plan.kind)
+            return (
+              <tr key={`plan-${plan.kind}-${index}`}>
+                <th scope="row">
+                  {plan.label}
+                  <span className="hint mono">{plan.kind}</span>
+                </th>
+                <td className="num" colSpan={2}>
+                  {plan.n_folds} folds
+                  {plan.repeats > 1 ? ` × ${plan.repeats} repeats` : ''}
+                  {plan.gap > 0 ? `, gap ${plan.gap}` : ''}
+                </td>
+                <td className="small">{meta?.blurb}</td>
+                <td>
+                  <button
+                    type="button"
+                    className="btn btn--small"
+                    onClick={() => setPlans(plans.filter((_, i) => i !== index))}
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            )
+          })}
         </Table>
+
+        {plans.length ? (
+          <details className="disclosure" style={{ marginBottom: 10 }}>
+            <summary>Plan configuration</summary>
+            <div className="stack">
+              {plans.map((plan, index) => (
+                <div key={`${plan.kind}-${index}`} className="row">
+                  <strong style={{ minWidth: 120 }}>{plan.label}</strong>
+                  <NumberFieldSmall
+                    id={`plan-folds-${index}`}
+                    label="Folds"
+                    min={2}
+                    max={10}
+                    value={plan.n_folds}
+                    onChange={(value) => patchPlan(index, { n_folds: value })}
+                  />
+                  {plan.kind === 'repeated_stratified_cv' ? (
+                    <NumberFieldSmall
+                      id={`plan-repeats-${index}`}
+                      label="Repeats"
+                      min={1}
+                      max={3}
+                      value={plan.repeats}
+                      onChange={(value) => patchPlan(index, { repeats: value })}
+                    />
+                  ) : null}
+                  {plan.kind === 'rolling_origin' ? (
+                    <NumberFieldSmall
+                      id={`plan-gap-${index}`}
+                      label="Purge gap (rows)"
+                      min={0}
+                      max={1000}
+                      value={plan.gap}
+                      onChange={(value) => patchPlan(index, { gap: value })}
+                    />
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </details>
+        ) : null}
 
         <p style={{ marginBottom: 0 }}>
           <button
@@ -288,7 +443,9 @@ export function ComparisonView({ onNavigate }: { onNavigate: (view: ViewId) => v
             className="btn btn--primary"
             disabled={
               busyLabel !== null ||
-              ((!includeExistingSplit || roles.split === null) && strategies.length === 0)
+              ((!includeExistingSplit || roles.split === null) &&
+                strategies.length === 0 &&
+                plans.length === 0)
             }
             onClick={async () => {
               await runComparison()
@@ -335,6 +492,8 @@ export function ComparisonView({ onNavigate }: { onNavigate: (view: ViewId) => v
                 hint="every candidate is checked under the same thresholds"
               />
             </div>
+
+            <SplitVisual comparison={comparison_.result} />
 
             <div style={{ overflowX: 'auto', marginTop: 12 }}>
               <table className="table">
@@ -511,6 +670,39 @@ export function ComparisonView({ onNavigate }: { onNavigate: (view: ViewId) => v
           </Card>
         </>
       )}
+    </div>
+  )
+}
+
+function NumberFieldSmall({
+  id,
+  label,
+  min,
+  max,
+  value,
+  onChange,
+}: {
+  id: string
+  label: string
+  min: number
+  max: number
+  value: number
+  onChange: (value: number) => void
+}) {
+  return (
+    <div className="field">
+      <label htmlFor={id}>{label}</label>
+      <input
+        id={id}
+        type="number"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(event) => {
+          const parsed = Number.parseInt(event.target.value, 10)
+          if (!Number.isNaN(parsed)) onChange(parsed)
+        }}
+      />
     </div>
   )
 }

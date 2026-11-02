@@ -17,6 +17,7 @@ from app.core.errors import LimitExceededError, ValidationFailure
 from app.explore.aggregates import correlation_matrix, distribution_payload, missingness_payload
 from app.explore.sampling import DEFAULT_RENDER_ROWS, MAX_RENDER_ROWS, render_sample
 from app.explore.schema import explore_schema
+from app.explore.similarity import SimilarityRequest, compute_similarity
 from app.explore.selection import evaluate_selection, parse_predicates, population_mask
 from app.explore.stats import (
     MAX_BINS,
@@ -75,6 +76,15 @@ class MissingnessRequest(BaseModel):
     filters: list[dict[str, Any]] = Field(default_factory=list, max_length=24)
 
 
+class SimilarityRequestModel(BaseModel):
+    """F07 train/test similarity explorer request."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    max_pairs: int = Field(default=25, ge=1, le=100)
+    columns: list[str] = Field(default_factory=list, max_length=60)
+
+
 class RowsRequest(BaseModel):
     """Fetch concrete rows by immutable id for the row-evidence inspector."""
 
@@ -85,6 +95,11 @@ class RowsRequest(BaseModel):
 
 
 def _dataset(dataset_id: str):
+    dataset, role_assignments, split_labels = _dataset_with_record(dataset_id)
+    return dataset, role_assignments, split_labels
+
+
+def _dataset_with_record(dataset_id: str):
     context = get_context()
     dataset = context.store.get_dataset(dataset_id)
     record = context.studies.get(dataset_id)
@@ -331,6 +346,28 @@ def post_rows(dataset_id: str, request: RowsRequest) -> dict[str, Any]:
         "unknown_ids": unknown,
         "population": dataset.row_count,
     }
+
+
+@router.post("/datasets/{dataset_id}/explore/similarity")
+def explore_similarity(dataset_id: str, request: SimilarityRequestModel) -> dict[str, Any]:
+    """Bounded nearest cross-split pairs under the documented SS-NEAR-001 method.
+
+    The split is the one confirmed in the Data stage (the study record). Pairs
+    are candidates for inspection, never findings; the response carries the
+    method, the scaling population and its bounds verbatim.
+    """
+    context = get_context()
+    dataset = context.store.get_dataset(dataset_id)
+    record = context.studies.get(dataset_id)
+    if record is None:
+        # Seed from the demo manifest exactly like the Study stage does, so the
+        # explorer reads the split a user has confirmed (or a demo declares) —
+        # never one it inferred.
+        from app.api.routes_research import _record as _seeded_record
+
+        _, record = _seeded_record(dataset_id)
+    result = compute_similarity(dataset, record, SimilarityRequest(**request.model_dump()))
+    return result.model_dump()
 
 
 __all__ = ["router"]
