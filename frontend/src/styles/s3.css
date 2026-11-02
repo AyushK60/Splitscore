@@ -3,7 +3,8 @@
    ----------------------------------------------------------------------------
    Loaded after landing.css and app.css. This layer does not replace the
    forensic-archive identity; it calibrates it:
-     - a slightly hotter copper and a brighter celadon so focal points carry,
+     - a softened, creamier ember so copper accents carry without dominating
+       (S4 Part 1 refinement; same hue family, less saturation),
      - a warmer paper so the ivory bands separate from the bone text,
      - the new four-phase boundary observatory and its instrument console,
      - the Study / Data research workspace.
@@ -12,16 +13,16 @@
    ========================================================================== */
 
 .lp {
-  --lp-copper: #e07a3c;
-  --lp-copper-light: #f2a86f;
-  --lp-copper-deep: #8f3d1e;
+  --lp-copper: #d58055;
+  --lp-copper-light: #e6ab84;
+  --lp-copper-deep: #8f4a2a;
   --lp-celadon: #b4d0bd;
   --lp-celadon-bright: #d6ecdd;
-  --lp-paper: #f3ebdb;
-  --lp-paper-hi: #faf4e8;
-  --lp-bone: #f5ecdc;
+  --lp-paper: #f1e9d9;
+  --lp-paper-hi: #f7f0e2;
+  --lp-bone: #f3ead9;
   --lp-ink-text: #18231d;
-  --lp-ink-soft: #55635b;
+  --lp-ink-soft: #4e5c54;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -58,15 +59,15 @@
 }
 
 .lp-timeline__num {
-  color: rgb(242 233 216 / 58%);
+  color: rgb(242 233 216 / 66%);
 }
 
 .lp-timeline p {
-  color: rgb(242 233 216 / 64%);
+  color: rgb(242 233 216 / 72%);
 }
 
 .lp-proof__command {
-  color: rgb(24 35 29 / 62%);
+  color: rgb(24 35 29 / 70%);
 }
 
 /* ------------------------------------------------------- closing band fix --- *
@@ -142,7 +143,7 @@
 }
 
 .obs-legend__title {
-  fill: rgb(242 233 216 / 62%);
+  fill: rgb(242 233 216 / 70%);
   font: 600 10px var(--lp-mono);
   letter-spacing: 0.22em;
 }
@@ -227,13 +228,13 @@
 }
 
 .obs-card--pair .obs-card__body {
-  stroke: rgb(224 122 60 / 28%);
+  stroke: rgb(213 128 85 / 28%);
 }
 
 .obs-scene[data-phase='discovery'] .obs-card--pair .obs-card__body,
 .obs-scene[data-phase='evidence'] .obs-card--pair .obs-card__body {
-  fill: rgb(224 122 60 / 9%);
-  stroke: rgb(224 122 60 / 85%);
+  fill: rgb(213 128 85 / 9%);
+  stroke: rgb(213 128 85 / 85%);
   stroke-width: 1.2;
 }
 
@@ -324,7 +325,7 @@
 }
 
 .obs-arc__glow {
-  stroke: rgb(232 131 74 / 40%);
+  stroke: rgb(230 171 132 / 40%);
   stroke-width: 10;
   opacity: 0;
   filter: blur(5px);
@@ -388,8 +389,8 @@
 }
 
 .obs-tag rect {
-  fill: rgb(8 14 11 / 88%);
-  stroke: rgb(224 122 60 / 55%);
+  fill: rgb(10 17 13 / 88%);
+  stroke: rgb(213 128 85 / 55%);
   stroke-width: 1;
 }
 
@@ -400,12 +401,12 @@
 }
 
 .obs-tag__note {
-  fill: rgb(242 233 216 / 56%);
+  fill: rgb(242 233 216 / 64%);
   font: 400 8.5px var(--lp-mono);
 }
 
 .obs-tag__leader {
-  stroke: rgb(224 122 60 / 45%);
+  stroke: rgb(213 128 85 / 45%);
   stroke-width: 1;
   stroke-dasharray: 2 3;
 }
@@ -430,7 +431,7 @@
   padding: 20px 22px 22px;
   border: 1px solid rgb(242 233 216 / 13%);
   background:
-    linear-gradient(180deg, rgb(12 21 16 / 76%), rgb(8 14 11 / 92%));
+    linear-gradient(180deg, rgb(13 21 17 / 76%), rgb(10 17 13 / 92%));
   box-shadow: 0 30px 70px -34px #000;
   backdrop-filter: blur(14px) saturate(115%);
 }
@@ -454,7 +455,7 @@
 .lp-readout__step {
   font: 400 9.5px/1 var(--lp-mono);
   letter-spacing: 0.14em;
-  color: rgb(242 233 216 / 44%);
+  color: rgb(242 233 216 / 54%);
   font-variant-numeric: tabular-nums;
 }
 
@@ -515,7 +516,7 @@
 
 .lp-readout__evidence tbody th {
   font-weight: 400;
-  color: rgb(242 233 216 / 62%);
+  color: rgb(242 233 216 / 70%);
 }
 
 .lp-readout__evidence tbody td {
@@ -543,7 +544,7 @@
 }
 
 .lp-readout__fine strong {
-  color: rgb(242 233 216 / 62%);
+  color: rgb(242 233 216 / 70%);
   font-weight: 500;
 }
 
@@ -584,7 +585,7 @@
 }
 
 .lp-console__btn:hover:not(:disabled) {
-  border-color: rgb(224 122 60 / 60%);
+  border-color: rgb(213 128 85 / 60%);
   background: rgb(242 233 216 / 9%);
   color: var(--lp-bone);
 }
@@ -785,8 +786,8 @@
 
 .lp-readout__matches li {
   padding: 4px 8px;
-  border: 1px solid rgb(224 122 60 / 45%);
-  background: rgb(224 122 60 / 10%);
+  border: 1px solid rgb(213 128 85 / 45%);
+  background: rgb(213 128 85 / 10%);
   color: var(--lp-copper-light);
   font: 400 10px/1.2 var(--lp-mono);
   letter-spacing: 0.04em;
@@ -810,8 +811,8 @@
 }
 
 .obs-finding rect {
-  fill: rgb(8 14 11 / 90%);
-  stroke: rgb(224 122 60 / 55%);
+  fill: rgb(10 17 13 / 90%);
+  stroke: rgb(213 128 85 / 55%);
   stroke-width: 1;
 }
 
@@ -822,12 +823,12 @@
 }
 
 .obs-finding__note {
-  fill: rgb(242 233 216 / 56%);
+  fill: rgb(242 233 216 / 64%);
   font: 400 9px var(--lp-mono);
 }
 
 .obs-finding__leader {
-  stroke: rgb(224 122 60 / 40%);
+  stroke: rgb(213 128 85 / 40%);
   stroke-width: 1;
   stroke-dasharray: 2 3;
 }
