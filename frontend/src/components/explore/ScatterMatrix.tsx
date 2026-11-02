@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { exploreApi } from '../../api/client'
 import type { ExploreSchema, SeriesResponse } from '../../api/types'
+import { FigureExport } from './FigureExport'
 
 /**
  * Scatter-plot matrix for a bounded subset of numeric variables.
@@ -102,6 +103,20 @@ export function ScatterMatrix({ schema, selectedIds, colorColumn, colorLevels, o
             : 'loading…'}
           {' · '}click a panel to open the pair full-size
         </span>
+        <FigureExport
+          figureId="scatter-matrix"
+          title={`Scatter matrix — ${columns.join(', ')}`}
+          settings={`pairwise panels · up to 4 variables`}
+          counts={
+            series
+              ? `${series.drawn_rows.toLocaleString('en-US')} of ${series.filtered_population.toLocaleString('en-US')} rows drawn per panel`
+              : ''
+          }
+          sampling={series?.sampling.description}
+          notes={['Panels share the render sample; open a pair full-size for vector exports.']}
+          getSvg={() => null}
+          vectorExports={false}
+        />
       </figcaption>
 
       <div className="xfig__controls">

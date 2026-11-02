@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { exploreApi } from '../../api/client'
 import type { BrushPredicate, MissingnessResponse } from '../../api/types'
+import { FigureExport } from './FigureExport'
 
 /**
  * Missing-data exploration.
@@ -26,6 +27,7 @@ export function MissingnessView({ datasetId, predicates, selectionActive, groupC
   const [data, setData] = useState<MissingnessResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [groupBy, setGroupBy] = useState('')
+  const svgRef = useRef<SVGSVGElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -64,6 +66,28 @@ export function MissingnessView({ datasetId, predicates, selectionActive, groupC
             ? `${data.population.toLocaleString('en-US')} rows in scope · population ${data.population_total?.toLocaleString('en-US') ?? data.population}`
             : 'computing…'}
         </span>
+        <FigureExport
+          figureId="missingness"
+          title={`Missingness — ${data ? data.columns.length : '?'} columns`}
+          settings={data ? `empty-cell policy · ${data.matrix.method} matrix` : ''}
+          counts={
+            data
+              ? `${data.population.toLocaleString('en-US')} rows in scope${
+                  data.population_total ? ` of ${data.population_total.toLocaleString('en-US')} total` : ''
+                }`
+              : ''
+          }
+          sampling={data?.matrix.description}
+          notes={[data?.policy ?? 'Missing means an empty cell.'].concat(
+            data?.columns
+              .slice(0, 3)
+              .map((name) => {
+                const entry = data.per_column.find((c) => c.column === name)
+                return `${name}: ${entry?.missing_pct.toFixed(1)}% missing (${entry?.missing_count} rows)`
+              }) ?? [],
+          )}
+          getSvg={() => svgRef.current}
+        />
       </figcaption>
 
       <div className="xfig__controls">
@@ -117,6 +141,7 @@ export function MissingnessView({ datasetId, predicates, selectionActive, groupC
           <div className="xmiss__matrix">
             <span className="xmiss__matrixtitle">{data.matrix.description}</span>
             <svg
+              ref={svgRef}
               width={Math.min(720, data.columns.length * 22 + 60)}
               height={Math.min(300, data.matrix.rows.length * 6 + 30)}
               role="img"

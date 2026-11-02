@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { exploreApi } from '../../api/client'
 import type { BrushPredicate, ExploreSchema, SeriesResponse } from '../../api/types'
+import { FigureExport } from './FigureExport'
 
 /**
  * Single scatter plot with a box brush.
@@ -48,6 +49,7 @@ export function ScatterFocus({
   const [drag, setDrag] = useState<{ x0: number; y0: number; x1: number; y1: number } | null>(null)
   const dragRef = useRef<{ x0: number; y0: number; x1: number; y1: number } | null>(null)
   const plotRef = useRef<HTMLDivElement>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
 
   useEffect(() => {
     const element = plotRef.current
@@ -164,6 +166,23 @@ export function ScatterFocus({
               } · up to ${pairValid.toLocaleString('en-US')} valid pairs`
             : 'loading…'}
         </span>
+        <FigureExport
+          figureId="scatter"
+          title={`Scatter — ${x} (x) × ${y} (y)`}
+          settings={`${series ? `render sample of ${series.filtered_population.toLocaleString('en-US')} rows` : ''}${
+            colorColumn ? ` · coloured by ${colorColumn}` : ''
+          }`}
+          counts={
+            series
+              ? `${series.drawn_rows.toLocaleString('en-US')} drawn · up to ${pairValid.toLocaleString('en-US')} valid pairs${
+                  selectedIds.size > 0 ? ` · ${selectedIds.size.toLocaleString('en-US')} selected` : ''
+                }`
+              : ''
+          }
+          sampling={series?.sampling.description}
+          notes={['Point positions are genuine values; missing or unparsable cells are not drawn.']}
+          getSvg={() => svgRef.current}
+        />
       </figcaption>
 
       <div className="xfig__controls">
@@ -203,6 +222,7 @@ export function ScatterFocus({
       {series && xScale && yScale && (
         <div ref={plotRef} className="xfig__plot">
           <svg
+            ref={svgRef}
             width={size.width}
             height={size.height}
             role="img"

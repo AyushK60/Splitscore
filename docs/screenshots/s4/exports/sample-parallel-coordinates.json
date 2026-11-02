@@ -1,0 +1,45 @@
+{
+  "figure_schema_version": "1.0.0",
+  "figure_id": "parallel-coordinates",
+  "generated_at_utc": "2026-11-02T20:25:02Z",
+  "application": {
+    "name": "SplitScope",
+    "version": "1.0.0"
+  },
+  "title": "Parallel coordinates — month_index, tenure_months, monthly_spend, support_tickets, avg_session_minutes",
+  "settings": "5 numeric axes · coloured by churned",
+  "counts": "240 of 240 rows drawn",
+  "sampling": "All rows are drawn (the dataset fits the render cap).",
+  "notes": [
+    "Axis ranges cover the full dataset population; drawn lines follow the active filters.",
+    "Density of drawn lines represents the render sample, not the full dataset."
+  ],
+  "caption": [
+    "Parallel coordinates — month_index, tenure_months, monthly_spend, support_tickets, avg_session_minutes",
+    "5 numeric axes · coloured by churned — 240 of 240 rows drawn",
+    "All rows are drawn (the dataset fits the render cap).",
+    "Active selection: none (full dataset population)",
+    "repeated_entity.csv · sha256:c4992126471b70fc… · 240 rows · SplitScope 1.0.0 · parallel-coordinates · 2026-11-02T20:25:02Z",
+    "Axis ranges cover the full dataset population; drawn lines follow the active filters.",
+    "Density of drawn lines represents the render sample, not the full dataset."
+  ],
+  "dataset": {
+    "dataset_id": "ds-a92758304342",
+    "name": "repeated_entity.csv",
+    "source": "demo",
+    "is_synthetic": true,
+    "sha256": "c4992126471b70fca4a3b0c87509410428bd7fd114fc1c80f7f25708f14b3365",
+    "row_count": 240,
+    "column_count": 8
+  },
+  "active_selection": {
+    "predicates": [],
+    "total_selected": 0,
+    "population": 240,
+    "ids_truncated": false
+  },
+  "privacy": {
+    "raw_rows_embedded": false,
+    "note": "The manifest references the in-memory dataset; it carries no cell values."
+  }
+}

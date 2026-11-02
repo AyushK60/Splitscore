@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { BrushPredicate, SeriesResponse } from '../../api/types'
+import { FigureExport } from './FigureExport'
 
 /** A committed axis brush over real data units. */
 type BrushRangePredicate = Extract<BrushPredicate, { kind: 'range' }>
@@ -304,6 +305,20 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
               Reset brushes ({activeBrushes.length})
             </button>
           )}
+          <FigureExport
+            figureId="parallel-coordinates"
+            title={`Parallel coordinates — ${axes.map((a) => a.column).join(', ')}`}
+            settings={`${axes.length} numeric axes${colorColumn ? ` · coloured by ${colorColumn}` : ''}`}
+            counts={`${series.drawn_rows.toLocaleString('en-US')} of ${series.filtered_population.toLocaleString('en-US')} rows drawn${
+              selectedIds.size > 0 ? ` · ${selectedIds.size.toLocaleString('en-US')} selected` : ''
+            }`}
+            sampling={series.sampling.description}
+            notes={[
+              'Axis ranges cover the full dataset population; drawn lines follow the active filters.',
+              'Density of drawn lines represents the render sample, not the full dataset.',
+            ]}
+            getSvg={() => svgRef.current}
+          />
         </div>
       </div>
       <div className="xpc__canvas">

@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { exploreApi } from '../../api/client'
 import type { CorrelationResponse, ExploreSchema } from '../../api/types'
+import { FigureExport } from './FigureExport'
 
 /**
  * Correlation heatmap (Pearson / Spearman).
@@ -38,6 +39,7 @@ export function CorrelationHeatmap({ schema, onRequestScatter }: Props) {
   const [data, setData] = useState<CorrelationResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [focused, setFocused] = useState<string | null>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
 
   useEffect(() => {
     setColumns((previous) => {
@@ -115,6 +117,17 @@ export function CorrelationHeatmap({ schema, onRequestScatter }: Props) {
             ? `${data.population.toLocaleString('en-US')} rows · pairwise complete observations · ${data.min_pairs} pair minimum`
             : 'computing…'}
         </span>
+        <FigureExport
+          figureId={`correlation-${method}`}
+          title={`Correlation matrix (${method}) — ${columns.join(', ')}`}
+          settings={`${method} · ${columns.length} variables · pairwise complete`}
+          counts={data ? `${data.population.toLocaleString('en-US')} rows · ${data.cells.length} pairs` : ''}
+          notes={[
+            'Correlation describes association, not causation.',
+            `Each cell keeps its own valid-pair count; coefficients need at least ${data?.min_pairs ?? 3} complete pairs.`,
+          ]}
+          getSvg={() => svgRef.current}
+        />
       </figcaption>
 
       <div className="xfig__controls">
@@ -160,7 +173,7 @@ export function CorrelationHeatmap({ schema, onRequestScatter }: Props) {
 
       {data && columns.length >= 2 && (
         <div className="xfig__scroll">
-          <svg width={width} height={height} role="img" aria-label={`${method} correlation matrix`}>
+          <svg ref={svgRef} width={width} height={height} role="img" aria-label={`${method} correlation matrix`}>
             <defs>
               <pattern id="xcorr-undefined" width="6" height="6" patternUnits="userSpaceOnUse">
                 <rect width="6" height="6" fill="var(--rs-sunken)" />

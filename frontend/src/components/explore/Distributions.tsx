@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { exploreApi } from '../../api/client'
 import type { BrushPredicate, DistributionResponse, ExploreSchema } from '../../api/types'
+import { FigureExport } from './FigureExport'
 
 /**
  * Distribution views: histogram + box plot for numeric columns, frequency
@@ -27,6 +28,7 @@ export function Distributions({ schema, predicates, selectionActive }: Props) {
   const [groupBy, setGroupBy] = useState<string>('')
   const [data, setData] = useState<DistributionResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
 
   const columnType = schema.columns.find((c) => c.name === column)?.detected_type
   const isNumeric = columnType === 'numeric' || columnType === 'integer'
@@ -95,6 +97,27 @@ export function Distributions({ schema, predicates, selectionActive }: Props) {
                 : ` · ${data.missing_count} missing`)
             : 'computing…'}
         </span>
+        <FigureExport
+          figureId={`distribution-${column}`}
+          title={`Distribution — ${column} (${isNumeric ? 'numeric' : 'categorical'})`}
+          settings={`${isNumeric ? `${bins} equal-width bins` : 'per-level counts'}${
+            data?.group_by ? ` · grouped by ${data.group_by}` : ''
+          }`}
+          counts={
+            data
+              ? `population ${data.population.toLocaleString('en-US')} rows${
+                  isNumeric ? ` · ${data.valid_count?.toLocaleString('en-US')} valid · ${data.missing_count} missing · ${data.unparsed_count} unparsable` : ` · ${data.missing_count} missing`
+                }${data.selection ? ` · selection ${data.selection.population.toLocaleString('en-US')} rows` : ''}`
+              : ''
+          }
+          notes={[
+            'Each group uses only its own rows; group sizes are reported.',
+            isNumeric
+              ? 'Quartiles: linear interpolation; whiskers end at the most extreme values within 1.5×IQR fences.'
+              : undefined,
+          ].filter((note): note is string => Boolean(note))}
+          getSvg={() => svgRef.current}
+        />
       </figcaption>
 
       <div className="xfig__controls">
@@ -144,10 +167,10 @@ export function Distributions({ schema, predicates, selectionActive }: Props) {
       )}
 
       {data && data.kind === 'numeric' && data.bins && data.counts && (
-        <Histogram data={data} fmt={fmt} />
+        <Histogram data={data} fmt={fmt} svgRef={svgRef} />
       )}
       {data && data.kind === 'categorical' && data.levels && (
-        <CategoricalChart data={data} />
+        <CategoricalChart data={data} svgRef={svgRef} />
       )}
 
       {data?.groups && data.groups.length > 0 && (
@@ -189,7 +212,15 @@ export function Distributions({ schema, predicates, selectionActive }: Props) {
   )
 }
 
-function Histogram({ data, fmt }: { data: DistributionResponse; fmt: (v: number) => string }) {
+function Histogram({
+  data,
+  fmt,
+  svgRef,
+}: {
+  data: DistributionResponse
+  fmt: (v: number) => string
+  svgRef: React.RefObject<SVGSVGElement | null>
+}) {
   const bins = data.bins ?? []
   const counts = data.counts ?? []
   const sel = data.selection
@@ -204,7 +235,7 @@ function Histogram({ data, fmt }: { data: DistributionResponse; fmt: (v: number)
 
   return (
     <div className="xfig__scroll">
-      <svg width={width} height={height} role="img" aria-label={`Histogram of ${data.column}`}>
+      <svg ref={svgRef} width={width} height={height} role="img" aria-label={`Histogram of ${data.column}`}>
         <line x1={pad.left} y1={pad.top + innerH} x2={pad.left + innerW} y2={pad.top + innerH} stroke="var(--rs-line-strong)" />
         {[0.5, 1].map((t) => (
           <g key={t}>
@@ -278,7 +309,13 @@ function Histogram({ data, fmt }: { data: DistributionResponse; fmt: (v: number)
   )
 }
 
-function CategoricalChart({ data }: { data: DistributionResponse }) {
+function CategoricalChart({
+  data,
+  svgRef,
+}: {
+  data: DistributionResponse
+  svgRef: React.RefObject<SVGSVGElement | null>
+}) {
   const levels = data.levels ?? []
   const width = 720
   const rowH = 30
@@ -287,7 +324,7 @@ function CategoricalChart({ data }: { data: DistributionResponse }) {
   const max = Math.max(1, ...levels.map((l) => l.count))
   return (
     <div className="xfig__scroll">
-      <svg width={width} height={height} role="img" aria-label={`Frequencies of ${data.column}`}>
+      <svg ref={svgRef} width={width} height={height} role="img" aria-label={`Frequencies of ${data.column}`}>
         {levels.map((level, i) => (
           <g key={level.value}>
             <text x={padL - 10} y={i * rowH + 19} textAnchor="end" className="xfig__axislabel">

@@ -824,3 +824,29 @@
   font: 400 10px/1.5 var(--rs-mono);
   color: color-mix(in srgb, var(--rs-soft) 80%, transparent);
 }
+
+/* ---- figure export ---------------------------------------------------------- */
+
+.xexport {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.xexport__label {
+  font: 600 9.5px/1.2 var(--rs-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rs-soft);
+}
+
+.xexport__error {
+  font: 500 10px/1.3 var(--rs-mono);
+  color: var(--rs-bad);
+}
+
+.xexport__hint {
+  font: 400 9.5px/1.3 var(--rs-mono);
+  color: color-mix(in srgb, var(--rs-soft) 75%, transparent);
+}
