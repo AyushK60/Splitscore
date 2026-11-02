@@ -21,6 +21,15 @@ MAX_RENDER_ROWS = 5000
 DEFAULT_RENDER_ROWS = 1200
 
 
+def _ordinal(number: int) -> str:
+    """1 → '1st', 3 → '3rd', 9 → '9th' — for the sampling caption."""
+    if 10 <= number % 100 <= 20:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(number % 10, "th")
+    return f"{number}{suffix}"
+
+
 @dataclass(frozen=True)
 class RenderSample:
     """Which rows a point-level chart draws, and how to describe that."""
@@ -35,7 +44,7 @@ class RenderSample:
         if self.stride <= 1:
             return "All rows are drawn (the dataset fits the render cap)."
         return (
-            f"Systematic grid sample: every {self.stride}th row of {self.population:,} "
+            f"Systematic grid sample: every {_ordinal(self.stride)} row of {self.population:,} "
             f"in file order; {len(self.indices):,} rows drawn."
         )
 

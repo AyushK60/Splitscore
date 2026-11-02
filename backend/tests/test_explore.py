@@ -635,3 +635,15 @@ def test_population_mask_union_within_column(client):
         [Predicate(column="v", min=0.0, max=1.0), Predicate(column="v", min=4.0, max=5.0)],
     )
     assert mask.tolist() == [True, True, False, False, True, True]
+
+
+def test_sampling_caption_uses_ordinals():
+    from app.explore.sampling import _ordinal, render_sample
+
+    assert _ordinal(1) == "1st"
+    assert _ordinal(3) == "3rd"
+    assert _ordinal(9) == "9th"
+    assert _ordinal(12) == "12th"
+    assert _ordinal(111) == "111th"
+    sample = render_sample(3000, 1000)
+    assert "every 3rd row" in sample.description
