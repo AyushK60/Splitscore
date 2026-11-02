@@ -140,3 +140,68 @@ cd frontend && npm run test:e2e        # use SPLITSCOPE_E2E_PORT=<free port> if 
 2. Add a visual-regression baseline set (Playwright screenshots per view at 1440/768/390) so future styling changes are diffed, not eyeballed.
 3. Add landing-page E2E coverage (hero CTA + capability-card navigation) to `npm run test:e2e` so regressions in the new route are caught by CI.
 4. Only after S3–S11 are specified: Causal Lab / Model Lab / Visual Explorer — behind clearly-labelled routes, never linked from the landing page until they compute real results.
+## Follow-up session — landing page art direction
+
+The first landing pass solved structure but not art direction. The landing page was
+redesigned from scratch around a single, deliberate concept.
+
+### Direction: "forensic archive"
+
+The page is a research plate at night and a printed specification by day. Palette:
+bottle-ink green-black (`#080e0b` / `#0b1410`), bone ivory (`#ece3d2` / `#f6efe2`),
+copper ember (`#d9793f`) reserved for anything the audit *finds*, celadon (`#a7c4b2`)
+for structure. No navy, cyan, teal or default-SaaS blue. Typography is a triad: an
+editorial display serif (Iowan Old Style → Palatino Linotype → Georgia) for headings,
+a grotesque for body, monospace for instrument labels. The split boundary is the one
+motif: a vertical rule that runs through the hero, the final band, and the ledger
+hairlines. Motion is staged clip-reveals, a filament that draws across the boundary,
+one slow scan pass and a breathing halo — nothing bounces.
+
+### Hero
+
+Replaced `HeroScene` (a framed diagram beside the copy) with `HeroField`, a
+full-bleed field that *is* the hero background: 42 record rows split into train and
+test registers by a dashed boundary with tick marks and a copper laser, six column
+threads feeding those rows, and a single filament that leaves a training row, climbs
+across the boundary and lands on the testing row that shares its information, with a
+`SS-DUP-001` annotation on a leader line. The headline is set over the field in a
+display serif with an italic copper phrase, deliberately indented off the grid; the
+plate caption sits on dark glass in the lower right. The theme check that this is a
+conceptual illustration is in the plate, the index strip and the caption copy.
+
+### Page structure
+
+Five bands with different compositions instead of stacked cards: hero; a capabilities
+*ledger* (sticky rail + numbered hairline rows, one row carrying the five implemented
+check names, the V2 roadmap reduced to a single honest footnote); a full-width method
+band with a staggered five-station timeline on a drawn bus line; an evidence band built
+as a hairline 12-column metric grid with a serif pull-quote and an italic caveat; and a
+closing band with a manifest of the five real steps. Scroll reveals are one
+IntersectionObserver pass (`useRevealOnScroll`), skipped under reduced motion.
+
+### Files
+
+- Rewritten: `frontend/src/views/LandingView.tsx`, `frontend/src/styles/landing.css`
+- Added: `frontend/src/components/HeroField.tsx`, `frontend/src/lib/useReveal.ts`
+- Removed: `frontend/src/components/HeroScene.tsx`
+- Updated: `frontend/index.html` (title, description, theme-color),
+  `frontend/scripts/capture-v2-screenshots.mjs` (hero/tablet captures, scroll pass,
+  reveal + reduced-motion assertions)
+
+### Verification
+
+`npm run typecheck` 0 · `npm run lint` 0 warnings · `npm run test` 70 passed ·
+`npm run build` exit 0 (52 modules, 55.7 kB CSS / 337.3 kB JS) ·
+`npm run test:e2e` 4 passed · capture harness exit 0: landing h1 correct, 0px
+horizontal overflow at 1440 / 768 / 390 (landing and workbench), 25 sections revealed,
+visible focus ring on first Tab, CTA → demo → audit findings, reduced-motion scan band
+hidden with 0 hidden sections, zero console/page/request errors.
+
+Screenshots: `docs/screenshots/v2/v2-landing-hero.png`, `v2-landing-desktop.png`,
+`v2-landing-tablet.png`, `v2-landing-mobile.png` (plus the three workbench captures).
+
+### Limitations
+
+Display/body faces are system stacks (no webfonts are downloaded — the product is
+local-first, so no outbound font requests). The hero field is deliberately illustrative
+and labelled as such; it never claims to show a computed result.

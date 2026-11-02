@@ -1,18 +1,28 @@
 /**
  * Landing — the SplitScope product front door.
  *
- * One dominant hero illustration (HeroScene), a real explanation of what the
- * application does today, and working paths into the workbench. Nothing here
- * advertises an unimplemented capability as operational: the V2 research
- * surfaces are named only in a clearly marked roadmap strip, and every number
- * in the verification section is one this repository's own suites produce.
+ * Art direction: "forensic archive". The page reads like a research plate at
+ * night and a printed specification by day: bottle-ink and bone ivory, a copper
+ * ember for anything the audit *finds*, celadon for structure. One motif — the
+ * vertical split boundary — runs from the hero through every band, and the
+ * display serif is the voice of the page while monospace handles instrument
+ * labels.
+ *
+ * Honesty is structural, not decorative: the hero field is labelled a synthetic
+ * illustration, capability rows only point at screens that exist, and the V2
+ * workspaces are named as not-yet-built in a single footnote.
  */
+import { useRef, type CSSProperties } from 'react'
 
 import type { ViewId } from '../lib/router'
 import { useApp } from '../state/AppState'
-import { HeroScene } from '../components/HeroScene'
+import { HeroField } from '../components/HeroField'
+import { useRevealOnScroll } from '../lib/useReveal'
 
 type LandingProps = { onNavigate: (view: ViewId) => void }
+
+/** Per-item stagger, read by the reveal transition. */
+const delay = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties
 
 const NAV_LINKS = [
   { href: '#lp-capabilities', label: 'Capabilities' },
@@ -20,61 +30,94 @@ const NAV_LINKS = [
   { href: '#lp-evidence', label: 'Evidence' },
 ]
 
-const CAPABILITIES = [
+const HERO_FACTS = ['Local-first', 'Row-level evidence', 'No account', 'JSON · HTML · CSV']
+
+type Capability = {
+  num: string
+  title: string
+  body: string
+  checks?: string[]
+  action: string
+  view: ViewId
+}
+
+const CAPABILITIES: Capability[] = [
   {
-    id: 'detect',
-    kicker: 'Detect contamination',
-    body: 'Five evidence-based checks — exact duplicates, entity overlap, chronology, target copy and opt-in near-duplicates — each reporting severity, denominators and the exact rows behind the finding. Checks that cannot run are listed separately, never as a pass.',
-    action: { label: 'Open the audit workflow', view: 'overview' as ViewId },
+    num: '01',
+    title: 'Detect contamination',
+    body: 'Five evidence-based checks read the split from both sides. Each finding carries a severity, its denominators, the assumptions it depends on, and the exact rows behind it — a check that cannot run is listed as not run, never as a pass.',
+    checks: ['exact duplicates', 'entity overlap', 'chronology', 'target copy', 'near-duplicates'],
+    action: 'Open the audit workflow',
+    view: 'overview',
   },
   {
-    id: 'compare',
-    kicker: 'Compare split strategies',
-    body: 'Audit the split you already have, then generate random, stratified, group and chronological alternatives and compare their consequences side by side. SplitScope shows the trade-offs and never declares a winner.',
-    action: { label: 'See split comparison', view: 'comparison' as ViewId },
+    num: '02',
+    title: 'Trace a finding to its rows',
+    body: 'Every result resolves to row identifiers and the values that matched, so a reviewer can inspect the evidence instead of trusting a score. Nothing is summarised away.',
+    action: 'Load a dataset to trace',
+    view: 'dataset',
   },
   {
-    id: 'report',
-    kicker: 'Export the evidence',
-    body: 'Every run can be downloaded as a JSON report, a self-contained HTML file or per-strategy assignment CSVs — with role settings, check coverage and row identifiers intact, so a reviewer can retrace each number.',
-    action: { label: 'Go to reports', view: 'export' as ViewId },
+    num: '03',
+    title: 'Compare split strategies',
+    body: 'Audit the split you already have, then generate random, stratified, group and chronological alternatives with a fixed seed and compare their consequences side by side. SplitScope shows the trade-offs and never declares a winner.',
+    action: 'See split comparison',
+    view: 'comparison',
+  },
+  {
+    num: '04',
+    title: 'Export and retrace',
+    body: 'Download a JSON report, a self-contained HTML file or per-strategy assignment CSVs, with role settings, check coverage and row identifiers intact.',
+    action: 'Go to reports',
+    view: 'export',
   },
 ]
 
 const STEPS = [
   {
     title: 'Load a dataset',
-    body: 'Upload a CSV or open a bundled synthetic demo. The file is parsed into a bounded, in-memory store with a SHA-256 fingerprint; it is never written to disk.',
+    body: 'A CSV or a bundled synthetic demo is parsed into a bounded in-memory store with a SHA-256 fingerprint — never written to disk.',
   },
   {
     title: 'Map column roles',
-    body: 'State whether the file already marks train and test, then confirm split, target, entity, timestamp and feature columns. Suggestions are shown with their reason and never applied silently.',
+    body: 'Confirm split, target, entity, timestamp and feature columns. Suggestions show their reason and are never applied silently.',
   },
   {
     title: 'Run the audit',
-    body: 'Each enabled check runs against the selected split and returns findings with severity, counts, denominators, assumptions and the exact row identifiers behind them.',
+    body: 'Each enabled check returns findings with severity, counts, denominators and the exact row identifiers behind them.',
   },
   {
     title: 'Compare strategies',
-    body: 'Generate alternative splits with a fixed seed and compare how each one changes entity overlap, chronology and duplicate exposure — consequences, not a verdict.',
+    body: 'Alternative splits are generated with a fixed seed and compared on entity overlap, chronology and duplicate exposure.',
   },
   {
     title: 'Export and retrace',
-    body: 'Download the audit as JSON or HTML, plus the exact row assignments per strategy, so every claim in the report can be checked against the data you loaded.',
+    body: 'The audit ships as JSON or HTML with the exact row assignments per strategy, so every claim can be rechecked.',
   },
 ]
 
-const VERIFICATION = [
-  { value: '218', label: 'backend tests', command: 'python -m pytest -q' },
-  { value: '70', label: 'frontend tests', command: 'npm run test' },
-  { value: '41 / 61', label: 'synthetic cases / checks', command: 'python scripts/evaluate_synthetic.py' },
-  { value: '4', label: 'browser journeys', command: 'npm run test:e2e' },
+const PROOF = [
+  { value: '218', label: 'backend tests', command: 'python -m pytest -q', span: 'span-5' },
+  { value: '70', label: 'frontend tests', command: 'npm run test', span: 'span-3' },
+  { value: '41 / 61', label: 'synthetic cases / checks', command: 'evaluate_synthetic.py', span: 'span-4' },
+  { value: '4', label: 'browser journeys', command: 'npm run test:e2e', span: 'span-4' },
+  { value: '6', label: 'bundled synthetic demos', command: 'labelled synthetic throughout', span: 'span-4' },
+  { value: '3', label: 'export formats', command: 'JSON · HTML · CSV', span: 'span-4' },
 ]
 
-const ROADMAP = ['Visual Explorer', 'Model Lab', 'Causal Lab', 'Assumption registry', 'Research dossier']
+const NEXT_STEPS = [
+  'Choose a file or demo',
+  'Confirm column roles',
+  'Run the five checks',
+  'Compare split strategies',
+  'Export the evidence',
+]
 
 export function LandingView({ onNavigate }: LandingProps) {
   const { demos, loadDemo, busyLabel, status } = useApp()
+  const rootRef = useRef<HTMLDivElement>(null)
+  useRevealOnScroll(rootRef)
+
   const featured = demos?.featured_journey
   const featuredDemo = demos?.demos.find((demo) => demo.demo_id === featured?.demo_id)
   const demoReady = Boolean(featuredDemo?.file_present)
@@ -87,7 +130,7 @@ export function LandingView({ onNavigate }: LandingProps) {
   }
 
   return (
-    <div className="lp">
+    <div className="lp" ref={rootRef}>
       <a className="skip-link" href="#main">
         Skip to main content
       </a>
@@ -96,17 +139,25 @@ export function LandingView({ onNavigate }: LandingProps) {
         <div className="lp-nav__inner">
           <a className="lp-brand" href="#/" aria-label="SplitScope home">
             <span className="lp-brand__mark" aria-hidden="true">
-              <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
-                <rect x="1" y="1" width="6" height="14" rx="1.5" fill="currentColor" opacity="0.95" />
-                <rect x="9" y="1" width="6" height="14" rx="1.5" fill="currentColor" opacity="0.45" />
-                <path d="M8 0.5v15" stroke="currentColor" strokeWidth="1.5" />
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="2" y="2" width="7.5" height="16" rx="1" fill="currentColor" opacity="0.92" />
+                <rect
+                  x="10.5"
+                  y="2"
+                  width="7.5"
+                  height="16"
+                  rx="1"
+                  fill="currentColor"
+                  opacity="0.22"
+                />
+                <path d="M10 1v18" stroke="#d9793f" strokeWidth="1" />
               </svg>
             </span>
-            <span className="lp-brand__word">SplitScope</span>
-            <span className="lp-brand__tag">Research integrity</span>
+            <span className="lp-brand__name">SplitScope</span>
+            <span className="lp-brand__meta">Research integrity studio</span>
           </a>
 
-          <nav className="lp-nav__links" aria-label="Landing">
+          <nav className="lp-nav__links" aria-label="Landing sections">
             {NAV_LINKS.map((link) => (
               <a key={link.href} href={link.href}>
                 {link.label}
@@ -114,252 +165,304 @@ export function LandingView({ onNavigate }: LandingProps) {
             ))}
           </nav>
 
-          <div className="lp-nav__actions">
-            <button
-              type="button"
-              className="btn btn--primary"
-              onClick={() => onNavigate('overview')}
-            >
-              Launch Workbench
-            </button>
-          </div>
+          <button
+            type="button"
+            className="lp-btn lp-btn--line lp-btn--sm"
+            onClick={() => onNavigate('overview')}
+          >
+            Launch workbench
+          </button>
         </div>
       </header>
 
       <main id="main" tabIndex={-1} className="lp-main">
-        {/* ------------------------------- hero ------------------------------ */}
+        {/* ------------------------------- 01 hero ----------------------------- */}
         <section className="lp-hero" aria-labelledby="lp-title">
-          <div className="lp-hero__text">
-            <p className="lp-eyebrow">Local-first · runs entirely on your machine</p>
-            <h1 id="lp-title">From data leakage to causal insight.</h1>
-            <p className="lp-lead">
-              SplitScope audits the boundary between training and test data before a model ever
-              sees it — five evidence-based checks, the exact rows behind every finding, and split
-              alternatives you can compare. Evaluation you can defend starts with knowing what your
-              split actually shares.
-            </p>
+          <div className="lp-hero__field" aria-hidden="true">
+            <HeroField />
+          </div>
+          <div className="lp-hero__scrim" aria-hidden="true" />
+          <div className="lp-hero__grain" aria-hidden="true" />
 
-            <div className="lp-hero__actions">
-              <button
-                type="button"
-                className="btn btn--big btn--primary"
-                onClick={() => onNavigate('overview')}
-              >
-                Launch Workbench
-              </button>
-              <button
-                type="button"
-                className="btn btn--big btn--onDark"
-                disabled={busy || !demoReady}
-                onClick={() => void openDemo()}
-              >
-                {busy ? busyLabel : 'Explore Interactive Demo'}
-              </button>
-            </div>
-
-            <p className="lp-hero__note">
-              {featuredDemo ? (
-                <>
-                  The demo opens <strong>{featuredDemo.title}</strong>, a bundled{' '}
-                  <strong>synthetic</strong> dataset with roles already filled in — labelled
-                  synthetic everywhere it appears.
-                </>
-              ) : (
-                <>
-                  The demo opens a bundled <strong>synthetic</strong> dataset with roles already
-                  filled in — labelled synthetic everywhere it appears.
-                </>
-              )}{' '}
-              Your own CSV stays in server memory and is never written to disk.
-            </p>
-
-            {status.kind === 'error' ? (
-              <p className="lp-hero__warn" role="status">
-                The backend catalogue has not loaded: {status.message} The workbench still opens —
-                upload and demo loading need the local API.
+          <div className="lp-hero__inner">
+            <div className="lp-hero__copy">
+              <p className="lp-kicker">
+                <span className="lp-kicker__rule" aria-hidden="true" />
+                Local-first · the split is the product
               </p>
-            ) : null}
-          </div>
 
-          <HeroScene />
-        </section>
-
-        {/* --------------------------- capability strip ---------------------- */}
-        <section className="lp-strip" aria-label="What is implemented today">
-          <ul>
-            <li>
-              <strong>5</strong> evidence-based leakage checks
-            </li>
-            <li>
-              <strong>Row-level</strong> evidence for every finding
-            </li>
-            <li>
-              <strong>4</strong> split strategies compared
-            </li>
-            <li>
-              <strong>JSON · HTML · CSV</strong> exports
-            </li>
-            <li>
-              <strong>6</strong> bundled synthetic demos
-            </li>
-            <li>
-              <strong>Local-first</strong> — no network calls at runtime
-            </li>
-          </ul>
-        </section>
-
-        {/* --------------------------- capabilities -------------------------- */}
-        <section className="lp-section" id="lp-capabilities" aria-labelledby="lp-cap-h">
-          <div className="lp-section__head">
-            <p className="lp-eyebrow">What the workbench does today</p>
-            <h2 id="lp-cap-h">Real capabilities, not a feature list</h2>
-            <p className="lp-section__lede">
-              Every action below opens a working screen in the application. Each result it produces
-              is computed by the local audit engine and traceable to the rows you loaded.
-            </p>
-          </div>
-
-          <div className="lp-cards">
-            {CAPABILITIES.map((card, index) => (
-              <article className="lp-card" key={card.id}>
-                <span className="lp-card__index" aria-hidden="true">
-                  {String(index + 1).padStart(2, '0')}
+              <h1 id="lp-title" className="lp-title">
+                <span className="lp-title__line">
+                  <span>From data leakage</span>
                 </span>
-                <h3>{card.kicker}</h3>
-                <p>{card.body}</p>
+                <span className="lp-title__line lp-title__line--indent">
+                  <span>
+                    to <em>causal insight</em>.
+                  </span>
+                </span>
+              </h1>
+
+              <p className="lp-hero__lead">
+                SplitScope audits the boundary between training and test data before a model ever
+                sees it — five evidence-based checks, the exact rows behind every finding, and
+                split alternatives you can compare. Evaluation you can defend starts with knowing
+                what your split actually shares.
+              </p>
+
+              <div className="lp-hero__actions">
                 <button
                   type="button"
-                  className="lp-card__action"
-                  onClick={() => onNavigate(card.action.view)}
+                  className="lp-btn lp-btn--solid lp-btn--lg"
+                  onClick={() => onNavigate('overview')}
                 >
-                  {card.action.label}
-                  <span aria-hidden="true">→</span>
+                  Launch Workbench
+                  <span className="lp-btn__arrow" aria-hidden="true">
+                    →
+                  </span>
                 </button>
-              </article>
-            ))}
+                <button
+                  type="button"
+                  className="lp-btn lp-btn--ghost lp-btn--lg"
+                  disabled={busy || !demoReady}
+                  onClick={() => void openDemo()}
+                >
+                  {busy ? busyLabel : 'Explore Interactive Demo'}
+                </button>
+              </div>
+
+              <ul className="lp-hero__facts" aria-label="Product properties">
+                {HERO_FACTS.map((fact) => (
+                  <li key={fact}>{fact}</li>
+                ))}
+              </ul>
+
+              {status.kind === 'error' ? (
+                <p className="lp-hero__warn" role="status">
+                  The catalogue has not loaded: {status.message} The workbench still opens —
+                  uploading and demo loading need the local API.
+                </p>
+              ) : null}
+            </div>
+
+            <aside className="lp-hero__plate">
+              <p className="lp-plate__label">Plate 01 · audit field</p>
+              <p className="lp-plate__body">
+                Two registers of synthetic records, one boundary between them, and a single pair of
+                rows carrying the same information across it.
+              </p>
+              <p className="lp-plate__note">
+                Conceptual illustration, not a computed result. The demo opens{' '}
+                {featuredDemo ? <strong>{featuredDemo.title}</strong> : 'a bundled synthetic dataset'}
+                {' — '}synthetic throughout. Your CSV stays in server memory, never on disk.
+              </p>
+            </aside>
           </div>
 
-          <aside className="lp-roadmap" aria-label="Planned V2 workspaces">
-            <p className="lp-roadmap__label">Planned for SplitScope V2 — not available yet</p>
-            <ul>
-              {ROADMAP.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <p className="lp-roadmap__note">
-              These workspaces are specified in the V2 blueprint and are not implemented in this
-              build. Nothing on this page links to them.
-            </p>
-          </aside>
+          <div className="lp-hero__index">
+            <span>01 — Audit field</span>
+            <span className="lp-hero__index-mid">Synthetic illustration</span>
+            <span>Scroll ↓</span>
+          </div>
         </section>
 
-        {/* ------------------------------ method ----------------------------- */}
-        <section className="lp-section lp-section--method" id="lp-method" aria-labelledby="lp-method-h">
-          <div className="lp-section__head">
-            <p className="lp-eyebrow">Method</p>
-            <h2 id="lp-method-h">How an audit runs</h2>
-            <p className="lp-section__lede">
-              The workflow is deliberately short: five steps from raw file to exported evidence,
-              with a confirmation gate wherever a human judgment is required.
-            </p>
-          </div>
+        {/* --------------------------- 02 capabilities ------------------------- */}
+        <section className="lp-band lp-band--paper" id="lp-capabilities" aria-labelledby="lp-cap-h">
+          <div className="lp-band__grid">
+            <div className="lp-band__rail">
+              <p className="lp-index">02 — Capabilities</p>
+              <h2 id="lp-cap-h" className="lp-h2" data-reveal="">
+                Four things it can prove, <em>row by row</em>.
+              </h2>
+              <p className="lp-lede" data-reveal="" style={delay(80)}>
+                Every action below opens a working screen. Every figure comes from the local audit
+                engine and resolves to the rows you loaded.
+              </p>
+            </div>
 
-          <ol className="lp-steps">
-            {STEPS.map((step, index) => (
-              <li key={step.title}>
-                <span className="lp-steps__num" aria-hidden="true">
-                  {index + 1}
-                </span>
-                <div>
+            <div className="lp-band__body">
+              <div className="lp-ledger">
+                {CAPABILITIES.map((cap, index) => (
+                  <article className="lp-entry" key={cap.num} data-reveal="" style={delay(index * 70)}>
+                    <p className="lp-entry__num" aria-hidden="true">
+                      {cap.num}
+                    </p>
+                    <div className="lp-entry__main">
+                      <h3 className="lp-entry__title">{cap.title}</h3>
+                      <p className="lp-entry__body">{cap.body}</p>
+                      {cap.checks ? (
+                        <ul className="lp-entry__checks" aria-label="Implemented leakage checks">
+                          {cap.checks.map((check) => (
+                            <li key={check}>{check}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="lp-link"
+                        onClick={() => onNavigate(cap.view)}
+                      >
+                        {cap.action}
+                        <span aria-hidden="true">↗</span>
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <p className="lp-footnote" data-reveal="">
+                <span className="lp-footnote__label">Not in this build</span>
+                Planned for SplitScope V2: Visual Explorer · Model Lab · Causal Lab · Assumption
+                registry · Research dossier. Nothing on this page links to them.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------ 03 method ---------------------------- */}
+        <section className="lp-band lp-band--ink" id="lp-method" aria-labelledby="lp-method-h">
+          <div className="lp-band__wide">
+            <div className="lp-method__head">
+              <div>
+                <p className="lp-index lp-index--ink">03 — Method</p>
+                <h2 id="lp-method-h" className="lp-h2 lp-h2--ink" data-reveal="">
+                  Five steps, <em>one confirmation gate</em>.
+                </h2>
+              </div>
+              <p className="lp-lede lp-lede--ink" data-reveal="" style={delay(80)}>
+                The workflow is deliberately short: from raw file to exported evidence, with a human
+                confirmation wherever a judgment is required.
+              </p>
+            </div>
+
+            <ol className="lp-timeline" data-reveal="">
+              {STEPS.map((step, index) => (
+                <li key={step.title} data-reveal="" style={delay(index * 90)}>
+                  <span className="lp-timeline__num" aria-hidden="true">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span className="lp-timeline__dot" aria-hidden="true" />
                   <h3>{step.title}</h3>
                   <p>{step.body}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+                </li>
+              ))}
+            </ol>
 
-          <div className="lp-method__cta">
-            <p>
-              Start with the guided demo — no file, no setup: the roles, target and entity are
-              pre-filled and you can change every one of them.
-            </p>
-            <button
-              type="button"
-              className="btn btn--primary"
-              disabled={busy || !demoReady}
-              onClick={() => void openDemo()}
-            >
-              Open the synthetic walkthrough
-            </button>
-          </div>
-        </section>
-
-        {/* ----------------------------- evidence ---------------------------- */}
-        <section className="lp-section lp-section--evidence" id="lp-evidence" aria-labelledby="lp-evidence-h">
-          <div className="lp-section__head">
-            <p className="lp-eyebrow">Evidence</p>
-            <h2 id="lp-evidence-h">Verified on this build</h2>
-            <p className="lp-section__lede">
-              These are the repository's own suites and the commands that produce them. The
-              synthetic evaluation proves the checks implement their stated definitions on
-              hand-built fixtures — it is not a measure of real-world detection accuracy.
-            </p>
-          </div>
-
-          <ul className="lp-verify">
-            {VERIFICATION.map((item) => (
-              <li key={item.label}>
-                <span className="lp-verify__value">{item.value}</span>
-                <span className="lp-verify__label">{item.label}</span>
-                <code>{item.command}</code>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* ------------------------------- final ----------------------------- */}
-        <section className="lp-final" aria-labelledby="lp-final-h">
-          <div className="lp-final__inner">
-            <h2 id="lp-final-h">Audit the split before you trust the score.</h2>
-            <p>
-              Open a synthetic demo in one click, or load your own CSV — it stays in server memory
-              and expires with the session.
-            </p>
-            <div className="lp-final__actions">
+            <div className="lp-method__foot" data-reveal="" style={delay(180)}>
+              <p>
+                Start with the guided demo — no file, no setup: roles, target and entity are
+                pre-filled, and you can change every one of them.
+              </p>
               <button
                 type="button"
-                className="btn btn--big btn--primary"
+                className="lp-btn lp-btn--solid"
                 disabled={busy || !demoReady}
                 onClick={() => void openDemo()}
               >
-                Start with a demo
-              </button>
-              <button
-                type="button"
-                className="btn btn--big btn--onDark"
-                onClick={() => onNavigate('dataset')}
-              >
-                Upload dataset
+                Open the synthetic walkthrough
               </button>
             </div>
+          </div>
+        </section>
+
+        {/* ----------------------------- 04 evidence --------------------------- */}
+        <section
+          className="lp-band lp-band--paper lp-band--proof"
+          id="lp-evidence"
+          aria-labelledby="lp-evidence-h"
+        >
+          <div className="lp-band__grid">
+            <div className="lp-band__rail">
+              <p className="lp-index">04 — Evidence</p>
+              <h2 id="lp-evidence-h" className="lp-h2" data-reveal="">
+                Verified <em>on this build</em>.
+              </h2>
+              <p className="lp-lede" data-reveal="" style={delay(80)}>
+                These are the repository's own suites and the exact commands that produce them.
+                Nothing here is a projection.
+              </p>
+            </div>
+
+            <div className="lp-band__body">
+              <div className="lp-proof" data-reveal="">
+                {PROOF.map((cell) => (
+                  <div className={`lp-proof__cell ${cell.span}`} key={cell.label}>
+                    <p className="lp-proof__value">{cell.value}</p>
+                    <p className="lp-proof__label">{cell.label}</p>
+                    <code className="lp-proof__command">{cell.command}</code>
+                  </div>
+                ))}
+              </div>
+
+              <blockquote className="lp-pullquote" data-reveal="" style={delay(120)}>
+                Every check reports its denominators, its assumptions and the rows behind the
+                finding.
+              </blockquote>
+
+              <p className="lp-caveat" data-reveal="" style={delay(160)}>
+                The synthetic evaluation proves each check implements its stated definition on
+                hand-built fixtures. It is <em>not</em> a measure of real-world detection accuracy.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------ 05 begin ----------------------------- */}
+        <section className="lp-final" aria-labelledby="lp-final-h">
+          <div className="lp-final__grain" aria-hidden="true" />
+          <div className="lp-final__inner">
+            <div className="lp-final__copy">
+              <p className="lp-index lp-index--ink">05 — Begin</p>
+              <h2 id="lp-final-h" className="lp-final__title" data-reveal="">
+                Audit the split <em>before</em> you trust the score.
+              </h2>
+              <p className="lp-lede lp-lede--ink" data-reveal="" style={delay(80)}>
+                Open a synthetic demo in one click, or load your own CSV — it stays in server memory
+                and expires with the session.
+              </p>
+              <div className="lp-hero__actions" data-reveal="" style={delay(140)}>
+                <button
+                  type="button"
+                  className="lp-btn lp-btn--solid lp-btn--lg"
+                  disabled={busy || !demoReady}
+                  onClick={() => void openDemo()}
+                >
+                  Start with a demo
+                </button>
+                <button
+                  type="button"
+                  className="lp-btn lp-btn--ghost lp-btn--lg"
+                  onClick={() => onNavigate('dataset')}
+                >
+                  Upload dataset
+                </button>
+              </div>
+            </div>
+
+            <ol className="lp-final__steps" data-reveal="" style={delay(120)}>
+              {NEXT_STEPS.map((line, index) => (
+                <li key={line}>
+                  <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                  {line}
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
       </main>
 
       <footer className="lp-footer">
-        <div className="lp-footer__inner">
-          <p className="lp-footer__brand">
-            <strong>SplitScope</strong> — Research Integrity & Causal Intelligence Studio
-          </p>
-          <p>
-            SplitScope audits splits, not models. Findings are evidence about the split you
-            selected — never a guarantee that data is safe or that a model will perform well.
-          </p>
-          <p className="lp-footer__meta">
-            Local-first · no accounts · no outbound network calls · datasets held in bounded,
-            in-memory storage with a one-hour TTL
-          </p>
+        <div className="lp-footer__top">
+          <p className="lp-footer__brand">SplitScope</p>
+          <p className="lp-footer__tag">Research Integrity &amp; Causal Intelligence Studio</p>
         </div>
+        <p className="lp-footer__statement">
+          SplitScope audits splits, not models. Findings are evidence about the split you selected —
+          never a guarantee that data is safe or that a model will perform well.
+        </p>
+        <p className="lp-footer__meta">
+          Local-first · no accounts · no outbound network calls · datasets held in bounded, in-memory
+          storage with a one-hour TTL
+        </p>
       </footer>
     </div>
   )

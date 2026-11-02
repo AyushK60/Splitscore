@@ -3,15 +3,15 @@
  * production build served by the local backend.
  *
  * Captures (docs/screenshots/v2/):
- *   v2-landing-desktop.png    1440x900, full page
+ *   v2-landing-hero.png      1440x900, hero viewport only
+ *   v2-landing-desktop.png   1440x900, full page
+ *   v2-landing-tablet.png     768x1024, full page
  *   v2-landing-mobile.png     390x844, full page
- *   v2-workbench-start.png    interior Start screen
- *   v2-workbench-dataset.png  loaded synthetic demo (interior)
- *   v2-workbench-audit.png    audit results with findings (interior)
+ *   v2-workbench-*.png        interior screens
  *
- * Also asserts: no console/page/request errors, no horizontal overflow at
- * desktop or mobile, landing CTAs really navigate, focus ring is visible on
- * keyboard focus, and the hero scene is static under reduced motion.
+ * Also asserts: no console/page/request errors, no horizontal overflow at any
+ * width, landing CTAs really navigate, keyboard focus is visible, and the hero
+ * field is static under reduced motion.
  *
  * Usage (backend running and `npm run build` done):
  *   node scripts/capture-v2-screenshots.mjs
@@ -42,6 +42,22 @@ async function horizontalOverflow(page) {
   return page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
 }
 
+/**
+ * Scroll the whole page so scroll-triggered reveals really run, then return to
+ * the top. Without this a full-page screenshot captures unrevealed sections.
+ */
+async function settleReveals(page) {
+  await page.evaluate(async () => {
+    const step = Math.round(window.innerHeight * 0.6)
+    for (let y = 0; y < document.body.scrollHeight; y += step) {
+      window.scrollTo(0, y)
+      await new Promise((resolve) => setTimeout(resolve, 110))
+    }
+    window.scrollTo(0, 0)
+    await new Promise((resolve) => setTimeout(resolve, 800))
+  })
+}
+
 // --- 1. landing, desktop 1440x900 -----------------------------------------
 const desktop = await openPage(1440, 900)
 await desktop.goto(BASE, { waitUntil: 'networkidle' })
@@ -49,6 +65,12 @@ await desktop.waitForSelector('h1')
 checks.push(`landing h1: ${(await desktop.locator('h1').first().innerText()).replace(/\n/g, ' ')}`)
 checks.push(`desktop horizontal overflow: ${await horizontalOverflow(desktop)}px`)
 
+// Hero viewport, captured before any scrolling.
+await desktop.waitForTimeout(2200)
+await desktop.screenshot({ path: `${OUT}/v2-landing-hero.png` })
+
+await settleReveals(desktop)
+checks.push(`revealed sections: ${await desktop.locator('[data-reveal="in"]').count()}`)
 await desktop.screenshot({ path: `${OUT}/v2-landing-desktop.png`, fullPage: true })
 
 // Keyboard: the first Tab lands on the skip link and shows a visible ring.
@@ -63,7 +85,6 @@ const focus = await desktop.evaluate(() => {
   }
 })
 checks.push(`first Tab focuses <${focus.tag}> class="${focus.cls}" outline=${focus.outline}`)
-
 
 // --- 2. landing CTA -> synthetic demo -> audit (real journey) --------------
 await desktop.getByRole('button', { name: 'Explore Interactive Demo' }).click()
@@ -83,39 +104,44 @@ await desktop.goto(`${BASE}/#/overview`, { waitUntil: 'networkidle' })
 await desktop.waitForSelector('h1')
 await desktop.screenshot({ path: `${OUT}/v2-workbench-start.png` })
 
-// --- 3. landing, mobile 390x844 -------------------------------------------
-const mobile = await openPage(390, 844)
-await mobile.goto(BASE, { waitUntil: 'networkidle' })
-await mobile.waitForSelector('h1')
-checks.push(`mobile horizontal overflow: ${await horizontalOverflow(mobile)}px`)
-await mobile.screenshot({ path: `${OUT}/v2-landing-mobile.png`, fullPage: true })
-
-// --- 3b. landing + workbench, tablet 768x1024 -----------------------------
+// --- 3. landing, tablet 768x1024 -----------------------------------------
 const tablet = await openPage(768, 1024)
 await tablet.goto(BASE, { waitUntil: 'networkidle' })
 await tablet.waitForSelector('h1')
 checks.push(`tablet horizontal overflow: ${await horizontalOverflow(tablet)}px`)
+await settleReveals(tablet)
+await tablet.screenshot({ path: `${OUT}/v2-landing-tablet.png`, fullPage: true })
 await tablet.goto(`${BASE}/#/overview`, { waitUntil: 'networkidle' })
 await tablet.waitForSelector('h1')
 checks.push(`tablet workbench overflow: ${await horizontalOverflow(tablet)}px`)
 
-// --- 4. reduced motion ----------------------------------------------------
+// --- 4. landing, mobile 390x844 ------------------------------------------
+const mobile = await openPage(390, 844)
+await mobile.goto(BASE, { waitUntil: 'networkidle' })
+await mobile.waitForSelector('h1')
+checks.push(`mobile horizontal overflow: ${await horizontalOverflow(mobile)}px`)
+await settleReveals(mobile)
+await mobile.screenshot({ path: `${OUT}/v2-landing-mobile.png`, fullPage: true })
+
+// --- 5. reduced motion ----------------------------------------------------
 const calm = await openPage(1440, 900, { reducedMotion: 'reduce' })
 await calm.goto(BASE, { waitUntil: 'networkidle' })
 await calm.waitForSelector('.hs-scene')
 const scene = await calm.evaluate(() => {
   const scan = document.querySelector('.hs-scan-band')
-  const tag = document.querySelector('.hs-tag__text')
+  const box = document.querySelector('.hs-scene').getBoundingClientRect()
+  const hidden = Array.from(document.querySelectorAll('[data-reveal]')).filter(
+    (node) => getComputedStyle(node).opacity !== '1',
+  ).length
   return {
     scan: scan ? getComputedStyle(scan).display : 'missing',
-    tagVisible: tag ? getComputedStyle(tag).fill !== 'none' : false,
-    sceneBox: (() => {
-      const box = document.querySelector('.hs-scene').getBoundingClientRect()
-      return `${Math.round(box.width)}x${Math.round(box.height)}`
-    })(),
+    hidden,
+    sceneBox: `${Math.round(box.width)}x${Math.round(box.height)}`,
   }
 })
-checks.push(`reduced motion: scan band display=${scene.scan}, scene box=${scene.sceneBox}`)
+checks.push(
+  `reduced motion: scan band display=${scene.scan}, hidden sections=${scene.hidden}, scene box=${scene.sceneBox}`,
+)
 
 await browser.close()
 
