@@ -10,7 +10,7 @@
 
 .rs.xw {
   max-width: none;
-  padding: 26px 22px 60px;
+  padding: 26px 0 60px;
 }
 
 /* ---- header -------------------------------------------------------------- */
@@ -273,6 +273,7 @@
 
 .xpc__line {
   fill: none;
+  stroke-width: 1.05;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
@@ -293,22 +294,22 @@
 }
 
 .xpc__axisname {
-  font: 600 11px/1 var(--rs-mono);
+  font: 600 12px/1 var(--rs-mono);
   fill: var(--rs-ink);
 }
 
 .xpc__axisrange {
-  font: 400 9px/1 var(--rs-mono);
+  font: 400 10px/1 var(--rs-mono);
   fill: var(--rs-soft);
 }
 
 .xpc__axisnote {
-  font: 500 9.5px/1 var(--rs-mono);
+  font: 500 10px/1 var(--rs-mono);
   fill: var(--rs-warn);
 }
 
 .xpc__tick {
-  font: 400 9px/1 var(--rs-mono);
+  font: 400 10px/1 var(--rs-mono);
   fill: var(--rs-soft);
 }
 
@@ -410,6 +411,41 @@
   align-items: baseline;
   gap: 10px;
   margin-bottom: 8px;
+}
+
+/* Compact guidance state: short, honest, no invented rows. */
+.xrow__guide {
+  border-top: 1px solid var(--rs-line);
+  padding-top: 8px;
+}
+
+.xrow__notetitle {
+  font: 600 10.5px/1.4 var(--rs-mono);
+  color: var(--rs-ink);
+  margin: 0 0 4px;
+}
+
+.xrow__guide ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.xrow__guide li {
+  font: 400 10.5px/1.5 var(--rs-mono);
+  color: var(--rs-soft);
+  padding-left: 12px;
+  position: relative;
+}
+
+.xrow__guide li::before {
+  content: '·';
+  position: absolute;
+  left: 2px;
+  color: var(--rs-copper);
 }
 
 .xrow__title {
@@ -532,6 +568,7 @@
 
 .xpc__plot {
   min-height: 380px;
+  overflow-x: auto;
 }
 
 /* ---- plot tabs ------------------------------------------------------------ */
@@ -616,6 +653,7 @@
 
 .xfig__plot {
   position: relative;
+  overflow-x: auto;
 }
 
 .xfig__brushlayer {
@@ -647,17 +685,17 @@
 }
 
 .xfig__axislabel {
-  font: 500 10px/1 var(--rs-mono);
+  font: 500 11px/1 var(--rs-mono);
   fill: var(--rs-soft);
 }
 
 .xfig__axistitle {
-  font: 600 10.5px/1 var(--rs-mono);
+  font: 600 11.5px/1 var(--rs-mono);
   fill: var(--rs-ink);
 }
 
 .xfig__cellvalue {
-  font: 500 8.5px/1 var(--rs-mono);
+  font: 500 9.5px/1 var(--rs-mono);
   fill: var(--rs-ink);
 }
 

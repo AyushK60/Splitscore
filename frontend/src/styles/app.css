@@ -1,45 +1,54 @@
 /* SplitScope styles.
    Plain CSS with custom properties: no component library, no CSS-in-JS, no
-   external fonts. One restrained indigo accent, deep ink text, generous
-   whitespace, and a visible focus ring on every interactive element. */
+   external fonts. The S5 workspace identity: the landing page's forensic
+   archive carried into the instrument — warm ivory paper, deep ink-green
+   structure, teal for the workbench's own actions, copper reserved for what
+   the audit finds and what the user selects. */
 
 :root {
-  /* Ink and paper: deep, slightly cool text on a quiet workspace. */
-  --ink: #111527;
-  --ink-soft: #343b4f;
-  --muted: #616a7d;
-  --line: #e7e9f0;
-  --line-strong: #ced2dd;
+  /* Ink and paper: deep ink-green text on warm ivory. */
+  --ink: #18231d;
+  --ink-soft: #2f3d35;
+  --muted: #5c6b62;
+  --line: #e3ddd0;
+  --line-strong: #cfc6b5;
   --bg: #ffffff;
-  --bg-sunken: #f5f6fa;
+  --bg-sunken: #f5f1e7;
   --bg-raised: #ffffff;
-  --bg-quiet: #f8f9fc;
+  --bg-quiet: #faf7f0;
+  --paper: #fbf8f1;
+  --ink-band: #12190f;
+  --ink-band-2: #17211a;
+  --bone: #f3ead9;
+  --bone-dim: rgb(243 234 217 / 72%);
+  --celadon: #b4d0bd;
+  --celadon-deep: #0a6d7d;
 
   /* The single accent. Action, selection and focus — never decoration. */
-  --accent: #4a4fd0;
+  --accent: #0a6d7d;
   --accent-ink: #ffffff;
-  --accent-soft: #eef0fd;
-  --accent-deep: #383db1;
-  --accent-line: #c9cdf3;
+  --accent-soft: #e7f3f5;
+  --accent-deep: #08505c;
+  --accent-line: #bcd9de;
 
   /* Severity is a muted, print-like palette so it never shouts over the text. */
-  --high: #ac2f28;
-  --high-soft: #fbeeec;
+  --high: #9d2b20;
+  --high-soft: #fbe9e6;
   --medium: #8a5a0a;
-  --medium-soft: #fdf4e5;
-  --low: #2f5b85;
+  --medium-soft: #fbf1d9;
+  --low: #3a6186;
   --low-soft: #ecf2f8;
   --info: #4d5563;
   --info-soft: #f0f2f5;
-  --ok: #17694a;
-  --ok-soft: #e9f5ee;
-  --focus: #4a4fd0;
+  --ok: #2a6a4b;
+  --ok-soft: #e9f3ec;
+  --focus: #0a6d7d;
 
-  --radius: 14px;
-  --radius-sm: 9px;
-  --radius-xs: 6px;
-  --shadow: 0 1px 2px rgb(17 21 39 / 4%), 0 6px 18px -14px rgb(17 21 39 / 26%);
-  --shadow-raised: 0 1px 2px rgb(17 21 39 / 5%), 0 16px 40px -26px rgb(17 21 39 / 34%);
+  --radius: 4px;
+  --radius-sm: 3px;
+  --radius-xs: 2px;
+  --shadow: 0 1px 2px rgb(24 35 29 / 5%), 0 6px 18px -14px rgb(24 35 29 / 24%);
+  --shadow-raised: 0 1px 2px rgb(24 35 29 / 6%), 0 16px 40px -26px rgb(24 35 29 / 30%);
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -47,8 +56,16 @@
   --space-5: 24px;
   --space-6: 32px;
   --space-7: 48px;
-  --mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Mono", "SF Mono", ui-monospace, Consolas, monospace;
+  --sans: "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont,
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino,
+    "Times New Roman", Georgia, serif;
+
+  /* Full-width responsive workspace: the scientific stages use the monitor. */
+  --ws-max: 1800px;
+  --ws-gutter: clamp(18px, 2.6vw, 44px);
+  --ws-reading: 76ch;
 }
 
 *,
@@ -152,18 +169,18 @@ a {
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgb(255 255 255 / 92%);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 1px 0 var(--line);
+  background: rgb(18 25 15 / 92%);
+  backdrop-filter: blur(12px) saturate(140%);
+  box-shadow: 0 1px 0 rgb(243 234 217 / 12%);
 }
 
 .app-header {
   background: transparent;
   border-bottom: 0;
-  padding: var(--space-3) var(--space-5);
+  padding: var(--space-3) var(--ws-gutter);
 }
 .app-header__inner {
-  max-width: 1120px;
+  max-width: var(--ws-max);
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
@@ -180,30 +197,34 @@ a {
   flex: none;
   width: 28px;
   height: 28px;
-  border-radius: 8px;
-  background: var(--ink);
-  color: #fff;
+  border-radius: 3px;
+  background: var(--bone);
+  color: #12190f;
   display: grid;
   place-items: center;
-  box-shadow: 0 1px 2px rgb(17 21 39 / 22%);
+  box-shadow: inset 0 0 0 1px rgb(18 25 15 / 25%);
 }
 .app-header__mark svg {
   display: block;
 }
 .app-header__title {
-  font-size: 16.5px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: 0.005em;
+  color: var(--bone);
 }
 .app-header__tagline {
-  color: var(--muted);
-  font-size: 13px;
-  border-left: 1px solid var(--line-strong);
+  color: var(--bone-dim);
+  font-size: 12px;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  border-left: 1px solid rgb(243 234 217 / 18%);
   padding-left: 10px;
 }
 .app-header__meta {
   margin-left: auto;
-  color: var(--muted);
+  color: var(--bone-dim);
   font-size: 12.5px;
   font-family: var(--mono);
   display: inline-flex;
@@ -214,68 +235,68 @@ a {
 .app-nav {
   background: transparent;
   border-bottom: 0;
-  padding: 0 var(--space-5);
+  padding: 0 var(--ws-gutter);
 }
 .app-nav__inner {
-  max-width: 1120px;
+  max-width: var(--ws-max);
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  padding-bottom: var(--space-2);
+  gap: 2px;
+  padding-bottom: 0;
 }
 .app-nav button {
   appearance: none;
   border: 0;
   background: none;
   font: inherit;
-  font-size: 14px;
-  color: var(--ink-soft);
-  padding: 6px 11px;
-  border-radius: 999px;
+  font-size: 13.5px;
+  color: var(--bone-dim);
+  padding: 9px 12px 8px;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  transition: color 120ms ease, background-color 120ms ease;
+  transition: color 120ms ease, border-color 120ms ease;
 }
 .app-nav button:hover:not(:disabled) {
-  color: var(--accent-deep);
-  background: var(--accent-soft);
+  color: var(--bone);
+  border-bottom-color: rgb(243 234 217 / 28%);
 }
 .app-nav button[aria-current='page'] {
-  color: var(--accent-deep);
-  background: var(--accent-soft);
+  color: var(--bone);
   font-weight: 650;
+  border-bottom-color: var(--celadon);
 }
 .app-nav button:disabled {
-  color: #a7adbb;
+  color: rgb(243 234 217 / 30%);
   cursor: not-allowed;
 }
 .app-nav__step {
   font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
+  font-size: 10px;
+  color: rgb(243 234 217 / 55%);
+  border: 1px solid rgb(243 234 217 / 22%);
+  border-radius: 1px;
   padding: 0 5px;
-  background: var(--bg-raised);
   line-height: 1.5;
 }
 .app-nav button[aria-current='page'] .app-nav__step {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-ink);
+  background: var(--celadon);
+  border-color: var(--celadon);
+  color: #12190f;
 }
 .app-nav button:disabled .app-nav__step {
   background: none;
-  border-color: var(--line);
+  border-color: rgb(243 234 217 / 12%);
 }
 
 .app-main {
-  max-width: 1120px;
+  max-width: var(--ws-max);
   margin: 0 auto;
-  padding: var(--space-5) var(--space-5) var(--space-7);
+  padding: var(--space-5) var(--ws-gutter) var(--space-7);
 }
 
 .stack > * + * {

@@ -48,19 +48,23 @@ export function ScatterFocus({
   const [size, setSize] = useState({ width: 720, height: 460 })
   const [drag, setDrag] = useState<{ x0: number; y0: number; x1: number; y1: number } | null>(null)
   const dragRef = useRef<{ x0: number; y0: number; x1: number; y1: number } | null>(null)
-  const plotRef = useRef<HTMLDivElement>(null)
+  // The plot div renders only once data exists, so the ref arrives after
+  // mount; state (not a plain ref) re-runs the observer effect when it does.
+  const [plotEl, setPlotEl] = useState<HTMLDivElement | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
 
   useEffect(() => {
-    const element = plotRef.current
-    if (!element) return
+    if (!plotEl) return
     const observer = new ResizeObserver((entries) => {
       const rect = entries[0].contentRect
-      setSize({ width: Math.max(420, rect.width), height: Math.max(340, rect.height) })
+      // On phones the panel itself is narrower than the old 420px floor; the
+      // plot container scrolls horizontally instead of overflowing the page.
+      const floor = Math.min(420, window.innerWidth - 40)
+      setSize({ width: Math.max(floor, rect.width), height: Math.max(340, rect.height) })
     })
-    observer.observe(element)
+    observer.observe(plotEl)
     return () => observer.disconnect()
-  }, [])
+  }, [plotEl])
 
   useEffect(() => {
     if (!x || !y || x === y) {
@@ -220,7 +224,7 @@ export function ScatterFocus({
       )}
 
       {series && xScale && yScale && (
-        <div ref={plotRef} className="xfig__plot">
+        <div ref={setPlotEl} className="xfig__plot">
           <svg
             ref={svgRef}
             width={size.width}

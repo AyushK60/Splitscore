@@ -11,7 +11,7 @@
  *
  * Traces and screenshots are captured on failure by `playwright.config.ts`.
  */
-import { test as base, expect } from '@playwright/test'
+import { test as base, expect, type Page } from '@playwright/test'
 
 type FailureDiagnostics = {
   /** Register an intentional failure so it is reported but not treated as a bug. */
@@ -57,3 +57,18 @@ const test = base.extend<FailureDiagnostics>({
 })
 
 export { expect, test }
+
+/**
+ * Loads a bundled demo from the S5 workspace entry panel and waits for the
+ * Data stage. The old collapsed "Browse other demos" disclosure no longer
+ * exists; the entry lists every demo with a real Open action.
+ */
+export async function loadDemoFromEntry(page: Page, title: string): Promise<void> {
+  await page.goto('/#/overview')
+  await page
+    .locator('.we__demo')
+    .filter({ hasText: title })
+    .getByRole('button', { name: 'Open', exact: true })
+    .click()
+  await page.waitForURL(/#\/dataset/)
+}

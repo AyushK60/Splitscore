@@ -96,7 +96,7 @@ function Shell() {
                 </svg>
               </span>
               <span className="app-header__title">SplitScope</span>
-              <span className="app-header__tagline">— check a train/test split for data leakage</span>
+              <span className="app-header__tagline">— leakage assurance workbench · audit · study · explore · compare</span>
             </button>
             {busyLabel ? (
               <p className="app-header__meta" role="status" aria-live="polite">

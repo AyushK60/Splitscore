@@ -51,11 +51,10 @@ test('rejected upload shows an understandable error and the user can recover', a
   await expect(page.getByRole('alert')).toHaveCount(0)
 
   await page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: /Start/ }).click()
-  await page.getByText('Browse other demos').click()
   await page
-    .locator('.demo-list__row')
+    .locator('.we__demo')
     .filter({ hasText: 'Repeated-entity subscription panel' })
-    .getByRole('button', { name: 'Load', exact: true })
+    .getByRole('button', { name: 'Open', exact: true })
     .click()
 
   await expect(page).toHaveURL(/#\/dataset$/)

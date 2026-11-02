@@ -11,7 +11,8 @@
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { expect, test } from './fixtures'
+import { expect, loadDemoFromEntry, test } from './fixtures'
+import type { Page } from '@playwright/test'
 
 // The explorer's canvas is tall; the default 1280x720 viewport puts the
 // scatter's lower half below the fold, where pointer events cannot start.
@@ -23,22 +24,14 @@ test.beforeAll(() => {
   mkdirSync(TMP, { recursive: true })
 })
 
-async function loadDemoAndOpenExplorer(page: import('@playwright/test').Page) {
-  await page.goto('/#/overview')
-  await page.getByText('Browse other demos').click()
-  await page
-    .locator('.demo-list__row')
-    .filter({ hasText: 'Repeated-entity subscription panel' })
-    .first()
-    .getByRole('button', { name: 'Load', exact: true })
-    .click()
-  await page.waitForURL(/#\/dataset/)
+async function loadDemoAndOpenExplorer(page: Page) {
+  await loadDemoFromEntry(page, 'Repeated-entity subscription panel')
   await page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: 'Explore' }).click()
   await expect(page.locator('[data-testid="parallel-coordinates"] svg')).toBeVisible()
   await expect(page.locator('.xpc__axisname').first()).toBeVisible()
 }
 
-async function brushFirstAxis(page: import('@playwright/test').Page) {
+async function brushFirstAxis(page: Page) {
   const hitArea = page.locator('.xpc__axis rect[fill="transparent"]').first()
   const box = await hitArea.boundingBox()
   expect(box).not.toBeNull()

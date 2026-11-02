@@ -1,99 +1,157 @@
 /**
- * Start (landing).
+ * Workspace entry (S5).
  *
- * The first screen answers three questions in order — what does this tool do,
- * how do I try it, what can it find — and shows what "shared information"
- * between a training and a testing side actually looks like before asking for
- * anything. The check catalogue, the honesty notes, the limits and the full
- * demo list stay one disclosure away, so a first-time reader is not asked to
- * digest them first.
+ * The workbench has ONE public landing page; this is not a second one. It is
+ * the instrument's entry panel: when no dataset is active it offers the three
+ * real ways in (upload, bundled synthetic demonstration, resume the session's
+ * dataset when one exists), and when a dataset is already loaded it becomes a
+ * contextual overview of where the session stands and what to do next.
  */
 
 import { useRef } from 'react'
 
-import { bytes, integer } from '../lib/format'
+import { integer } from '../lib/format'
 import type { ViewId } from '../lib/router'
 import { useApp } from '../state/AppState'
-import { Callout } from '../components/ui'
 
-/**
- * Two sides of a split, with two rows appearing on both sides.
- *
- * Purely decorative next to the caption that says the same thing in words; the
- * colours reuse the train/test palette used by the charts so the diagram and
- * the results speak one language.
- */
-function OverlapDiagram() {
-  const trainRows = [40, 64, 88, 112, 136]
-  const shared = new Set([64, 112])
+interface DemoEntry {
+  demo_id: string
+  title: string
+  subtitle: string
+  teaching_point: string
+  row_count: number
+  column_count: number
+  file_present: boolean
+}
+
+function fingerprint8(sha: string): string {
+  return sha.slice(0, 8)
+}
+
+/** Contextual overview: a dataset is already active in this session. */
+function SessionOverview({ onNavigate }: { onNavigate: (view: ViewId) => void }) {
+  const { dataset, roles, audit, comparison } = useApp()
+  if (!dataset) return null
+  const summary = dataset.dataset
+  const splitLabel =
+    roles.split && roles.split_train_value && roles.split_test_value
+      ? `${roles.split}: ${roles.split_train_value} / ${roles.split_test_value}`
+      : 'not chosen yet — set it in Data'
+  const stages: Array<{
+    id: ViewId
+    title: string
+    state: string
+    action: string
+  }> = [
+    {
+      id: 'dataset',
+      title: 'Data',
+      state: 'File loaded and roles proposed',
+      action: 'Verify split source and column roles',
+    },
+    {
+      id: 'study',
+      title: 'Study',
+      state: dataset.dataset ? 'Data dictionary and profile available' : '',
+      action: 'Record the study card and methodology',
+    },
+    {
+      id: 'explore',
+      title: 'Explore',
+      state: `${integer(summary.row_count)} rows ready for the visual explorer`,
+      action: 'Inspect distributions and link selections',
+    },
+    {
+      id: 'audit',
+      title: 'Results',
+      state: audit
+        ? `Audit run — ${audit.result.findings.length} finding${audit.result.findings.length === 1 ? '' : 's'}`
+        : 'Not audited yet in this session',
+      action: audit ? 'Review findings and the risk scorecard' : 'Run the five leakage checks',
+    },
+    {
+      id: 'comparison',
+      title: 'Compare',
+      state: comparison ? 'Split comparison available' : 'No comparison run yet',
+      action: 'Compare alternative ways of splitting',
+    },
+  ]
+
   return (
-    <svg
-      className="overlap-figure"
-      viewBox="0 0 312 178"
-      role="img"
-      aria-label="Diagram: a training side and a testing side of a split; two rows appear on both sides — the shared information an audit looks for."
-    >
-      <text className="overlap-figure__label" x="16" y="20">
-        TRAIN
-      </text>
-      <text className="overlap-figure__label" x="208" y="20">
-        TEST
-      </text>
-      {trainRows.map((y) => {
-        const isShared = shared.has(y)
-        return (
-          <g key={y}>
-            <rect
-              x="16"
-              y={y}
-              width="104"
-              height="16"
-              rx="4"
-              className={isShared ? 'overlap-figure__row--shared' : 'overlap-figure__row--train'}
-            />
-            <rect
-              x="192"
-              y={y}
-              width="104"
-              height="16"
-              rx="4"
-              className={isShared ? 'overlap-figure__row--shared' : 'overlap-figure__row--test'}
-            />
-            {isShared ? (
-              <line
-                x1="126"
-                y1={y + 8}
-                x2="186"
-                y2={y + 8}
-                className="overlap-figure__link"
-              />
-            ) : null}
-          </g>
-        )
-      })}
-    </svg>
+    <div className="rs we">
+      <p className="rs-eyebrow">Workspace — session active</p>
+      <h1 className="rs-h1">Where this session stands</h1>
+      <p className="rs-lede">
+        A dataset is loaded in memory. Everything below reads the same session context; nothing
+        here is persisted between browser sessions unless you export it.
+      </p>
+
+      <section className="we__context" aria-label="Active dataset">
+        <div className="we__contextfile">
+          <span className="we__contextname">{summary.name}</span>
+          <span className="xw__badge">
+            {summary.source === 'demo' ? 'Synthetic demo' : 'Uploaded file'}
+          </span>
+        </div>
+        <dl className="we__facts">
+          <div>
+            <dt>Shape</dt>
+            <dd>
+              {integer(summary.row_count)} rows × {summary.column_count} columns
+            </dd>
+          </div>
+          <div>
+            <dt>Fingerprint</dt>
+            <dd className="mono">{fingerprint8(summary.fingerprint_sha256)}…</dd>
+          </div>
+          <div>
+            <dt>Split</dt>
+            <dd>{splitLabel}</dd>
+          </div>
+          <div>
+            <dt>Entity</dt>
+            <dd>{roles.entity ?? 'none declared'}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <nav className="we__stages" aria-label="Workspace stages">
+        {stages.map((stage) => (
+          <button
+            key={stage.id}
+            type="button"
+            className="we__stage"
+            onClick={() => onNavigate(stage.id)}
+          >
+            <span className="we__stagetitle">{stage.title}</span>
+            <span className="we__stagestate">{stage.state}</span>
+            <span className="we__stageaction">{stage.action} →</span>
+          </button>
+        ))}
+      </nav>
+    </div>
   )
 }
 
+/** Entry panel: no usable dataset in this session yet. */
 export function OverviewView({ onNavigate }: { onNavigate: (view: ViewId) => void }) {
-  const { checks, demos, health, loadDemo, uploadFile, busyLabel } = useApp()
+  const { dataset, demos, health, uploadFile, loadDemo, busyLabel } = useApp()
   const fileInput = useRef<HTMLInputElement>(null)
 
-  const featured = demos?.featured_journey
-  const otherDemos = demos?.demos ?? []
-  const featuredId = featured?.demo_id
-  const featuredDemo = otherDemos.find((demo) => demo.demo_id === featuredId)
-  const uploadLimitMb = health ? (health.limits.max_upload_bytes ?? 0) / (1024 * 1024) : null
+  if (dataset) {
+    return <SessionOverview onNavigate={onNavigate} />
+  }
 
-  // The gallery leads with the featured demo, then any demo whose file is
-  // actually present. Everything stays reachable in "Browse other demos".
-  const galleryDemos = [...otherDemos]
-    .sort((a, b) => {
-      if (a.demo_id === featuredId) return -1
-      if (b.demo_id === featuredId) return 1
-      return Number(b.file_present) - Number(a.file_present)
-    })
-    .slice(0, 3)
+  const demoList: DemoEntry[] = (demos?.demos ?? []).map((demo) => ({
+    demo_id: demo.demo_id,
+    title: demo.title,
+    subtitle: demo.subtitle,
+    teaching_point: demo.teaching_point,
+    row_count: demo.row_count,
+    column_count: demo.column_count,
+    file_present: demo.file_present,
+  }))
+  const uploadLimitMb = health ? (health.limits.max_upload_bytes ?? 0) / (1024 * 1024) : null
 
   const openDemo = async (demoId: string) => {
     await loadDemo(demoId)
@@ -101,91 +159,83 @@ export function OverviewView({ onNavigate }: { onNavigate: (view: ViewId) => voi
   }
 
   return (
-    <div className="landing">
-      <section className="landing__hero">
-        <div className="landing__hero-text">
-          <p className="landing__eyebrow">
-            <span className="badge badge--info">ML data-leakage checks</span>
-          </p>
-          <h1>Check whether your training and test data share information</h1>
-          <p className="landing__lead">
-            SplitScope checks whether your training and test rows share information — duplicated
-            records, the same person or device on both sides, time leaks, or a column that copies
-            the value you want to predict — that could make model results look better than they are.
-          </p>
+    <div className="rs we">
+      <p className="rs-eyebrow">Workspace entry</p>
+      <h1 className="rs-h1">Load a dataset to begin</h1>
+      <p className="rs-lede">
+        The workbench audits a train/test split for leakage. Everything starts from one dataset —
+        bring your own file, or open a bundled synthetic demonstration with its leak built in.
+      </p>
 
-          <div className="landing__actions">
-            <button
-              type="button"
-              className="btn btn--primary btn--big"
-              disabled={busyLabel !== null || !featuredDemo?.file_present}
-              onClick={() => void (featuredDemo && openDemo(featuredDemo.demo_id))}
-            >
-              Try a demo
-            </button>
-            <button
-              type="button"
-              className="btn btn--big"
-              disabled={busyLabel !== null}
-              onClick={() => fileInput.current?.click()}
-            >
-              Upload CSV
-            </button>
-            <input
-              ref={fileInput}
-              type="file"
-              accept=".csv,.txt,.tsv,text/csv"
-              className="visually-hidden"
-              tabIndex={-1}
-              aria-hidden="true"
-              onChange={async (event) => {
-                const file = event.target.files?.[0]
-                event.target.value = ''
-                if (file) {
-                  await uploadFile(file)
-                  onNavigate('dataset')
-                }
-              }}
-            />
-          </div>
-
-          <p className="landing__note">
-            “Try a demo” opens a small{' '}
-            <strong>synthetic</strong> dataset ({featuredDemo ? featuredDemo.title : 'bundled demo'}){' '}
-            with sensible settings already filled in. “Upload CSV” uses your own file
-            {uploadLimitMb ? ` — CSV, up to ${uploadLimitMb.toFixed(0)} MB` : ''}; it stays in server
-            memory and is never written to disk.
+      <div className="we__entry">
+        <section className="we__panel we__panel--upload" aria-labelledby="we-upload">
+          <h2 id="we-upload" className="we__paneltitle">
+            1 — Upload a dataset
+          </h2>
+          <p className="we__paneltext">
+            Your own CSV with the rows you want to audit. The file is read into server memory for
+            this session only; it is never written to disk and never leaves your machine.
           </p>
-        </div>
+          <button
+            type="button"
+            className="btn btn--primary"
+            disabled={busyLabel !== null}
+            onClick={() => fileInput.current?.click()}
+          >
+            Choose a CSV file
+          </button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept=".csv,.txt,.tsv,text/csv"
+            className="visually-hidden"
+            tabIndex={-1}
+            aria-hidden="true"
+            onChange={async (event) => {
+              const file = event.target.files?.[0]
+              event.target.value = ''
+              if (file) {
+                await uploadFile(file)
+                onNavigate('dataset')
+              }
+            }}
+          />
+          <ul className="we__honest">
+            <li>Formats: .csv, .tsv, .txt (comma- or tab-separated text)</li>
+            <li>
+              {uploadLimitMb
+                ? `Limit: up to ${uploadLimitMb.toFixed(0)} MB per upload`
+                : 'Limits are reported by the backend once it responds'}
+            </li>
+            <li>In-memory session storage · SHA-256 fingerprint for reproducibility</li>
+          </ul>
+        </section>
 
-        <figure className="landing__figure">
-          <OverlapDiagram />
-          <figcaption>
-            An audit looks for rows, people and dates that appear on both sides of a split — the
-            overlap that makes test results look better than they are.
-          </figcaption>
-        </figure>
-      </section>
-
-      <section className="landing__gallery" aria-labelledby="scenarios">
-        <h2 id="scenarios">Start from an example</h2>
-        {!demos ? (
-          <p className="hint">
-            The bundled demo list has not loaded yet. You can still upload your own CSV; if that
-            also fails, check that the backend is running.
+        <section className="we__panel" aria-labelledby="we-demos">
+          <h2 id="we-demos" className="we__paneltitle">
+            2 — Open a synthetic demonstration
+          </h2>
+          <p className="we__paneltext">
+            Six bundled datasets, each generated with a specific leakage problem built in. They are
+            teaching data — not real people or events — and each states what it demonstrates.
           </p>
-        ) : (
-          <div className="scenario-grid">
-            {galleryDemos.map((demo) => (
-              <article className="scenario-card" key={demo.demo_id}>
-                <div className="scenario-card__title">
-                  <strong>{demo.title}</strong>
-                </div>
-                <p className="scenario-card__text">{demo.subtitle}</p>
-                <div className="scenario-card__foot">
-                  <span className="tiny muted">
-                    Synthetic · {integer(demo.row_count)} × {demo.column_count}
-                  </span>
+          {!demos ? (
+            <p className="we__paneltext">
+              The demo list has not loaded yet. If it stays empty, check that the backend is
+              running.
+            </p>
+          ) : (
+            <ul className="we__demolist">
+              {demoList.map((demo) => (
+                <li key={demo.demo_id} className="we__demo">
+                  <div className="we__demomain">
+                    <span className="we__demotitle">{demo.title}</span>
+                    <span className="we__demosub">{demo.subtitle}</span>
+                    <span className="we__demopoint">{demo.teaching_point}</span>
+                    <span className="we__demometa">
+                      Synthetic · {integer(demo.row_count)} rows × {demo.column_count} columns
+                    </span>
+                  </div>
                   <button
                     type="button"
                     className="btn btn--small btn--primary"
@@ -194,124 +244,18 @@ export function OverviewView({ onNavigate }: { onNavigate: (view: ViewId) => voi
                   >
                     Open
                   </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="landing__how" aria-labelledby="what-next">
-        <h2 id="what-next">How it works</h2>
-        <ol className="landing__steps">
-          <li>
-            <strong>Load a file</strong>
-            Upload a CSV or open one of the synthetic demos. Your file stays in server memory.
-          </li>
-          <li>
-            <strong>Answer a few questions</strong>
-            Does the file already mark train and test? What does each column mean? Suggestions are
-            shown with their reason and never applied silently.
-          </li>
-          <li>
-            <strong>Run the audit</strong>
-            Every enabled check runs, with the exact rows behind each finding — and checks that
-            could not run are listed separately.
-          </li>
-          <li>
-            <strong>Compare or export</strong>
-            Optionally compare other ways of splitting, then export a JSON report or a
-            self-contained HTML file.
-          </li>
-        </ol>
-        {featured ? (
-          <p className="landing__walkthrough">
-            The featured demo walks through: {featured.steps.slice(0, 4).join(' → ')}
-          </p>
-        ) : null}
-      </section>
-
-      <details className="disclosure">
-        <summary>Browse other demos</summary>
-        <ul className="demo-list">
-          {otherDemos.map((demo) => (
-            <li key={demo.demo_id}>
-              <div className="demo-list__row">
-                <div>
-                  <div className="demo-list__title">
-                    <strong>{demo.title}</strong>
-                    <span className="badge badge--neutral">Synthetic</span>
-                    <span className="tiny muted">
-                      {integer(demo.row_count)} rows × {demo.column_count} columns
-                    </span>
-                  </div>
-                  <p className="small muted" style={{ margin: '2px 0 0' }}>
-                    {demo.subtitle}
-                  </p>
-                  <p className="small" style={{ margin: '2px 0 0' }}>
-                    {demo.teaching_point}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn--small"
-                  disabled={busyLabel !== null || !demo.file_present}
-                  onClick={() => void openDemo(demo.demo_id)}
-                >
-                  Load
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </details>
-
-      <details className="disclosure">
-        <summary>What SplitScope checks (and what it does not)</summary>
-        {!checks ? (
-          <p className="small muted">The check list has not loaded from the backend yet.</p>
-        ) : (
-          <>
-            <ul className="list-tight">
-              {checks.checks.map((check) => (
-                <li key={check.rule_id}>
-                  <strong>{check.title}</strong>
-                  {check.default_enabled ? null : <span className="hint"> (off by default)</span>}
-                  <span className="small"> — {check.summary}</span>
                 </li>
               ))}
             </ul>
-            <h3>What this app does not do</h3>
-            <ul className="list-tight small">
-              {checks.what_this_app_does_not_do.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <Callout tone="warn" title="What “no findings” means">
-              {checks.no_findings_means}
-            </Callout>
-          </>
-        )}
-      </details>
+          )}
+        </section>
+      </div>
 
-      <details className="disclosure">
-        <summary>Limits, privacy and technical details</summary>
-        <ul className="list-tight small">
-          <li>Uploads stay in server memory and expire; nothing is written to disk.</li>
-          <li>Values are treated as data, never as instructions, in every view and export.</li>
-          <li>
-            A SHA-256 fingerprint identifies your file for reproducibility; it is an identifier,
-            not anonymization.
-          </li>
-          {health ? (
-            <li>
-              Limits: {bytes(health.limits.max_upload_bytes)} per upload ·{' '}
-              {integer(health.limits.max_rows)} rows · {integer(health.limits.max_columns)}{' '}
-              columns.
-            </li>
-          ) : null}
-        </ul>
-      </details>
+      <p className="we__footnote">
+        A loaded dataset opens the Data stage, where the split source and column roles are
+        confirmed before anything is audited. Steps that cannot run yet stay disabled rather than
+        pretending.
+      </p>
     </div>
   )
 }

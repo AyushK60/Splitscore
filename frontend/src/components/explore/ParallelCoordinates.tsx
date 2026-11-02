@@ -50,7 +50,7 @@ interface AxisLayout {
   brokenRows: number
 }
 
-const PAD = { top: 34, right: 150, bottom: 46, left: 90 }
+const PAD = { top: 48, right: 110, bottom: 46, left: 70 }
 
 function fmt(value: number): string {
   if (Number.isInteger(value)) return value.toLocaleString('en-US')
@@ -111,7 +111,10 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
     // height (which includes those bars) and grow every frame.
     const observer = new ResizeObserver((entries) => {
       const rect = entries[0].contentRect
-      setSize({ width: Math.max(560, rect.width), height: Math.max(360, rect.height) })
+      // The 560px floor assumes a desktop panel; on a phone the plot container
+      // scrolls horizontally rather than overflowing the page.
+      const floor = Math.min(560, window.innerWidth - 32)
+      setSize({ width: Math.max(floor, rect.width), height: Math.max(360, rect.height) })
     })
     observer.observe(element)
     return () => observer.disconnect()
@@ -342,7 +345,7 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
               className="xpc__line"
               style={{
                 stroke: colorColumn ? levelColors[i % levelColors.length] : 'var(--rs-teal)',
-                opacity: selectedIds.size > 0 ? 0.08 : colorColumn ? 0.16 : 0.13,
+                opacity: selectedIds.size > 0 ? 0.09 : colorColumn ? 0.34 : 0.28,
                 fill: 'none',
               }}
             />
@@ -419,7 +422,7 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
                 )}
                 {/* header */}
                 <g
-                  transform={`translate(${axis.x}, ${PAD.top - 16})`}
+                  transform={`translate(${axis.x}, ${PAD.top - 30})`}
                   className="xpc__header"
                   onPointerEnter={() => setHoveredAxis(axis.column)}
                   onPointerLeave={() => setHoveredAxis(null)}

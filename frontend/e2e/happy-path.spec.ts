@@ -126,17 +126,15 @@ test('happy path: load demo, audit, evidence, group comparison, report downloads
   // -- 1. Open the app ----------------------------------------------------- //
   await page.goto('/#/overview')
   await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: /Check whether your training and test data share information/, level: 1 })).toBeVisible()
-  // The two entry actions of the first screen.
-  await expect(page.getByRole('button', { name: 'Try a demo' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Upload CSV' })).toBeVisible()
+  // The S5 workspace entry: a functional panel, not a second landing page.
+  await expect(page.getByRole('heading', { name: /Load a dataset to begin/, level: 1 })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Choose a CSV file' })).toBeVisible()
 
-  // -- 2. Load the repeated-entity demo (secondary chooser) ---------------- //
-  await page.getByText('Browse other demos').click()
+  // -- 2. Load the repeated-entity demo from the entry panel --------------- //
   await page
-    .locator('.demo-list__row')
+    .locator('.we__demo')
     .filter({ hasText: DEMO_PANEL })
-    .getByRole('button', { name: 'Load', exact: true })
+    .getByRole('button', { name: 'Open', exact: true })
     .click()
 
   // -- 3. Dataset readiness and selected roles ----------------------------- //

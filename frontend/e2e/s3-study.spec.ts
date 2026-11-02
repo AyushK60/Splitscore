@@ -10,7 +10,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { expect, test } from './fixtures'
+import { expect, loadDemoFromEntry, test } from './fixtures'
 
 const DEMO_PANEL = 'Repeated-entity subscription panel'
 const TMP = join(tmpdir(), 'splitscope-s3-e2e')
@@ -18,16 +18,7 @@ const TMP = join(tmpdir(), 'splitscope-s3-e2e')
 test('study card, role conflicts and a manifest round trip', async ({ page }) => {
   mkdirSync(TMP, { recursive: true })
 
-  await page.goto('/#/overview')
-  // The demo chooser is a collapsed disclosure on the Start screen; open it
-  // before reaching for its Load buttons.
-  await page.getByText('Browse other demos').click()
-  const panel = page
-    .locator('.demo-list__row')
-    .filter({ hasText: DEMO_PANEL })
-    .first()
-  await panel.getByRole('button', { name: 'Load', exact: true }).click()
-  await page.waitForURL(/#\/dataset/)
+  await loadDemoFromEntry(page, DEMO_PANEL)
 
   await page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: /Study/ }).click()
   await expect(page.getByRole('heading', { name: /repeated_entity\.csv/ })).toBeVisible()
