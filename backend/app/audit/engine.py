@@ -24,6 +24,7 @@ from app.audit.dataset import Dataset, SplitMasks
 from app.audit.diagnostics import build_diagnostics
 from app.audit.rules import RULES
 from app.audit.rules.base import RuleContext, RuleOutput, severity_ordered
+from app.audit.scorecard import build_risk_scorecard
 from app.audit.types import (
     AuditConfig,
     AuditResult,
@@ -33,6 +34,7 @@ from app.audit.types import (
     NotEvaluatedCheck,
     ResolvedRoles,
     RuleOutcome,
+    RunHistoryEntry,
     SplitSummary,
 )
 from app.core.config import Settings
@@ -134,6 +136,7 @@ def run_audit(
     masks: SplitMasks,
     split_summary: SplitSummary,
     settings: Settings,
+    run_history: list[RunHistoryEntry] | None = None,
 ) -> AuditResult:
     """Run every enabled rule against one split and assemble the result."""
     started = time.perf_counter()
@@ -146,6 +149,8 @@ def run_audit(
         config=config,
         settings=settings,
         canonicalizer=canonicalizer,
+        split_summary=split_summary,
+        run_history=run_history,
     )
 
     outcomes: list[RuleOutcome] = []
@@ -245,7 +250,7 @@ def run_audit(
         },
     }
 
-    return AuditResult(
+    result = AuditResult(
         generated_at_utc=datetime.now(UTC).isoformat(timespec="seconds"),
         duration_ms=round((time.perf_counter() - started) * 1000, 3),
         audit_config=config,
@@ -267,6 +272,8 @@ def run_audit(
         limitations=limitations,
         assumptions=GLOBAL_ASSUMPTIONS,
     )
+    result.risk_scorecard = build_risk_scorecard(result)
+    return result
 
 
 __all__ = [

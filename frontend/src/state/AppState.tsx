@@ -271,7 +271,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...previous,
       dataset: loaded,
       roles: loaded.suggested_roles,
-      config: loaded.recommended_audit_config ?? structuredClone(DEFAULT_AUDIT_CONFIG),
+      config: {
+        // Merge over the defaults so a recommended config from an older backend
+        // (missing newer declaration fields) can never leave the editor reading
+        // undefined structures.
+        ...structuredClone(DEFAULT_AUDIT_CONFIG),
+        ...(loaded.recommended_audit_config ?? {}),
+      },
       validation: loaded.validation,
       validationPending: false,
       preview: null,

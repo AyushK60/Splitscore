@@ -6,8 +6,15 @@
  * near-duplicate block is opt-in and states its own cost and limits inline.
  */
 
-import type { AuditConfig } from '../api/types'
+import type { AvailabilityLevel, AuditConfig, PreprocessingStep } from '../api/types'
 import { Callout } from './ui'
+
+const AVAILABILITY_LEVELS: Array<{ value: AvailabilityLevel; label: string }> = [
+  { value: 'before_prediction', label: 'Before prediction' },
+  { value: 'at_prediction', label: 'At the prediction/decision point' },
+  { value: 'after_prediction', label: 'Only after (future-only information)' },
+  { value: 'unknown', label: 'Unknown' },
+]
 
 function Toggle({
   id,
@@ -86,6 +93,7 @@ function NumberField({
 export function AuditConfigEditor({
   config,
   onChange,
+  features,
   hasTarget,
   hasEntity,
   hasTimestamp,
@@ -93,6 +101,7 @@ export function AuditConfigEditor({
 }: {
   config: AuditConfig
   onChange: (config: AuditConfig) => void
+  features: string[]
   hasTarget: boolean
   hasEntity: boolean
   hasTimestamp: boolean
@@ -104,6 +113,20 @@ export function AuditConfigEditor({
 
   function patchNear(next: Partial<AuditConfig['near_duplicates']>) {
     onChange({ ...config, near_duplicates: { ...config.near_duplicates, ...next } })
+  }
+
+  function patchStep(index: number, next: Partial<PreprocessingStep>) {
+    const steps = [...(config.preprocessing?.steps ?? [])]
+    steps[index] = { ...steps[index], ...next }
+    onChange({ ...config, preprocessing: { steps, note: config.preprocessing?.note ?? null } })
+  }
+
+  function removeStep(index: number) {
+    const steps = (config.preprocessing?.steps ?? []).filter((_, i) => i !== index)
+    onChange({
+      ...config,
+      preprocessing: steps.length ? { steps, note: config.preprocessing?.note ?? null } : null,
+    })
   }
 
   return (
@@ -274,6 +297,163 @@ export function AuditConfigEditor({
           ) : null}
         </fieldset>
       ) : null}
+
+      <fieldset>
+        <legend>Integrity declarations (S5)</legend>
+        <p className="hint" style={{ marginTop: 0 }}>
+          These are <strong>your declarations</strong> about the modelling process. SplitScope never
+          infers them from the file: anything left undeclared is reported as NOT EVALUATED rather
+          than passed.
+        </p>
+
+        <div className="field">
+          <span style={{ fontWeight: 600 }}>Feature availability ledger</span>
+          <span className="hint">
+            For each predictor, when does its value become known relative to the prediction or
+            decision point? Future-only predictors are flagged; unknown declarations are shown as
+            an explicit gap.
+          </span>
+        </div>
+        {features.length === 0 ? (
+          <p className="small muted" style={{ margin: 0 }}>
+            Select feature columns first; the ledger lists them here.
+          </p>
+        ) : (
+          <div className="grid-2" style={{ maxWidth: 720 }}>
+            {features.map((feature) => (
+              <div className="field" key={feature}>
+                <label htmlFor={'cfg-avl-' + feature} className="mono">
+                  {feature}
+                </label>
+                <select
+                  id={'cfg-avl-' + feature}
+                  value={config.feature_availability[feature] ?? ''}
+                  onChange={(event) => {
+                    const next = { ...config.feature_availability }
+                    const value = event.target.value
+                    if (value === '') delete next[feature]
+                    else next[feature] = value as AvailabilityLevel
+                    patch({ feature_availability: next })
+                  }}
+                >
+                  <option value="">Not declared (check reports not evaluated)</option>
+                  {AVAILABILITY_LEVELS.map((level) => (
+                    <option key={level.value} value={level.value}>
+                      {level.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="row" style={{ maxWidth: 720, marginTop: 12 }}>
+          <NumberField
+            id="cfg-horizon"
+            label="Prediction horizon (days)"
+            hint="How long after the training cutoff the evaluation predicts. Leave empty to keep the horizon check NOT EVALUATED."
+            value={config.temporal_horizon_days ?? NaN}
+            min={0.0001}
+            step={1}
+            onChange={(value) => patch({ temporal_horizon_days: value })}
+          />
+          <div className="field" style={{ flex: 1, minWidth: 220 }}>
+            <label htmlFor="cfg-horizon-note">Horizon note (event-time interpretation)</label>
+            <input
+              id="cfg-horizon-note"
+              type="text"
+              value={config.temporal_horizon_note ?? ''}
+              onChange={(event) =>
+                patch({
+                  temporal_horizon_note: event.target.value === '' ? null : event.target.value,
+                })
+              }
+              placeholder="e.g. monthly decisions, 30-day label delay"
+            />
+          </div>
+        </div>
+
+        <div className="field" style={{ marginTop: 12 }}>
+          <span style={{ fontWeight: 600 }}>Preprocessing fit boundary</span>
+          <span className="hint">
+            Declare each preprocessing step and where it was fitted. Full-dataset fitting is
+            leakage regardless of how the split is drawn. Without any declaration this check
+            reports NOT EVALUATED.
+          </span>
+        </div>
+        {(config.preprocessing?.steps ?? []).length === 0 ? (
+          <p className="small muted" style={{ margin: '4px 0 6px' }}>
+            No steps declared.
+          </p>
+        ) : (
+          <div className="stack" style={{ maxWidth: 760, margin: '4px 0 6px' }}>
+            {(config.preprocessing?.steps ?? []).map((step, index) => (
+              <div className="row" key={index}>
+                <div className="field" style={{ minWidth: 160 }}>
+                  <label htmlFor={'cfg-ppf-name-' + index}>Step name</label>
+                  <input
+                    id={'cfg-ppf-name-' + index}
+                    type="text"
+                    value={step.name}
+                    onChange={(event) => patchStep(index, { name: event.target.value })}
+                  />
+                </div>
+                <div className="field" style={{ minWidth: 140 }}>
+                  <label htmlFor={'cfg-ppf-kind-' + index}>Kind</label>
+                  <input
+                    id={'cfg-ppf-kind-' + index}
+                    type="text"
+                    value={step.kind}
+                    onChange={(event) => patchStep(index, { kind: event.target.value })}
+                  />
+                </div>
+                <div className="field" style={{ minWidth: 200 }}>
+                  <label htmlFor={'cfg-ppf-fit-' + index}>Fitted on</label>
+                  <select
+                    id={'cfg-ppf-fit-' + index}
+                    value={step.fit_context}
+                    onChange={(event) =>
+                      patchStep(index, {
+                        fit_context: event.target.value as PreprocessingStep['fit_context'],
+                      })
+                    }
+                  >
+                    <option value="train_only">Training data only</option>
+                    <option value="full_dataset">Full dataset (train + test)</option>
+                    <option value="unknown">Unknown</option>
+                    <option value="not_recorded">Not recorded</option>
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn--small btn--ghost"
+                  onClick={() => removeStep(index)}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <button
+          type="button"
+          className="btn btn--small"
+          onClick={() =>
+            patch({
+              preprocessing: {
+                steps: [
+                  ...(config.preprocessing?.steps ?? []),
+                  { name: '', kind: '', columns: [], fit_context: 'not_recorded' },
+                ],
+                note: config.preprocessing?.note ?? null,
+              },
+            })
+          }
+        >
+          + Add preprocessing step
+        </button>
+      </fieldset>
 
       <details className="disclosure">
         <summary>Canonicalization and comparison rules</summary>

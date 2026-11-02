@@ -148,6 +148,25 @@ export interface NearDuplicateSettings {
   sample_seed: number
 }
 
+/** S5: user-declared prediction-time availability of one feature column. */
+export type AvailabilityLevel =
+  | 'before_prediction'
+  | 'at_prediction'
+  | 'after_prediction'
+  | 'unknown'
+
+export interface PreprocessingStep {
+  name: string
+  kind: string
+  columns: string[]
+  fit_context: 'train_only' | 'full_dataset' | 'unknown' | 'not_recorded'
+}
+
+export interface PreprocessingDeclaration {
+  steps: PreprocessingStep[]
+  note: string | null
+}
+
 export interface AuditConfig {
   enable_exact_duplicates: boolean
   enable_entity_overlap: boolean
@@ -158,6 +177,12 @@ export interface AuditConfig {
   normalize_numeric_strings: boolean
   missing_tokens: string[]
   chronology_intent: 'future_prediction' | 'not_applicable'
+  /** S5 declarations: never inferred, never fabricated by the UI. */
+  feature_availability: Record<string, AvailabilityLevel>
+  derived_feature_dependencies: Record<string, string[]>
+  temporal_horizon_days: number | null
+  temporal_horizon_note: string | null
+  preprocessing: PreprocessingDeclaration | null
   entity_overlap_high_test_share: number
   chronology_high_train_share: number
   target_copy_min_coverage: number
@@ -258,6 +283,39 @@ export interface AuditResult {
   audit_limits: Record<string, unknown>
   limitations: string[]
   assumptions: string[]
+  risk_scorecard: RiskScorecard | null
+}
+
+/** F06 — category-based risk scorecard derived from one audit's outcomes. */
+export type ScorecardStatus =
+  | 'finding_present'
+  | 'evaluated_no_finding'
+  | 'error'
+  | 'not_applicable'
+  | 'not_checked'
+
+export interface ScorecardRule {
+  rule_id: string
+  title: string
+  status: 'evaluated' | 'disabled' | 'not_evaluated' | 'unsupported' | 'insufficient_data' | 'error'
+  finding_count: number
+  max_severity: Finding['severity'] | null
+  not_evaluated_reason: string | null
+}
+
+export interface ScorecardCategory {
+  key: string
+  label: string
+  status: ScorecardStatus
+  finding_count: number
+  max_severity: Finding['severity'] | null
+  affected_rows: number | null
+  rules: ScorecardRule[]
+}
+
+export interface RiskScorecard {
+  categories: ScorecardCategory[]
+  note: string
 }
 
 export interface ComparisonRow {

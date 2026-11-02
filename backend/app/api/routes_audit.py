@@ -17,6 +17,7 @@ from app.audit.service import (
     audit_generated_split,
     resolve_or_raise,
 )
+from app.audit.types import RunHistoryEntry
 from app.core.errors import ValidationFailure
 from app.core.logging_config import get_logger
 from app.reports.csv_export import EXPORT_SANITIZATION_NOTE
@@ -26,6 +27,41 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/api", tags=["audit"])
 
 EXPORT_PATH = "/api/exports/split/{assignment_id}.csv"
+
+
+def _session_run_history(store, dataset_id: str) -> list[RunHistoryEntry]:
+    """Summarise this session's stored runs for the validation-reuse check.
+
+    The store is the only evidence the application actually has about prior
+    evaluations; payloads carry the full result, from which the split identity
+    and finding count are read back. Runs of other datasets are skipped.
+    """
+    entries: list[RunHistoryEntry] = []
+    for record in store.list_runs():
+        if record["dataset_id"] != dataset_id:
+            continue
+        try:
+            run = store.get_run(record["run_id"])
+        except Exception:  # noqa: BLE001 - an expired run is not an audit failure
+            continue
+        payload = run.payload or {}
+        split = payload.get("split") or {}
+        evaluation = payload.get("evaluation") or {}
+        entries.append(
+            RunHistoryEntry(
+                run_id=run.run_id,
+                kind=run.kind,
+                dataset_id=run.dataset_id,
+                split_kind=split.get("kind"),
+                split_column=split.get("split_column"),
+                train_value=split.get("train_value"),
+                test_value=split.get("test_value"),
+                train_rows=int(split.get("train_rows") or 0),
+                test_rows=int(split.get("test_rows") or 0),
+                findings_total=int(evaluation.get("findings_total") or 0),
+            )
+        )
+    return entries
 
 
 @router.post("/audit", response_model=AuditResponse)
@@ -42,6 +78,7 @@ def run_audit_route(request: AuditRequest) -> AuditResponse:
             config=request.config,
             split=request.generate,
             settings=context.settings,
+            run_history=_session_run_history(context.store, dataset.dataset_id),
         )
         context.store.put_assignment(assignment)
         summary = assignment.summary
@@ -56,7 +93,11 @@ def run_audit_route(request: AuditRequest) -> AuditResponse:
         )
     else:
         result = audit_existing_split(
-            dataset, roles=request.roles, config=request.config, settings=context.settings
+            dataset,
+            roles=request.roles,
+            config=request.config,
+            settings=context.settings,
+            run_history=_session_run_history(context.store, dataset.dataset_id),
         )
     run_id = context.store.put_run(
         kind="audit",

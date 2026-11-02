@@ -1950,3 +1950,114 @@ details.disclosure[open] > summary {
     padding: var(--space-4);
   }
 }
+
+/* ---------- S5 risk scorecard (F06) ---------- */
+
+.scorecard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.scorecard__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-raised);
+  align-items: flex-start;
+}
+
+.scorecard__row:last-child {
+  border-bottom: 0;
+}
+
+.scorecard__main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 220px;
+  flex: 0 0 260px;
+}
+
+.scorecard__label {
+  font-family: var(--display);
+  font-size: 15.5px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.scorecard__status {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  padding: 2px 7px;
+  width: fit-content;
+  color: var(--muted);
+}
+
+.scorecard__status--finding {
+  border-color: color-mix(in srgb, var(--high) 45%, transparent);
+  color: var(--high);
+  background: var(--high-soft);
+}
+
+.scorecard__status--clean {
+  border-color: color-mix(in srgb, var(--ok) 40%, transparent);
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.scorecard__status--error {
+  border-color: color-mix(in srgb, var(--high) 60%, transparent);
+  color: var(--high);
+}
+
+.scorecard__status--unchecked {
+  border-color: var(--line-strong);
+  color: var(--muted);
+  background: var(--bg-sunken);
+}
+
+.scorecard__affected {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.scorecard__rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.scorecard__rule {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.scorecard__reason {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.scorecard__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 0 0 auto;
+}

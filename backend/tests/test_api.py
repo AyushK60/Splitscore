@@ -74,8 +74,22 @@ def test_health_reports_versions_limits_and_storage_note(client):
 def test_checks_endpoint_serves_the_real_catalogue(client):
     body = client.get("/api/checks").json()
     ids = [check["rule_id"] for check in body["checks"]]
-    assert ids == ["SS-DUP-001", "SS-ENT-001", "SS-CHR-001", "SS-TGT-001", "SS-NEAR-001"]
-    assert sum(1 for check in body["checks"] if check["default_enabled"]) == 4
+    # The five original checks keep their ids and order; the S5 integrity
+    # capabilities follow as separate typed rules.
+    assert ids == [
+        "SS-DUP-001",
+        "SS-ENT-001",
+        "SS-CHR-001",
+        "SS-TGT-001",
+        "SS-NEAR-001",
+        "SS-AVL-001",
+        "SS-TGT-002",
+        "SS-ENT-002",
+        "SS-CHR-002",
+        "SS-PPF-001",
+        "SS-VRU-001",
+    ]
+    assert sum(1 for check in body["checks"] if check["default_enabled"]) == 10
     assert body["what_this_app_does_not_do"]
     assert "must not be read as passing" in body["no_findings_means"]
 
@@ -177,10 +191,18 @@ def test_audit_endpoint_returns_engine_findings_and_a_run_id(client, loaded_demo
     assert result["findings"][0]["rule_id"] == "SS-ENT-001"
     assert result["findings"][0]["severity"] == "high"
     assert result["findings"][0]["examples"]
-    assert result["evaluation"]["findings_total"] == 1
+    # The planted entity-overlap finding leads; the total always equals the
+    # finding list length (S5 screens may add info-level candidates).
+    assert result["findings"][0]["rule_id"] == "SS-ENT-001"
+    assert result["evaluation"]["findings_total"] == len(result["findings"])
+    # SS-VRU-001 evaluates against the (empty) session history the API supplies;
+    # an empty history is a real observation, not a missing one.
     assert {check["rule_id"] for check in result["evaluation"]["not_evaluated"]} == {
         "SS-CHR-001",
         "SS-NEAR-001",
+        "SS-AVL-001",
+        "SS-CHR-002",
+        "SS-PPF-001",
     }
     assert result["diagnostics"]["counts"]["total_rows"] == 240
 

@@ -206,9 +206,63 @@ class SplitAssignment(_Model):
     test_row_ids: list[str]
 
 
+class RunHistoryEntry(_Model):
+    """Minimal identity of one prior audit run in this session.
+
+    The validation-reuse check uses these records — and only these records —
+    because reuse is a property of the session's evaluation history, not of the
+    dataset bytes. No entry, no reuse claim in either direction.
+    """
+
+    run_id: str
+    kind: Literal["audit", "comparison"]
+    dataset_id: str
+    split_kind: str | None = None
+    split_column: str | None = None
+    train_value: str | None = None
+    test_value: str | None = None
+    train_rows: int = 0
+    test_rows: int = 0
+    findings_total: int = 0
+
+
 # --------------------------------------------------------------------------- #
 # Audit configuration, evidence and findings
 # --------------------------------------------------------------------------- #
+
+
+# --------------------------------------------------------------------------- #
+# S5 integrity declarations (user-declared, never inferred)
+# --------------------------------------------------------------------------- #
+
+
+AvailabilityLevel = Literal[
+    "before_prediction",  # known strictly before the prediction/decision point
+    "at_prediction",  # known at the prediction/decision point
+    "after_prediction",  # only known afterwards (future-only information)
+    "unknown",  # the user cannot say
+]
+
+
+class PreprocessingStep(_Model):
+    """One declared preprocessing step and where it was fitted.
+
+    This is a *declaration*, not an observation: SplitScope does not execute or
+    instrument preprocessing, so the fit boundary is only as trustworthy as the
+    declaration it comes from.
+    """
+
+    name: str = Field(description="Human-readable step name, e.g. 'standard scaler'.")
+    kind: str = Field(description="Step kind, e.g. 'scaler', 'imputer', 'encoder', 'selector'.")
+    columns: list[str] = Field(default_factory=list)
+    fit_context: Literal["train_only", "full_dataset", "unknown", "not_recorded"] = "not_recorded"
+
+
+class PreprocessingDeclaration(_Model):
+    """The user's declared preprocessing pipeline and fit boundaries."""
+
+    steps: list[PreprocessingStep] = Field(default_factory=list)
+    note: str | None = None
 
 
 class NearDuplicateSettings(_Model):
@@ -289,6 +343,31 @@ class AuditConfig(_Model):
 
     #: Chronology is only a violation for an intended future-prediction evaluation.
     chronology_intent: Literal["future_prediction", "not_applicable"] = "future_prediction"
+
+    # -- S5 integrity declarations ------------------------------------------- #
+    #: Declared prediction-time availability per feature column. Absent columns
+    #: are simply undeclared; nothing is inferred from column names.
+    feature_availability: dict[str, AvailabilityLevel] = Field(
+        default_factory=dict,
+        description="User-declared knowledge availability per feature. SplitScope never "
+        "infers this from a column name; undeclared features are reported as undeclared.",
+    )
+    #: Declared dependency edges for derived features (feature -> its inputs).
+    derived_feature_dependencies: dict[str, list[str]] = Field(default_factory=dict)
+    #: Declared prediction horizon in days for the temporal-horizon check.
+    temporal_horizon_days: float | None = Field(
+        default=None,
+        description="Declared prediction horizon: how long after the training cutoff the "
+        "evaluation is meant to predict. Without a declaration the horizon check reports "
+        "NOT EVALUATED rather than guessing.",
+    )
+    temporal_horizon_note: str | None = Field(
+        default=None,
+        description="Free-text context for the horizon declaration (event-time "
+        "interpretation, label delay, and so on).",
+    )
+    #: Declared preprocessing pipeline and fit boundaries (may stay None).
+    preprocessing: PreprocessingDeclaration | None = None
 
     # -- severity / evidence thresholds, all reported in the audit settings -- #
     entity_overlap_high_test_share: float = 0.10
@@ -481,6 +560,61 @@ class EvaluationSummary(_Model):
     headline: str
 
 
+# --------------------------------------------------------------------------- #
+# S5 category risk scorecard
+# --------------------------------------------------------------------------- #
+
+
+ScorecardStatus = Literal[
+    "finding_present",  # at least one rule in the category reported a finding
+    "evaluated_no_finding",  # every rule that could run ran, and none found anything
+    "error",  # a rule in this category raised
+    "not_applicable",  # the checks exist but were disabled for this audit
+    "not_checked",  # nothing ran: not evaluated, unsupported or lacking inputs
+]
+
+
+class ScorecardRule(_Model):
+    """One rule's outcome inside a scorecard category."""
+
+    rule_id: str
+    title: str
+    status: Literal[
+        "evaluated", "disabled", "not_evaluated", "unsupported", "insufficient_data", "error"
+    ]
+    finding_count: int = 0
+    max_severity: Severity | None = None
+    not_evaluated_reason: str | None = None
+
+
+class ScorecardCategory(_Model):
+    """One risk category of the scorecard.
+
+    There is deliberately no numeric score: a category is either carrying
+    findings, clean under the checks that ran, not applicable, or not checked.
+    Absence of findings is never presented as proof of safety.
+    """
+
+    key: str
+    label: str
+    status: ScorecardStatus
+    finding_count: int
+    max_severity: Severity | None = None
+    #: Best-effort affected-row figure: the largest rows-unit count of each
+    #: finding in the category, summed. Denominators stay in the findings.
+    affected_rows: int | None = None
+    rules: list[ScorecardRule] = Field(default_factory=list)
+
+
+class RiskScorecard(_Model):
+    """Category-based view of one audit run, derived only from its outcomes."""
+
+    categories: list[ScorecardCategory]
+    note: str = Field(
+        description="What this scorecard does and does not claim.",
+    )
+
+
 class AuditResult(_Model):
     schema_version: str = AUDIT_SCHEMA_VERSION
     app_version: str = APP_VERSION
@@ -498,6 +632,7 @@ class AuditResult(_Model):
     audit_limits: dict[str, Any]
     limitations: list[str]
     assumptions: list[str]
+    risk_scorecard: RiskScorecard | None = None
 
 
 class ComparisonRow(_Model):

@@ -781,6 +781,7 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
         <AuditConfigEditor
           config={config}
           onChange={setConfig}
+          features={roles.features}
           hasTarget={roles.target !== null}
           hasEntity={roles.entity !== null}
           hasTimestamp={roles.timestamp !== null}

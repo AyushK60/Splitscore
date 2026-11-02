@@ -28,7 +28,9 @@ from app.audit.types import (
     NotEvaluatedCheck,
     ResolvedRoles,
     RuleMetric,
+    RunHistoryEntry,
     Severity,
+    SplitSummary,
 )
 from app.core.config import Settings
 from app.core.hashing import signature_hash
@@ -44,6 +46,13 @@ class RuleContext:
     config: AuditConfig
     settings: Settings
     canonicalizer: ValueCanonicalizer
+    # What was actually audited: the summary of the split this run uses. Needed
+    # by rules that reason about the run itself rather than the data.
+    split_summary: SplitSummary | None = None
+    # Prior audit runs in this session, when the caller can supply them. None
+    # means "no history available" (the validation-reuse check reports NOT
+    # EVALUATED); an empty list is a real observation of no prior runs.
+    run_history: list[RunHistoryEntry] | None = None
 
     @property
     def train_frame(self) -> pd.DataFrame:

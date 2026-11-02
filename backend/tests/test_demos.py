@@ -190,8 +190,16 @@ def test_clean_control_produces_no_findings_and_evaluates_every_check():
         "SS-ENT-001",
         "SS-CHR-001",
         "SS-TGT-001",
+        "SS-TGT-002",
+        "SS-ENT-002",
     }
-    assert {check.rule_id for check in result.evaluation.not_evaluated} == {"SS-NEAR-001"}
+    assert {check.rule_id for check in result.evaluation.not_evaluated} == {
+        "SS-NEAR-001",
+        "SS-AVL-001",
+        "SS-CHR-002",
+        "SS-PPF-001",
+        "SS-VRU-001",
+    }
 
     counts = entry["summary_metrics"]
     assert metric_for(result, "SS-CHR-001", "chronology_status") == "ordered"

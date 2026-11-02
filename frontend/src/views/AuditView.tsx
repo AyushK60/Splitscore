@@ -12,6 +12,7 @@
 import { useMemo, useState } from 'react'
 
 import { FindingCard } from '../components/FindingCard'
+import { RiskScorecard } from '../components/RiskScorecard'
 import { BarPairChart, categoriesToBars, histogramToBars } from '../components/charts'
 import { Badge, Callout, Card, EmptyState, Stat, StatusBadge, Table } from '../components/ui'
 import type { CheckStatus, Severity } from '../api/types'
@@ -351,6 +352,17 @@ export function AuditView({ onNavigate }: { onNavigate: (view: ViewId) => void }
           ) : null}
         </details>
       </Card>
+
+      {result.risk_scorecard ? (
+        <RiskScorecard
+          scorecard={result.risk_scorecard}
+          findings={result.findings}
+          onOpenFinding={(finding) => {
+            selectFinding(finding, 'audit', result.split.label)
+            onNavigate('evidence')
+          }}
+        />
+      ) : null}
 
       <Card title={`Findings and check outcomes (${findings.length})`}>
         <details className="disclosure" style={{ marginBottom: 12 }}>

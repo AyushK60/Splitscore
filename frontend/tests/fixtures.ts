@@ -296,6 +296,47 @@ export function auditResponseFixture(overrides: Partial<AuditResponse> = {}): Au
       audit_limits: { max_examples: 10 },
       limitations: ['Fixture limitation of the audit.'],
       assumptions: ['Fixture assumption of the audit.'],
+      risk_scorecard: {
+        categories: [
+          {
+            key: 'entity',
+            label: 'Entity',
+            status: 'finding_present',
+            finding_count: 1,
+            max_severity: 'high',
+            affected_rows: 3,
+            rules: [
+              {
+                rule_id: 'SS-ENT-001',
+                title: 'Entity overlap between train and test splits',
+                status: 'evaluated',
+                finding_count: 1,
+                max_severity: 'high',
+                not_evaluated_reason: null,
+              },
+            ],
+          },
+          {
+            key: 'pipeline',
+            label: 'Pipeline',
+            status: 'not_checked',
+            finding_count: 0,
+            max_severity: null,
+            affected_rows: null,
+            rules: [
+              {
+                rule_id: 'SS-PPF-001',
+                title: 'Preprocessing fit boundary (declared)',
+                status: 'not_evaluated',
+                finding_count: 0,
+                max_severity: null,
+                not_evaluated_reason: 'No preprocessing declaration was provided.',
+              },
+            ],
+          },
+        ],
+        note: 'Fixture scorecard note.',
+      },
     },
     ...overrides,
   }

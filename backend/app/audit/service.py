@@ -18,6 +18,7 @@ from app.audit.types import (
     ColumnRoles,
     ResolvedRoles,
     RoleValidationResult,
+    RunHistoryEntry,
     SplitAssignment,
     SplitConfig,
     SplitSummary,
@@ -116,6 +117,7 @@ def audit_existing_split(
     roles: ColumnRoles,
     config: AuditConfig,
     settings: Settings,
+    run_history: list[RunHistoryEntry] | None = None,
 ) -> AuditResult:
     """Audit the split that is already present in the dataset."""
     resolved, _ = resolve_or_raise(dataset, roles)
@@ -128,6 +130,7 @@ def audit_existing_split(
         masks=masks,
         split_summary=summary,
         settings=settings,
+        run_history=run_history,
     )
 
 
@@ -138,6 +141,7 @@ def audit_generated_split(
     config: AuditConfig,
     split: SplitConfig,
     settings: Settings,
+    run_history: list[RunHistoryEntry] | None = None,
 ) -> tuple[AuditResult, SplitAssignment]:
     """Audit a split generated now from the dataset, returning its assignment."""
     resolved, _ = resolve_or_raise(dataset, roles)
@@ -153,6 +157,7 @@ def audit_generated_split(
         masks=masks,
         split_summary=summary,
         settings=settings,
+        run_history=run_history,
     )
     return result, assignment
 

@@ -117,16 +117,146 @@ CHECKS: tuple[dict[str, Any], ...] = (
             "Dataset-wide rates when the analysis ran on a disclosed sample.",
         ],
     },
+    {
+        "rule_id": "SS-AVL-001",
+        "title": "Feature availability ledger conflicts",
+        "category": "availability",
+        "default_enabled": True,
+        "requires": ["features", "availability_declaration"],
+        "summary": (
+            "Evaluates the prediction-time availability you declare for each predictor. Flags "
+            "predictors declared as only known after the decision point, derived features fed by "
+            "them, and declarations left unknown."
+        ),
+        "detects": [
+            "Future-only predictors: features declared 'after_prediction'.",
+            "Derived features whose declared dependencies include future-only columns.",
+            "Explicit 'unknown' declarations, reported as an information gap.",
+        ],
+        "does_not_detect": [
+            "Availability you did not declare. SplitScope never infers availability from a "
+            "column name, type or cardinality.",
+            "Whether a declaration is truthful; the ledger is a record of what you state.",
+        ],
+    },
+    {
+        "rule_id": "SS-TGT-002",
+        "title": "Target proxy candidates (heuristic screen)",
+        "category": "target",
+        "default_enabled": True,
+        "requires": ["target"],
+        "summary": (
+            "Bounded single-column screen for features that behave almost like a copy of the "
+            "target: categorical purity for class-like targets, single-threshold separation for "
+            "binary targets. Candidates carry their evidence and are always info-severity."
+        ),
+        "detects": [
+            "A feature value that determines the target class almost always over a documented "
+            "minimum share of rows.",
+            "A single threshold on a numeric feature that separates a binary target almost "
+            "perfectly.",
+        ],
+        "does_not_detect": [
+            "Leakage. A candidate is a question for the data owner, not proof; legitimate "
+            "near-deterministic features exist.",
+            "Interaction proxies (two innocuous columns that are informative together).",
+        ],
+    },
+    {
+        "rule_id": "SS-ENT-002",
+        "title": "Identifier-like feature values shared across the split",
+        "category": "group",
+        "default_enabled": True,
+        "requires": ["features"],
+        "summary": (
+            "Inspects feature columns whose observed values are all distinct (identifier-like by "
+            "observation) and reports cross-split value overlap — the raw material of row "
+            "memorisation."
+        ),
+        "detects": [
+            "Shared exact values of an all-distinct feature column across the split, with the "
+            "test rows affected.",
+        ],
+        "does_not_detect": [
+            "Whether the column is truly an identifier; identifier-like is an observed "
+            "property, stated with its evidence.",
+            "Memorisation itself — no model is trained, so this is exposure, not behaviour.",
+        ],
+    },
+    {
+        "rule_id": "SS-CHR-002",
+        "title": "Test predictions fall inside the declared prediction horizon",
+        "category": "temporal",
+        "default_enabled": True,
+        "requires": ["timestamp", "horizon_declaration"],
+        "summary": (
+            "With a declared prediction horizon, verifies the split's time gap covers it: test "
+            "rows timestamped inside the horizon window after the last training observation are "
+            "reported with their share."
+        ),
+        "detects": [
+            "Test predictions whose period is already represented in training data relative to "
+            "the declared horizon.",
+        ],
+        "does_not_detect": [
+            "Anything without a declared horizon: the check reports NOT EVALUATED rather than "
+            "guessing the horizon from the data.",
+            "Feature windows or label delays; only the split's timestamps are evaluated.",
+        ],
+    },
+    {
+        "rule_id": "SS-PPF-001",
+        "title": "Preprocessing fit boundary (declared)",
+        "category": "pipeline",
+        "default_enabled": True,
+        "requires": ["preprocessing_declaration"],
+        "summary": (
+            "Judges the fit context you declare for each preprocessing step. Without a "
+            "declaration the check is NOT EVALUATED — a raw CSV cannot establish where a scaler "
+            "or encoder was fitted, and this tool does not instrument pipelines."
+        ),
+        "detects": [
+            "Declared steps fitted on the full dataset (high severity).",
+            "Declared steps with unrecorded or unknown fit context (medium).",
+        ],
+        "does_not_detect": [
+            "Anything without a declaration; NOT EVALUATED is the honest state, not a pass.",
+            "Transformer parameters; only the declared fit context is judged.",
+        ],
+    },
+    {
+        "rule_id": "SS-VRU-001",
+        "title": "Repeated evaluation of the same split in this session",
+        "category": "reuse",
+        "default_enabled": True,
+        "requires": ["run_history"],
+        "summary": (
+            "Reads this session's in-memory run history and flags when the same split has been "
+            "audited many times — the workflow mechanism behind validation overfitting."
+        ),
+        "detects": [
+            "Repeated audits of one exact split within the current session.",
+        ],
+        "does_not_detect": [
+            "Evaluations made outside SplitScope; they leave no record here.",
+            "Whether decisions were actually made from the repeated runs; the finding is "
+            "informational by design.",
+        ],
+    },
 )
 
 WHAT_THIS_APP_DOES_NOT_DO: tuple[str, ...] = (
-    "It does not detect all data leakage. It implements five specific, enumerable checks.",
+    "It does not detect all data leakage. It implements five original split checks plus separate, "
+    "typed integrity capabilities (availability ledger, proxy screen, identifier reuse, declared "
+    "horizon, declared preprocessing fit boundary, session reuse).",
     "It does not prove that a model is valid, and it does not guarantee that a dataset is safe.",
     "It does not compute a combined trust score, because averaging unrelated defects hides which "
     "assumption was violated.",
     "It does not train or evaluate predictive models, so it reports no model performance.",
-    "It does not inspect preprocessing pipelines; leakage introduced by a scaler, target encoder or "
-    "imputer fitted on all data is outside its scope.",
+    "It does not instrument preprocessing execution. The preprocessing fit boundary is assessed "
+    "only from an explicit user declaration; without one the check reports NOT EVALUATED.",
+    "It does not infer prediction-time availability or the prediction horizon from the data; both "
+    "are declarations, and without them the corresponding checks report NOT EVALUATED.",
     "It does not modify the uploaded dataset. Split assignments are stored separately.",
     "It supports comma-separated text files only, in this version.",
 )
