@@ -13,7 +13,8 @@ import {
   captionLines,
   type FigureContext,
 } from '../src/explore/figureExport'
-import type { ExploreSchema, SelectionState } from '../src/api/types'
+import type { SelectionState } from '../src/explore/ExploreState'
+import type { ExploreSchema } from '../src/api/types'
 
 function schemaFixture(): ExploreSchema {
   return {
