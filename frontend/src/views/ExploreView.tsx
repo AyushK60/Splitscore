@@ -2,8 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { exploreApi } from '../api/client'
 import type { SeriesResponse } from '../api/types'
+import { CorrelationHeatmap } from '../components/explore/CorrelationHeatmap'
+import { Distributions } from '../components/explore/Distributions'
+import { MissingnessView } from '../components/explore/MissingnessView'
 import { ParallelCoordinates } from '../components/explore/ParallelCoordinates'
 import { RowEvidence } from '../components/explore/RowEvidence'
+import { ScatterFocus } from '../components/explore/ScatterFocus'
+import { ScatterMatrix } from '../components/explore/ScatterMatrix'
 import { useExplore } from '../explore/ExploreState'
 import type { ViewId } from '../lib/router'
 import { useApp } from '../state/AppState'
@@ -15,12 +20,24 @@ import { useApp } from '../state/AppState'
  * deliberately a workbench, not a dashboard: research controls in one band, a
  * large plot canvas that gets the space serious analysis needs, and a
  * permanent row-evidence inspector that keeps every mark traceable to
- * immutable row ids.
+ * immutable row ids. Plot modes are tabs over the same canvas — every mode
+ * reads and writes the same selection.
  */
 
 const MAX_AXES = 12
 const DEFAULT_AXIS_COUNT = 8
 const SERIES_DEBOUNCE_MS = 160
+
+type PlotTab = 'coordinates' | 'correlation' | 'scatter' | 'matrix' | 'distribution' | 'missingness'
+
+const TABS: Array<{ id: PlotTab; label: string }> = [
+  { id: 'coordinates', label: 'Parallel coordinates' },
+  { id: 'correlation', label: 'Correlations' },
+  { id: 'scatter', label: 'Scatter' },
+  { id: 'matrix', label: 'Scatter matrix' },
+  { id: 'distribution', label: 'Distributions' },
+  { id: 'missingness', label: 'Missingness' },
+]
 
 type Props = { onNavigate: (view: ViewId) => void }
 
@@ -33,6 +50,9 @@ export function ExploreView(_props: Props) {
   const [series, setSeries] = useState<SeriesResponse | null>(null)
   const [seriesError, setSeriesError] = useState<string | null>(null)
   const [focusMode, setFocusMode] = useState(false)
+  const [tab, setTab] = useState<PlotTab>('coordinates')
+  const [scatterX, setScatterX] = useState('')
+  const [scatterY, setScatterY] = useState('')
   const seriesSeq = useRef(0)
 
   const numericColumns = schema?.numeric_columns ?? []
@@ -47,8 +67,16 @@ export function ExploreView(_props: Props) {
       }
       return numericColumns.slice(0, DEFAULT_AXIS_COUNT)
     })
+    setScatterX((previous) => (numericColumns.includes(previous) ? previous : numericColumns[0] ?? ''))
+    setScatterY((previous) => (numericColumns.includes(previous) ? previous : numericColumns[1] ?? ''))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schema?.dataset.dataset_id])
+
+  const openPair = useCallback((x: string, y: string) => {
+    setScatterX(x)
+    setScatterY(y)
+    setTab('scatter')
+  }, [])
 
   const predicates = selection.predicates
 
@@ -243,25 +271,85 @@ export function ExploreView(_props: Props) {
         </p>
       )}
 
+      <nav className="xw__tabs" aria-label="Plot modes">
+        {TABS.map((entry) => (
+          <button
+            key={entry.id}
+            type="button"
+            className={`xtab${tab === entry.id ? ' xtab--on' : ''}`}
+            aria-current={tab === entry.id ? 'true' : undefined}
+            onClick={() => setTab(entry.id)}
+          >
+            {entry.label}
+          </button>
+        ))}
+      </nav>
+
       <div className={`xw__body${focusMode ? ' xw__body--focus' : ''}`}>
         <div className="xw__canvas">
-          {series ? (
-            <ParallelCoordinates
-              series={series}
+          {tab === 'coordinates' && (
+            <>
+              {series ? (
+                <ParallelCoordinates
+                  series={series}
+                  colorColumn={colorColumn}
+                  colorLevels={colorLevels}
+                  selectedIds={selection.status === 'ready' ? selection.ids : new Set()}
+                  predicates={predicates}
+                  onPredicates={applyPredicates}
+                  onHoverRow={() => {}}
+                  resizeKey={focusMode ? 'focus' : 'split'}
+                />
+              ) : (
+                <div className="xw__placeholder">
+                  {axes.length === 0
+                    ? 'Choose at least one numeric variable to draw the parallel-coordinates canvas.'
+                    : 'Preparing the plot from the loaded dataset…'}
+                </div>
+              )}
+            </>
+          )}
+          {tab === 'correlation' && schema && (
+            <CorrelationHeatmap schema={schema} onRequestScatter={openPair} />
+          )}
+          {tab === 'scatter' && schema && (
+            <ScatterFocus
+              schema={schema}
+              x={scatterX}
+              y={scatterY}
+              onAxisChange={(axis, column) =>
+                axis === 'x' ? setScatterX(column) : setScatterY(column)
+              }
+              onPredicates={applyPredicates}
+              predicates={predicates}
+              selectedIds={selection.status === 'ready' ? selection.ids : new Set()}
               colorColumn={colorColumn}
               colorLevels={colorLevels}
-              selectedIds={selection.status === 'ready' ? selection.ids : new Set()}
-              predicates={predicates}
-              onPredicates={applyPredicates}
-              onHoverRow={() => {}}
-              resizeKey={focusMode ? 'focus' : 'split'}
             />
-          ) : (
-            <div className="xw__placeholder">
-              {axes.length === 0
-                ? 'Choose at least one numeric variable to draw the parallel-coordinates canvas.'
-                : 'Preparing the plot from the loaded dataset…'}
-            </div>
+          )}
+          {tab === 'matrix' && schema && (
+            <ScatterMatrix
+              schema={schema}
+              selectedIds={selection.status === 'ready' ? selection.ids : new Set()}
+              colorColumn={colorColumn}
+              colorLevels={colorLevels}
+              onOpenPair={openPair}
+            />
+          )}
+          {tab === 'distribution' && schema && (
+            <Distributions
+              schema={schema}
+              predicates={predicates}
+              selectionActive={selection.status === 'ready' && selection.predicates.length > 0}
+            />
+          )}
+          {tab === 'missingness' && schema && (
+            <MissingnessView
+              datasetId={schema.dataset.dataset_id}
+              predicates={predicates}
+              selectionActive={selection.status === 'ready' && selection.predicates.length > 0}
+              groupCandidates={schema.color_candidates}
+            />
           )}
         </div>
         {!focusMode && (

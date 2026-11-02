@@ -123,6 +123,29 @@ class SelectionResult:
     predicates: list[Predicate]
 
 
+def population_mask(dataset: Dataset, predicates: list[Predicate]) -> np.ndarray:
+    """Boolean mask of the filtered population.
+
+    Union within a column, intersection across columns — the same combination
+    rule :func:`evaluate_selection` applies, exposed for aggregate endpoints
+    that compute selection overlays server-side (so a distribution chart can
+    show the exact selected-cohort histogram instead of a client-side guess).
+    """
+    n = dataset.row_count
+    if not predicates:
+        return np.ones(n, dtype=bool)
+    by_column: dict[str, list[Predicate]] = {}
+    for predicate in predicates:
+        by_column.setdefault(predicate.column, []).append(predicate)
+    combined = np.ones(n, dtype=bool)
+    for group in by_column.values():
+        union = np.zeros(n, dtype=bool)
+        for predicate in group:
+            union |= _mask_for(dataset, predicate)
+        combined &= union
+    return combined
+
+
 def evaluate_selection(dataset: Dataset, predicates: list[Predicate]) -> SelectionResult:
     """Intersect per-column unions into the final selected-id set."""
     n = dataset.row_count
@@ -165,4 +188,5 @@ __all__ = [
     "SelectionResult",
     "evaluate_selection",
     "parse_predicates",
+    "population_mask",
 ]

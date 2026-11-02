@@ -830,6 +830,8 @@ export interface DistributionResponse {
   distinct?: number
   group_by: string | null
   groups?: DistributionGroup[]
+  selection?: SelectionOverlay
+  filters_note?: string
 }
 
 export interface MissingnessColumn {
@@ -852,6 +854,9 @@ export interface MissingnessResponse {
   policy: string
   group_by: string | null
   groups?: Array<{ group: string; rows: number; per_column: MissingnessColumn[] }>
+  population_counts?: MissingnessColumn[]
+  population_total?: number
+  filters_note?: string
 }
 
 export interface RowsResponse {
@@ -860,4 +865,13 @@ export interface RowsResponse {
   rows: Array<{ id: string; index: number; values: Record<string, string> }>
   unknown_ids: string[]
   population: number
+}
+
+export interface SelectionOverlay {
+  counts?: number[]
+  valid_count?: number
+  missing_count?: number
+  unparsed_count?: number
+  population: number
+  box?: BoxStatsDto | null
 }

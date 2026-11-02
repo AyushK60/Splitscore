@@ -583,3 +583,55 @@ def test_rows_endpoint_returns_exact_rows_by_immutable_id(client):
     # File-order index travels with the row for provenance.
     assert by_id[first_id]["index"] == 0
     assert by_id[fifth_id]["index"] == 4
+
+
+def test_distribution_with_selection_overlay_is_exact(client):
+    rows, columns = _numeric_rows(40)
+    loaded = _upload(client, rows, columns)
+    dataset_id = loaded["dataset"]["dataset_id"]
+    # Selection: the 20 "even" rows. Base layer must stay the full population.
+    response = client.post(
+        f"/api/datasets/{dataset_id}/explore/distribution",
+        json={"column": "a", "bins": 10, "filters": [{"column": "g", "values": ["even"]}]},
+    )
+    payload = response.json()
+    assert payload["population"] == 40
+    assert sum(payload["counts"]) == 40
+    selection = payload["selection"]
+    assert selection["population"] == 20
+    assert sum(selection["counts"]) == selection["valid_count"]
+    assert selection["box"]["n"] == 20
+    assert "active selection" in payload["filters_note"]
+
+
+def test_missingness_with_selection_reports_both_populations(client):
+    rows, columns = _numeric_rows(30)
+    for i, row in enumerate(rows):
+        if i % 5 == 0:  # rows 0,5,10,15,20,25 — three even, three odd
+            row["a"] = ""
+    loaded = _upload(client, rows, columns)
+    dataset_id = loaded["dataset"]["dataset_id"]
+    response = client.post(
+        f"/api/datasets/{dataset_id}/explore/missingness",
+        json={"columns": ["a"], "filters": [{"column": "g", "values": ["even"]}]},
+    )
+    payload = response.json()
+    assert payload["population"] == 15
+    # Of the six missing cells, exactly three fall on even rows.
+    assert payload["per_column"][0]["missing_count"] == 3
+    # population_counts keeps the whole-dataset numbers for comparison.
+    assert payload["population_total"] == 30
+    assert payload["population_counts"][0]["missing_count"] == 6
+
+
+def test_population_mask_union_within_column(client):
+    from app.explore.selection import Predicate, population_mask
+
+    dataset = make_dataset(
+        [{"v": float(v)} for v in range(6)], columns=["v"]
+    )
+    mask = population_mask(
+        dataset,
+        [Predicate(column="v", min=0.0, max=1.0), Predicate(column="v", min=4.0, max=5.0)],
+    )
+    assert mask.tolist() == [True, True, False, False, True, True]

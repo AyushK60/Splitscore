@@ -252,10 +252,10 @@ export const exploreApi = {
   correlation: (datasetId: string, columns: string[], method: 'pearson' | 'spearman') =>
     request<CorrelationResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/correlation`, postInit({ columns, method })),
 
-  distribution: (datasetId: string, body: { column: string; bins?: number; group_by?: string | null }) =>
+  distribution: (datasetId: string, body: { column: string; bins?: number; group_by?: string | null; filters?: unknown[] }) =>
     request<DistributionResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/distribution`, postInit(body)),
 
-  missingness: (datasetId: string, body: { columns?: string[]; group_by?: string | null }) =>
+  missingness: (datasetId: string, body: { columns?: string[]; group_by?: string | null; filters?: unknown[] }) =>
     request<MissingnessResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/missingness`, postInit(body)),
 
   rows: (datasetId: string, ids: string[], columns?: string[]) =>

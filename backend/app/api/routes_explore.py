@@ -17,7 +17,7 @@ from app.core.errors import LimitExceededError, ValidationFailure
 from app.explore.aggregates import correlation_matrix, distribution_payload, missingness_payload
 from app.explore.sampling import DEFAULT_RENDER_ROWS, MAX_RENDER_ROWS, render_sample
 from app.explore.schema import explore_schema
-from app.explore.selection import evaluate_selection, parse_predicates
+from app.explore.selection import evaluate_selection, parse_predicates, population_mask
 from app.explore.stats import (
     MAX_BINS,
     MISSING_CELL,
@@ -64,6 +64,7 @@ class DistributionRequest(BaseModel):
     column: str = Field(min_length=1, max_length=200)
     bins: int = Field(default=20, ge=5, le=MAX_BINS)
     group_by: str | None = Field(default=None, max_length=200)
+    filters: list[dict[str, Any]] = Field(default_factory=list, max_length=24)
 
 
 class MissingnessRequest(BaseModel):
@@ -71,6 +72,7 @@ class MissingnessRequest(BaseModel):
 
     columns: list[str] | None = Field(default=None, max_length=MAX_MISSINGNESS_COLUMNS)
     group_by: str | None = Field(default=None, max_length=200)
+    filters: list[dict[str, Any]] = Field(default_factory=list, max_length=24)
 
 
 class RowsRequest(BaseModel):
@@ -130,7 +132,7 @@ def post_series(dataset_id: str, request: SeriesRequest) -> dict[str, Any]:
     selection = evaluate_selection(dataset, predicates)
 
     if predicates:
-        mask = selection_mask(dataset, predicates)
+        mask = population_mask(dataset, predicates)
         indices = np.flatnonzero(mask).tolist()
     else:
         indices = list(range(dataset.row_count))
@@ -188,24 +190,6 @@ def post_series(dataset_id: str, request: SeriesRequest) -> dict[str, Any]:
     }
 
 
-def selection_mask(dataset, predicates):
-    """Boolean mask of the filtered population (union within a column, intersect across columns)."""
-    from app.explore.selection import _mask_for
-
-    if not predicates:
-        return np.ones(dataset.row_count, dtype=bool)
-    by_column: dict[str, list[Any]] = {}
-    for p in predicates:
-        by_column.setdefault(p.column, []).append(p)
-    combined = np.ones(dataset.row_count, dtype=bool)
-    for group in by_column.values():
-        union = np.zeros(dataset.row_count, dtype=bool)
-        for p in group:
-            union |= _mask_for(dataset, p)
-        combined &= union
-    return combined
-
-
 @router.post("/datasets/{dataset_id}/explore/selection")
 def post_selection(dataset_id: str, request: SelectionRequest) -> dict[str, Any]:
     """Evaluate brush predicates into an exact, id-keyed selection."""
@@ -256,12 +240,18 @@ def post_distribution(dataset_id: str, request: DistributionRequest) -> dict[str
         if request.group_by == request.column:
             raise ValidationFailure("A column cannot group by itself.")
     types = _detected_types(dataset)
+    predicates = parse_predicates(dataset, request.filters)
+    mask = population_mask(dataset, predicates) if predicates else None
     return distribution_payload(
         dataset,
         request.column,
         types.get(request.column, "text"),
         bins=request.bins,
         group_by=request.group_by,
+        mask=mask,
+        filters_note="Counts describe the active selection; the base layer is the full population."
+        if mask is not None
+        else None,
     )
 
 
@@ -285,7 +275,17 @@ def post_missingness(dataset_id: str, request: MissingnessRequest) -> dict[str, 
             f"Group column {request.group_by!r} is not present in the dataset.",
             details={"available_columns": dataset.columns[:50]},
         )
-    return missingness_payload(dataset, columns, group_by=request.group_by)
+    predicates = parse_predicates(dataset, request.filters)
+    mask = population_mask(dataset, predicates) if predicates else None
+    return missingness_payload(
+        dataset,
+        columns,
+        group_by=request.group_by,
+        mask=mask,
+        filters_note="Percentages describe the active selection; population_counts keeps the whole-dataset numbers."
+        if mask is not None
+        else None,
+    )
 
 
 @router.post("/datasets/{dataset_id}/explore/rows")
