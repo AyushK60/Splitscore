@@ -203,20 +203,29 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
   // and the mirrored state only drives the live brush rectangle.
   const dragRef = useRef<{ axis: string; y0: number; y1: number } | null>(null)
 
+  // Brush geometry lives in SVG coordinates. offsetY is relative to the event
+  // target (the 14px-wide hit rect, which starts at PAD.top), so measuring
+  // against the SVG's own bounding box is the only target-independent reading.
+  const svgY = useCallback((event: React.PointerEvent): number => {
+    const svg = svgRef.current
+    if (!svg) return event.nativeEvent.offsetY
+    return event.clientY - svg.getBoundingClientRect().top
+  }, [])
+
   const onPointerDown = useCallback((event: React.PointerEvent, axis: AxisLayout) => {
     if (axis.constant) return
     const target = event.currentTarget as SVGElement
     target.setPointerCapture(event.pointerId)
-    const y = event.nativeEvent.offsetY
+    const y = svgY(event)
     dragRef.current = { axis: axis.column, y0: y, y1: y }
     setDrag({ axis: axis.column, y0: y, y1: y })
-  }, [])
+  }, [svgY])
 
   const onPointerMove = useCallback((event: React.PointerEvent) => {
-    const y = event.nativeEvent.offsetY
+    const y = svgY(event)
     if (dragRef.current) dragRef.current.y1 = y
     setDrag((previous) => (previous ? { ...previous, y1: y } : previous))
-  }, [])
+  }, [svgY])
 
   const onPointerUp = useCallback(
     (event: React.PointerEvent) => {
