@@ -6,13 +6,16 @@ import './styles/v2.css'
 import './styles/landing.css'
 import './styles/s3.css'
 import './styles/research.css'
+import './styles/explore.css'
 
 import { AppProvider, useApp } from './state/AppState'
 import { useHashRoute, type ViewId } from './lib/router'
+import { ExploreProvider } from './explore/ExploreState'
 import { LandingView } from './views/LandingView'
 import { OverviewView } from './views/OverviewView'
 import { DatasetView } from './views/DatasetView'
 import { StudyView } from './views/StudyView'
+import { ExploreView } from './views/ExploreView'
 import { AuditView } from './views/AuditView'
 import { EvidenceView } from './views/EvidenceView'
 import { ComparisonView } from './views/ComparisonView'
@@ -48,6 +51,11 @@ function Shell() {
     view === 'overview' ? <OverviewView onNavigate={navigate} /> :
     view === 'dataset' ? <DatasetView onNavigate={navigate} /> :
     view === 'study' ? <StudyView onNavigate={navigate} /> :
+    view === 'explore' ? (
+      <ExploreProvider>
+        <ExploreView onNavigate={navigate} />
+      </ExploreProvider>
+    ) :
     view === 'audit' ? <AuditView onNavigate={navigate} /> :
     view === 'evidence' ? <EvidenceView onNavigate={navigate} /> :
     view === 'comparison' ? <ComparisonView onNavigate={navigate} /> :
@@ -62,9 +70,10 @@ function Shell() {
     { id: 'overview', label: 'Start', step: 1 },
     { id: 'dataset', label: 'Data', step: 2 },
     ...(dataset ? [{ id: 'study' as ViewId, label: 'Study', step: 3 }] : []),
-    ...(dataset ? [{ id: 'audit' as ViewId, label: 'Results', step: 4 }] : []),
-    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 5 }] : []),
-    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 6 }] : []),
+    ...(dataset ? [{ id: 'explore' as ViewId, label: 'Explore', step: 4 }] : []),
+    ...(dataset ? [{ id: 'audit' as ViewId, label: 'Results', step: 5 }] : []),
+    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 6 }] : []),
+    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 7 }] : []),
   ]
 
   return (

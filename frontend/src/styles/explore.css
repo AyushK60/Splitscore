@@ -1,0 +1,535 @@
+/* ============================================================================
+   Scientific Visual Explorer (S4)
+   ----------------------------------------------------------------------------
+   The exploration workbench. Extends the Study workspace's tokens (.rs scope)
+   rather than inventing a second palette, so Start → Study → Explore reads as
+   one product. Copper marks the user's own selection; teal is the workbench's
+   structural colour; every chart label uses the mono face like the rest of
+   the instrument panel.
+   ========================================================================== */
+
+.rs.xw {
+  max-width: none;
+  padding: 26px 22px 60px;
+}
+
+/* ---- header -------------------------------------------------------------- */
+
+.xw__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.xw__identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  font: 500 11px/1.4 var(--rs-mono);
+  color: var(--rs-soft);
+}
+
+.xw__identityname {
+  font: 600 13px/1.3 var(--rs-mono);
+  color: var(--rs-ink);
+}
+
+.xw__badge {
+  border: 1px solid var(--rs-line-strong);
+  border-radius: 2px;
+  padding: 2px 7px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rs-soft);
+}
+
+.xw__badge--demo {
+  border-color: color-mix(in srgb, var(--rs-teal) 45%, transparent);
+  color: var(--rs-teal);
+}
+
+/* ---- controls ------------------------------------------------------------ */
+
+.xw__controls {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(180px, 1fr) minmax(170px, 1fr) minmax(150px, 0.9fr);
+  gap: 14px;
+  border: 1px solid var(--rs-line);
+  border-radius: 3px;
+  background: var(--rs-surface);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.xw__controlgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.xw__controlhead {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.xw__controllabel {
+  font: 600 10px/1.3 var(--rs-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--rs-soft);
+}
+
+.xw__controlmeta {
+  font: 400 10.5px/1.45 var(--rs-mono);
+  color: color-mix(in srgb, var(--rs-soft) 78%, transparent);
+}
+
+.xw__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.xchip {
+  border: 1px solid var(--rs-line-strong);
+  background: transparent;
+  border-radius: 2px;
+  padding: 4px 9px;
+  font: 500 11px/1.2 var(--rs-mono);
+  color: var(--rs-soft);
+  cursor: pointer;
+}
+
+.xchip--on {
+  border-color: var(--rs-teal);
+  background: var(--rs-teal-soft);
+  color: var(--rs-teal);
+}
+
+.xchip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.xselect {
+  border: 1px solid var(--rs-line-strong);
+  border-radius: 2px;
+  background: var(--rs-surface);
+  padding: 6px 8px;
+  font: 500 12px/1.3 var(--rs-mono);
+  color: var(--rs-ink);
+  max-width: 100%;
+}
+
+.xw__popcount {
+  margin: 0;
+  font: 500 13px/1.4 var(--rs-mono);
+  color: var(--rs-ink);
+}
+
+.xw__popcount strong {
+  font-size: 18px;
+  color: var(--rs-copper);
+}
+
+/* ---- buttons ------------------------------------------------------------- */
+
+.xbtn {
+  border: 1px solid var(--rs-line-strong);
+  background: var(--rs-surface);
+  border-radius: 2px;
+  padding: 5px 11px;
+  font: 600 10.5px/1.2 var(--rs-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rs-ink);
+  cursor: pointer;
+}
+
+.xbtn:hover:not(:disabled) {
+  border-color: var(--rs-teal);
+  color: var(--rs-teal);
+}
+
+.xbtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.xbtn[aria-pressed='true'] {
+  border-color: var(--rs-teal);
+  background: var(--rs-teal-soft);
+  color: var(--rs-teal);
+}
+
+.xbtn--ghost {
+  background: transparent;
+  border-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.xbtn--tiny {
+  padding: 3px 7px;
+  font-size: 9.5px;
+}
+
+/* ---- layout -------------------------------------------------------------- */
+
+.xw__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 14px;
+  align-items: start;
+}
+
+.xw__body--focus {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.xw__canvas {
+  border: 1px solid var(--rs-line);
+  border-radius: 3px;
+  background: var(--rs-surface);
+  padding: 12px 14px;
+  min-width: 0;
+}
+
+.xw__placeholder {
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+  color: var(--rs-soft);
+  font: 400 13px/1.6 var(--rs-mono);
+  text-align: center;
+  padding: 30px;
+}
+
+.xw__ploterror {
+  border: 1px solid color-mix(in srgb, var(--rs-bad) 40%, transparent);
+  background: var(--rs-bad-soft);
+  color: var(--rs-bad);
+  border-radius: 3px;
+  padding: 8px 12px;
+  font: 400 12px/1.5 var(--rs-mono);
+}
+
+.xw__empty {
+  max-width: 560px;
+  color: var(--rs-soft);
+  margin: 10px 0 16px;
+}
+
+/* ---- parallel coordinates ------------------------------------------------ */
+
+.xpc {
+  margin: 0;
+}
+
+.xpc__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.xpc__title {
+  font: 600 12px/1.3 var(--rs-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rs-ink);
+}
+
+.xpc__subtitle {
+  display: block;
+  font: 400 10.5px/1.5 var(--rs-mono);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--rs-soft);
+}
+
+.xpc__canvas {
+  min-height: 380px;
+}
+
+.xpc svg {
+  display: block;
+  max-width: 100%;
+}
+
+.xpc__rail {
+  stroke: var(--rs-line);
+  stroke-width: 1;
+}
+
+.xpc__line {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.xpc__line--selected {
+  stroke: var(--rs-copper);
+  stroke-width: 1.6;
+  opacity: 0.95;
+}
+
+.xpc__axisline {
+  stroke: var(--rs-line-strong);
+  stroke-width: 1;
+}
+
+.xpc__axis--hot .xpc__axisline {
+  stroke: var(--rs-teal);
+}
+
+.xpc__axisname {
+  font: 600 11px/1 var(--rs-mono);
+  fill: var(--rs-ink);
+}
+
+.xpc__axisrange {
+  font: 400 9px/1 var(--rs-mono);
+  fill: var(--rs-soft);
+}
+
+.xpc__axisnote {
+  font: 500 9.5px/1 var(--rs-mono);
+  fill: var(--rs-warn);
+}
+
+.xpc__tick {
+  font: 400 9px/1 var(--rs-mono);
+  fill: var(--rs-soft);
+}
+
+.xpc__brush {
+  fill: color-mix(in srgb, var(--rs-copper) 22%, transparent);
+  stroke: var(--rs-copper);
+  stroke-width: 1;
+}
+
+.xpc__brush--live {
+  fill: color-mix(in srgb, var(--rs-copper) 12%, transparent);
+  stroke-dasharray: 3 2;
+}
+
+.xpc__reorderbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: center;
+  border-top: 1px solid var(--rs-line);
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.xpc__reorderitem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.xpc__reordername {
+  font: 500 10px/1 var(--rs-mono);
+  color: var(--rs-soft);
+}
+
+.xpc__reorderhint {
+  font: 400 10px/1.4 var(--rs-mono);
+  color: color-mix(in srgb, var(--rs-soft) 75%, transparent);
+  margin-left: auto;
+}
+
+.xpc__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rs-line);
+  font: 500 10.5px/1.4 var(--rs-mono);
+  color: var(--rs-soft);
+}
+
+.xpc__legendtitle {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 9.5px;
+}
+
+.xpc__legenditem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.xpc__legenditem--selected {
+  color: var(--rs-copper);
+}
+
+.xpc__swatch {
+  width: 12px;
+  height: 3px;
+  border-radius: 1px;
+  display: inline-block;
+}
+
+.xpc__swatch--selected {
+  background: var(--rs-copper);
+  height: 4px;
+}
+
+/* ---- row evidence -------------------------------------------------------- */
+
+.xw__inspector {
+  border: 1px solid var(--rs-line);
+  border-radius: 3px;
+  background: var(--rs-surface);
+  padding: 12px 14px;
+  min-width: 0;
+  position: sticky;
+  top: 12px;
+  max-height: calc(100vh - 140px);
+  overflow: auto;
+}
+
+.xrow__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.xrow__title {
+  font: 600 12px/1.3 var(--rs-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.xrow__counts {
+  font: 500 10.5px/1.4 var(--rs-mono);
+  color: var(--rs-copper);
+}
+
+.xrow__predicates {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.xrow__predicateitem {
+  font: 500 10.5px/1.4 var(--rs-mono);
+  color: var(--rs-ink);
+  background: var(--rs-sunken);
+  border-left: 2px solid var(--rs-copper);
+  padding: 3px 8px;
+  border-radius: 0 2px 2px 0;
+}
+
+.xrow__note {
+  font: 400 10.5px/1.5 var(--rs-mono);
+  color: var(--rs-soft);
+  margin: 6px 0;
+}
+
+.xrow__note--bad {
+  color: var(--rs-bad);
+}
+
+.xrow__tablewrap {
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+.xrow__table {
+  border-collapse: collapse;
+  width: 100%;
+  font: 400 10.5px/1.4 var(--rs-mono);
+}
+
+.xrow__table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--rs-soft);
+  border-bottom: 1px solid var(--rs-line-strong);
+  padding: 4px 6px;
+  white-space: nowrap;
+}
+
+.xrow__table td {
+  border-bottom: 1px solid var(--rs-line);
+  padding: 4px 6px;
+  color: var(--rs-ink);
+  white-space: nowrap;
+}
+
+.xrow__idcell {
+  color: var(--rs-teal);
+}
+
+.xrow__activetr td {
+  background: var(--rs-teal-soft);
+}
+
+.xrow__pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.xrow__footnote {
+  font: 400 10px/1.55 var(--rs-mono);
+  color: color-mix(in srgb, var(--rs-soft) 80%, transparent);
+  margin: 10px 0 0;
+}
+
+/* ---- responsive ---------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .xw__controls {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .xw__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .xw__inspector {
+    position: static;
+    max-height: none;
+  }
+
+  .xw__controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .xpc__line,
+  .xpc__brush {
+    transition: opacity 160ms ease, fill 160ms ease;
+  }
+}
+
+.xpc__plot {
+  min-height: 380px;
+}

@@ -676,3 +676,188 @@ export interface ManifestResponse {
   warnings: string[]
   integrity: { raw_data_embedded: boolean; cell_values_embedded: boolean }
 }
+
+// --------------------------------------------------------------------------
+// S4 Scientific Visual Explorer
+// --------------------------------------------------------------------------
+
+export interface ExploreDatasetIdentity {
+  dataset_id: string
+  name: string
+  source: 'demo' | 'upload'
+  is_synthetic: boolean
+  fingerprint_sha256: string
+  row_count: number
+  column_count: number
+  demo_id: string | null
+}
+
+export interface ExploreNumericSummary {
+  missing_count: number
+  unparsed_count: number
+  valid_count: number
+  min?: number
+  max?: number
+  mean?: number
+  median?: number
+  all_integer?: boolean
+}
+
+export interface ExploreTextSummary {
+  missing_count: number
+  distinct: number
+  top_levels: Array<{ value: string; count: number }>
+}
+
+export interface ExploreColumn {
+  name: string
+  detected_type: 'numeric' | 'integer' | 'categorical' | 'boolean' | 'datetime' | 'identifier' | 'text' | 'empty'
+  roles: string[]
+  numeric?: ExploreNumericSummary
+  text?: ExploreTextSummary
+}
+
+export interface ExploreSchema {
+  dataset: ExploreDatasetIdentity
+  row_id_scheme: string
+  row_count: number
+  columns: ExploreColumn[]
+  numeric_columns: string[]
+  color_candidates: string[]
+  suggested_color_column: string | null
+  split: { column: string; train_value: string | null; test_value: string | null } | null
+}
+
+export interface ExploreScale {
+  numeric: boolean
+  min: number | null
+  max: number | null
+  valid_count: number
+  missing_count: number
+  unparsed_count: number
+}
+
+export interface SeriesRow {
+  id: string
+  index: number
+  values: Record<string, number | string | null>
+}
+
+export interface SeriesResponse {
+  dataset_id: string
+  columns: string[]
+  population: number
+  filtered_population: number
+  filters_active: boolean
+  drawn_rows: number
+  sampling: { method: string; stride: number; description: string }
+  scale: Record<string, ExploreScale>
+  rows: SeriesRow[]
+}
+
+export type BrushPredicate =
+  | { column: string; kind: 'range'; min: number; max: number }
+  | { column: string; kind: 'values'; values: string[] }
+
+export interface SelectionResponse {
+  dataset_id: string
+  population: number
+  total_selected: number
+  ids_truncated: boolean
+  row_ids: string[]
+  predicates: Array<Record<string, unknown>>
+}
+
+export interface CorrelationCell {
+  x: string
+  y: string
+  method: string
+  coefficient: number | null
+  n_valid: number
+  missing_policy: string
+  warning: string | null
+}
+
+export interface CorrelationResponse {
+  method: string
+  columns: string[]
+  cells: CorrelationCell[]
+  min_pairs: number
+  warnings: string[]
+  population: number
+  note: string
+}
+
+export interface BoxStatsDto {
+  n: number
+  q1: number
+  median: number
+  q3: number
+  whisker_low: number
+  whisker_high: number
+  iqr: number
+  outlier_count: number
+  outlier_examples: number[]
+  definition: string
+}
+
+export interface DistributionGroup {
+  group: string
+  rows: number
+  bins?: number[]
+  counts?: number[]
+  valid_count?: number
+  missing_count?: number
+  unparsed_count?: number
+  box?: BoxStatsDto | null
+  levels?: Array<{ value: string; count: number }>
+  other_count?: number
+  distinct?: number
+}
+
+export interface DistributionResponse {
+  column: string
+  kind: 'numeric' | 'categorical'
+  bins?: number[]
+  counts?: number[]
+  valid_count?: number
+  missing_count?: number
+  unparsed_count?: number
+  population: number
+  box?: BoxStatsDto | null
+  levels?: Array<{ value: string; count: number }>
+  other_count?: number
+  distinct?: number
+  group_by: string | null
+  groups?: DistributionGroup[]
+}
+
+export interface MissingnessColumn {
+  column: string
+  missing_count: number
+  missing_pct: number
+}
+
+export interface MissingnessResponse {
+  columns: string[]
+  per_column: MissingnessColumn[]
+  population: number
+  matrix: {
+    rows: Array<{ id: string; cells: number[] }>
+    row_count_drawn: number
+    stride: number
+    method: string
+    description: string
+  }
+  policy: string
+  group_by: string | null
+  groups?: Array<{ group: string; rows: number; per_column: MissingnessColumn[] }>
+}
+
+export interface RowsResponse {
+  dataset_id: string
+  columns: string[]
+  rows: Array<{ id: string; index: number; values: Record<string, string> }>
+  unknown_ids: string[]
+  population: number
+}

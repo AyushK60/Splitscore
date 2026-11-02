@@ -216,3 +216,48 @@ export const researchApi = {
   studyExportPath: (dataset_id: string) => `/api/datasets/${dataset_id}/study/export`,
   manifestExportPath: (dataset_id: string) => `/api/datasets/${dataset_id}/manifest/export`,
 }
+
+// --------------------------------------------------------------------------
+// S4 Scientific Visual Explorer
+// --------------------------------------------------------------------------
+
+import type {
+  CorrelationResponse,
+  DistributionResponse,
+  ExploreSchema,
+  MissingnessResponse,
+  RowsResponse,
+  SelectionResponse,
+  SeriesResponse,
+} from './types'
+
+function postInit(body: unknown): RequestInit {
+  return {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }
+}
+
+export const exploreApi = {
+  schema: (datasetId: string) =>
+    request<ExploreSchema>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/schema`),
+
+  series: (datasetId: string, body: { columns: string[]; max_rows?: number; filters?: unknown[] }) =>
+    request<SeriesResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/series`, postInit(body)),
+
+  selection: (datasetId: string, predicates: unknown[]) =>
+    request<SelectionResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/selection`, postInit({ predicates })),
+
+  correlation: (datasetId: string, columns: string[], method: 'pearson' | 'spearman') =>
+    request<CorrelationResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/correlation`, postInit({ columns, method })),
+
+  distribution: (datasetId: string, body: { column: string; bins?: number; group_by?: string | null }) =>
+    request<DistributionResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/distribution`, postInit(body)),
+
+  missingness: (datasetId: string, body: { columns?: string[]; group_by?: string | null }) =>
+    request<MissingnessResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/missingness`, postInit(body)),
+
+  rows: (datasetId: string, ids: string[], columns?: string[]) =>
+    request<RowsResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/rows`, postInit({ ids, columns })),
+}
