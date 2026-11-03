@@ -278,6 +278,8 @@ export const exploreApi = {
 
 import type {
   ModelRunListResponse,
+  PredictionRequest,
+  PredictionResult,
   StatisticalModelResult,
   StatisticsRequest,
 } from './types'
@@ -286,6 +288,12 @@ export const modelsApi = {
   fitStatistics: (datasetId: string, body: StatisticsRequest) =>
     request<StatisticalModelResult>(
       `/api/datasets/${encodeURIComponent(datasetId)}/models/statistics`,
+      postInit(body),
+    ),
+
+  fitPrediction: (datasetId: string, body: PredictionRequest) =>
+    request<PredictionResult>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/models/prediction`,
       postInit(body),
     ),
 

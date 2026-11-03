@@ -1,9 +1,10 @@
 # S6 handoff
 
-**Status: PARTIAL.** The mandatory S5 defect repairs are complete and verified,
-and the F09 statistical workbench is implemented, integrated and numerically
-validated. F10 (predictive ML), most of F11 (diagnostics) and F15 (subgroups)
-are not implemented. Nothing in those areas is simulated or advertised.
+**Status: PARTIAL.** The mandatory S5 defect repairs are complete and verified;
+F09 statistical work and F10 predictive modelling are implemented, integrated
+and independently validated; core model diagnostics and preliminary subgroups
+are delivered. The full F11 diagnostic workspace and confirmatory F15 analysis
+remain. Nothing in those areas is simulated or advertised.
 
 ## Delivered
 
@@ -11,76 +12,98 @@ are not implemented. Nothing in those areas is simulated or advertised.
 
 | Defect | Cause | Repair |
 |---|---|---|
-| Scatter page grew without bound | ResizeObserver wrote the container's content height back into the SVG it sized; the inline SVG line box added pixels every frame | Definite CSS height on the plot frame, observer reads only, state equality guard, SVG `display:block`; verified by measured height stability |
-| Header hover unreadable | Global `button:hover` painted `--accent-soft` behind `--bone` text; nav overrode only colour | Transparent nav/brand hover surfaces, explicit active+hover, celadon focus ring |
-| Navigation implied skipped stages | Study/Explore numbered before Results while Data → Run Audit goes to Results | Audit results is stage 3; breadcrumb plus per-stage next actions; Study/Explore marked optional; routes and history unchanged |
-| Parallel coordinates opaque | No encoding explanation, no selection count, bare `crosshair` | Progressive reading guide with annotated example, persistent one-line hint, count, empty-selection guidance, `ns-resize` brush affordance and rail labels |
+| Scatter page grew without bound | ResizeObserver wrote the container height back into the SVG it sized | Definite CSS plot height, read-only observer, equality guard, block SVG; measured 2174→2930 px before vs constant 1396 px after |
+| Header hover unreadable | Global `button:hover` painted a light surface behind light text | Transparent nav/brand hover, explicit active+hover, celadon focus ring |
+| Navigation implied skipped stages | Study/Explore numbered before Results while Data → Run Audit goes to Results | Audit results is stage 3; breadcrumb and per-stage next actions; optional stages labelled |
+| Parallel coordinates opaque | No encoding explanation, count or brush affordance | Reading guide with annotated example, persistent hint, exact selection count, rail labels |
 
 Evidence: `docs/S6_A_UI_REPAIRS.md`, `docs/screenshots/s6/{before,after,mobile,tablet}`,
 `frontend/e2e/s6-ui-repairs.spec.ts`.
 
 ### 2. S6-B — F09 statistical workbench (`aec75e9`)
 
-* Explicit typed specification (task, outcome, predictors, missing policy,
-  intercept, confidence level, positive class, categorical references).
-* OLS and binary logistic regression through `statsmodels` 0.15.0.
-* Coefficients, standard errors, confidence intervals, statistics, p-values,
-  odds ratios, R²/adjusted R²/F/df/residual σ, log-likelihood/AIC/BIC/McFadden
-  pseudo-R², class counts, coding reference and level list.
-* Complete-case accounting with per-column exclusions; `fail` policy refuses.
-* Guardrails: unknown/duplicate columns, constant outcome or predictor, singular
-  design, minimum sample, >12 category levels, single class, missing positive
-  level, perfect separation, non-convergence — all structured refusals.
-* Diagnostics subset: coefficient interval plot, residual-versus-fitted from the
-  fitted object, residual summary, VIF, condition number, sampled diagnostic
-  rows with immutable row ids.
-* Bounded run storage (`RunKind` now includes `model`), JSON export identical to
-  the on-screen payload, provenance including statsmodels/numpy/pandas/scipy
-  versions and dataset sha256.
-* Integrated Model Lab at `#/models`, step 6, three-region instrument layout,
-  responsive collapse, result reset on dataset replacement.
-* 11 numerical oracles comparing every inferential quantity against independent
-  numpy normal equations and a direct statsmodels logistic fit; tolerances
-  1e-8–1e-9.
+Explicit typed specification; statsmodels OLS and binary logistic regression;
+coefficients, standard errors, intervals, statistics, p-values, odds ratios,
+R²/adjusted R²/F/df/σ, log-likelihood/AIC/BIC/McFadden R², coding reference and
+population; complete-case accounting; structured refusals; residual/VIF/
+condition diagnostics; bounded run storage and export; Model Lab UI at step 6.
+11 numerical oracles against numpy normal equations and a direct statsmodels
+fit.
 
 Evidence: `docs/S6_STATISTICAL_METHODS.md`, `docs/S6_NUMERICAL_VALIDATION.md`,
-`docs/S6_MODEL_DIAGNOSTICS.md`, `docs/S6_VERIFICATION.md`,
-`frontend/e2e/s6-model-lab.spec.ts`.
+`docs/S6_MODEL_DIAGNOSTICS.md`, `frontend/e2e/s6-model-lab.spec.ts`.
+
+### 3. S6-C — F10 predictive engine and Model Lab tab (this checkpoint)
+
+* Split resolution from the confirmed study split or generated
+  random/stratified/group/chronological holdout.
+* A validation set carved from training rows with the same strategy family;
+  fit / validation / test are disjoint and recorded with row-id digests.
+* Leakage-safe scikit-learn pipelines: median/mode imputation and one-hot
+  encoding fitted on fit rows only; final refit on fit + validation; test read
+  exactly once after selection.
+* Dummy baselines plus logistic and random forest (classification); dummy mean,
+  linear, ridge and random forest (regression). No hyperparameter tuning.
+* Real metrics: accuracy, balanced accuracy, confusion matrix, per-class
+  precision/recall/F1, ROC-AUC, PR-AUC; MAE, RMSE, R², residual summary.
+  Undefined values are named with a reason.
+* Diagnostics: ROC curve, calibration bins, error cohort, residual sample and
+  plots, per-class table.
+* Preliminary subgroup table with exact test denominators, per-group metric,
+  share, outcome mean, small-group warning and outside-bin count.
+* Bounded run storage, JSON inspection/export, provenance and versions.
+* Predictive tab in the Model Lab: evaluation design, candidate comparison
+  (validation only), sealed-test metrics, diagnostics, subgroups and export.
+
+Actual results on `clean_control.csv` (240 rows; fit 144 · validation 36 · test
+60) are recorded in `S6_VERIFICATION.md`: the dummy prior wins validation
+because the fixture's features are independent of the label; test accuracy is
+0.400, ROC-AUC 0.500; regression MAE 0.950, RMSE 1.117, R² −0.063. These
+unflattering numbers are reported as computed.
+
+Evidence: `backend/app/models/prediction.py`,
+`backend/tests/test_models_prediction.py` (8 oracles),
+`backend/tests/test_models_prediction_api.py`,
+`frontend/src/views/PredictiveLabView.tsx`,
+`frontend/e2e/s6-prediction.spec.ts`,
+`docs/screenshots/s6/after/predictive-*.png`.
 
 ## Verification ledger (final code)
 
 | Suite | Result |
 |---|---|
-| Backend pytest | **351 passed** (340 baseline + 11 new) |
+| Backend pytest | **360 passed** (351 previous + 9 new) |
 | Synthetic audit oracle | **41/41 cases, 61/61 checks**, exit 0 |
 | Frontend vitest | **82 passed** |
-| TypeScript / ESLint / production build | clean |
-| Playwright | **18 passed** (11 baseline + 4 S6-A + 3 S6-B) |
+| TypeScript / ESLint / production build | clean (build emits a non-failing >500 kB chunk warning) |
+| Playwright | **20 passed** (18 previous + 2 S6-C journeys) |
 
 ## Not delivered
 
-* F10 predictive ML: no trained estimator, no predictive metric, no comparison,
-  no sealed-test policy in code. Contract only.
-* F11 remainder: Q–Q, influence/leverage, calibration, ROC/PR, confusion matrix,
-  threshold analysis, permutation importance, error cohorts.
-* F15 subgroups: no subgroup table, denominators or error analysis.
-* Synthetic fixtures 3–5 for leakage/group-time/subgroup validation.
-* Frontend unit tests specific to Model Lab (E2E covers it); 1366/1920 visual
-  captures.
+* F11 remainder: Q–Q, leverage/Cook's/influence, calibration plot, PR plot,
+  threshold analysis, permutation importance, partial dependence, learning
+  curves, multiclass ROC.
+* F15 confirmatory analysis: confidence intervals, multiplicity control,
+  formal heterogeneity tests. Current subgroups are descriptive.
+* Cross-validation, repeated holdouts, nested tuning or any hyperparameter
+  search.
+* Frontend unit tests specific to the predictive view; 1366/1920 captures for
+  the statistical tab; Firefox/WebKit; forced-colours mode.
 
-## Known limitations of the statistical workbench
+## Known limitations
 
-Classical standard errors only; complete case only; indicator coding only; no
-interactions, weights, offsets or splines; no multiple-testing correction;
-categorical reference defaults to the first sorted level unless the user chooses
-one (always reported). A statistical fit uses all analysed rows and does not
-establish predictive validity or detect leakage.
+One validation holdout per run. Categorical mode imputation plus one-hot
+encoding; unknown test levels ignored; no interactions, splines, weights or
+offsets. Classification threshold fixed at 0.5. Limits: 10,000 rows, 30
+predictors, 30 categorical levels, 20 classes. Predictive metrics describe a
+split and a fixture, not real-world validity, and are never causal effects.
+Subgroups are preliminary and can be unstable when small.
 
 ## Next stage
 
-S6-C: implement F10 against `S6_ML_EVALUATION_CONTRACT.md`, starting with
-`backend/app/models/prediction.py` and its leakage-boundary tests. Exact next
-action, commands, environment gotchas and architecture constraints are in
+Continue S6-D/F11 with the diagnostics listed above, adding an independent oracle
+for each number before showing it. Exact commands, environment gotchas,
+scientific constraints and the remaining task list are in
 `docs/S6_AGENT_CONTINUATION.md`.
 
-**Do not start S7 (causal DAG/estimation) in this stage.**
+**Do not start S7 (causal DAG/estimation) until the remaining S6 work is accepted.**

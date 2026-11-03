@@ -316,3 +316,75 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* S6-C predictive tab and shared Model Lab chrome. */
+.mlab-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mlab-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--rs-line);
+}
+
+.mlab-tabs__btn {
+  appearance: none;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 3px 3px 0 0;
+  background: transparent;
+  color: var(--rs-ink-soft);
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.mlab-tabs__btn:hover {
+  color: var(--rs-ink);
+  background: var(--rs-surface);
+}
+
+.mlab-tabs__btn--on {
+  color: var(--rs-ink);
+  background: var(--rs-surface);
+  border-color: var(--rs-line);
+  font-weight: 600;
+}
+
+.mlab__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.plab__partition {
+  border-left: 2px solid var(--rs-line-strong);
+  padding-left: 10px;
+}
+
+.plab__matrix td,
+.plab__matrix th {
+  font-variant-numeric: tabular-nums;
+}
+
+.plab__roc,
+.plab__residuals {
+  max-width: 100%;
+  height: auto;
+}
+
+.mlab__context .mlab__hint {
+  word-break: break-word;
+}
+
+.plab__params {
+  max-width: 220px;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}

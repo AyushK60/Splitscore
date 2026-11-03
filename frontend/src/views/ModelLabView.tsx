@@ -19,6 +19,7 @@ import { ApiError, api, downloadExport, modelsApi } from '../api/client'
 import type { StatisticalModelResult, StatisticsTask } from '../api/types'
 import type { ViewId } from '../lib/router'
 import { useApp } from '../state/AppState'
+import { PredictiveLabView } from './PredictiveLabView'
 
 interface Props {
   onNavigate: (view: ViewId) => void
@@ -43,6 +44,39 @@ function severityClass(severity: string): string {
 }
 
 export function ModelLabView({ onNavigate }: Props) {
+  const [mode, setMode] = useState<'statistical' | 'predictive'>('statistical')
+  return (
+    <div className="mlab-shell">
+      <div className="mlab-tabs" role="tablist" aria-label="Model Lab mode">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === 'statistical'}
+          className={`mlab-tabs__btn${mode === 'statistical' ? ' mlab-tabs__btn--on' : ''}`}
+          onClick={() => setMode('statistical')}
+        >
+          Statistical inference
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === 'predictive'}
+          className={`mlab-tabs__btn${mode === 'predictive' ? ' mlab-tabs__btn--on' : ''}`}
+          onClick={() => setMode('predictive')}
+        >
+          Predictive ML
+        </button>
+      </div>
+      {mode === 'statistical' ? (
+        <StatisticalLab onNavigate={onNavigate} />
+      ) : (
+        <PredictiveLabView onNavigate={onNavigate} />
+      )}
+    </div>
+  )
+}
+
+function StatisticalLab({ onNavigate }: Props) {
   const { dataset, roles, audit } = useApp()
   const datasetId = dataset?.dataset.dataset_id ?? null
 

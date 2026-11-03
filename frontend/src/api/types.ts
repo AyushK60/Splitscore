@@ -1149,3 +1149,206 @@ export interface ModelRunListResponse {
   }>
   note: string
 }
+
+// --------------------------------------------------------------------------
+// S6 Model Lab — predictive evaluation (F10)
+// --------------------------------------------------------------------------
+
+export type PredictionTask = 'classification' | 'regression'
+export type GeneratedSplitStrategy = 'random' | 'stratified' | 'group' | 'chronological'
+
+export interface PredictionRequest {
+  task: PredictionTask
+  outcome: string
+  predictors: string[]
+  positive_level: string | null
+  split_source: 'existing' | 'generated'
+  split_strategy: GeneratedSplitStrategy
+  test_fraction: number
+  seed: number
+  validation_fraction: number
+  models: string[]
+  subgroup_column: string | null
+  subgroup_bins: number[]
+}
+
+export interface PredictionCandidate {
+  family: string
+  label: string
+  status: 'fitted' | 'failed'
+  selection_metric?: string
+  selection_score?: number
+  validation?: Record<string, number>
+  parameters?: Record<string, unknown>
+  error?: string
+}
+
+export interface PredictionPerClass {
+  label: string
+  support: number
+  predicted: number
+  precision: number | null
+  recall: number | null
+  f1: number | null
+  accuracy: number | null
+}
+
+export interface PredictionMetrics {
+  n: number
+  accuracy?: number
+  balanced_accuracy?: number | null
+  roc_auc?: number | null
+  pr_auc?: number | null
+  classes?: string[]
+  confusion_matrix?: number[][]
+  per_class?: PredictionPerClass[]
+  mae?: number
+  rmse?: number
+  r2?: number | null
+  residual_summary?: Record<string, number | null>
+  undefined: Array<{ metric: string; reason: string }>
+}
+
+export interface PredictionResult {
+  run_id: string
+  created_at_utc: string
+  kind: 'prediction_model'
+  task: PredictionTask
+  specification: {
+    task: PredictionTask
+    outcome: string
+    predictors: string[]
+    positive_level: string | null
+    subgroup_column: string | null
+    subgroup_bins: number[]
+    seed: number
+    validation_fraction: number
+    selection_rule: string
+    test_evaluations: number
+    notes: string[]
+  }
+  dataset: {
+    dataset_id: string
+    name: string
+    sha256: string
+    row_count: number
+    column_count: number
+  }
+  split: {
+    source: 'existing' | 'generated'
+    strategy: string
+    seed: number | null
+    summary: Record<string, unknown>
+    partitions: { fit: number; validation: number; test: number }
+    partition_row_ids_sha256: Record<string, string>
+    test_row_ids_sha256: string
+  }
+  outcome: {
+    kind: 'classification' | 'regression'
+    labels?: string[]
+    positive_level?: string | null
+    class_counts?: Record<string, number>
+    mean?: number
+    std?: number
+    missing_count?: number
+  }
+  design: {
+    numeric: string[]
+    categorical: string[]
+    missing_by_column: Record<string, number>
+    categorical_levels: Record<string, string[]>
+    preprocessing: {
+      numeric: string
+      categorical: string
+      fit_partition: string
+      learned_on_rows: number
+      learned: {
+        numeric_medians: Record<string, number>
+        categorical_modes: Record<string, string | null>
+      }
+    }
+  }
+  candidates: PredictionCandidate[]
+  selected: {
+    family: string
+    label: string
+    validation: { metric: string; score: number; accuracy?: number; mae?: number }
+    parameters: Record<string, unknown>
+    refit_rows: number
+  }
+  evaluation: {
+    partition: 'test'
+    n: number
+    metrics: PredictionMetrics
+    diagnostics: {
+      confusion_matrix?: number[][]
+      per_class?: PredictionPerClass[]
+      roc_curve?: {
+        fpr: number[]
+        tpr: number[]
+        thresholds: number[]
+        auc: number
+      } | null
+      calibration?: Array<{
+        bin_low: number
+        bin_high: number
+        count: number
+        mean_predicted: number | null
+        observed_rate: number | null
+      }> | null
+      errors?: Array<{
+        row_id: string
+        observed: string
+        predicted: string
+        probability_positive: number | null
+      }>
+      error_count?: number
+      sample?: {
+        method: string
+        stride: number
+        drawn_rows: number
+        test_rows: number
+        description: string
+        rows: Array<{
+          row_id: string
+          observed: number
+          predicted: number
+          residual: number
+        }>
+      }
+      residual_summary?: Record<string, number | null>
+      undefined: Array<{ metric: string; reason: string }>
+    }
+    predictions: {
+      rows: Array<{
+        row_id: string
+        observed: string | number
+        predicted: string | number
+        probability_positive?: number | null
+      }>
+      test_rows: number
+      truncated: boolean
+      cap: number
+    }
+  }
+  subgroups: null | {
+    column: string
+    partition: 'test'
+    test_rows: number
+    grouped_rows: number
+    outside_bins: number
+    minimum_recommended_rows: number
+    rows: Array<{
+      group: string
+      n: number
+      share: number
+      metric_name?: string
+      metric: number | null
+      outcome_mean?: number
+      warning: string | null
+    }>
+    note: string
+  }
+  warnings: ModelWarning[]
+  versions: Record<string, string>
+}

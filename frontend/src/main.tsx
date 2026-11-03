@@ -50,7 +50,7 @@ const NEXT_GUIDANCE: Record<ViewId, string> = {
   evidence: 'Evidence belongs to the selected finding; the full audit lives in Audit results.',
   study: 'Study metadata is optional context. Explore the dataset, or run the audit from Data.',
   explore: 'Selections are analysis context, not findings. Inspect them, run the audit, or compare.',
-  models: 'A statistical fit describes the analysed rows; it does not prove predictive validity.',
+  models: 'Statistical fits describe analysed rows; predictive metrics describe a held-out split. Neither proves causation.',
   comparison: 'A comparison shows consequences, not a winner. Inspect evidence or export the run.',
   export: 'Exports contain the runs you actually executed; no dossier report exists in this stage.',
 }
