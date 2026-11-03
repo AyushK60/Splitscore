@@ -92,6 +92,9 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
   const [order, setOrder] = useState<string[]>(series.columns)
   const [drag, setDrag] = useState<{ axis: string; y0: number; y1: number } | null>(null)
   const [hoveredAxis, setHoveredAxis] = useState<string | null>(null)
+  // Progressive disclosure: the chart stays compact until a beginner asks for
+  // the reading guide. The guide explains the encoding, never an inference.
+  const [helpOpen, setHelpOpen] = useState(false)
 
   // Re-derive the axis order when the requested columns change (dataset or
   // control change), while keeping any reordering the user already applied.
@@ -312,6 +315,21 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
           </span>
         </figcaption>
         <div className="xpc__actions">
+          <span className="xpc__count" aria-live="polite">
+            {selectedIds.size > 0
+              ? `${selectedIds.size.toLocaleString('en-US')} selected`
+              : 'no rows selected'}
+          </span>
+          <button
+            type="button"
+            id="xpc-help-toggle"
+            className="xbtn xbtn--ghost"
+            aria-expanded={helpOpen}
+            aria-controls="xpc-help"
+            onClick={() => setHelpOpen((open) => !open)}
+          >
+            {helpOpen ? 'Hide reading guide' : 'How to read this chart'}
+          </button>
           {activeBrushes.length > 0 && (
             <button type="button" className="xbtn xbtn--ghost" onClick={() => onPredicates([])}>
               Reset brushes ({activeBrushes.length})
@@ -333,6 +351,77 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
           />
         </div>
       </div>
+      <p className="xpc__readhint">
+        Each line is one observation · each vertical rail is a numeric variable · drag on a rail to
+        brush a value range.
+      </p>
+      {helpOpen && (
+        <section className="xpc__help" id="xpc-help" aria-label="How to read parallel coordinates">
+          <div className="xpc__helpgrid">
+            <div>
+              <h3>One line = one observation</h3>
+              <p>
+                Each connected line follows a single row of the dataset across every selected
+                variable. A line that jumps between rails is one observation whose values differ
+                between those variables.
+              </p>
+            </div>
+            <div>
+              <h3>One rail = one variable</h3>
+              <p>
+                The top and bottom of each rail are that variable's observed minimum and maximum in
+                the active population. Values are plotted at their real position, in the column's
+                own units; a constant column collapses to a mid-rail and says so.
+              </p>
+            </div>
+            <div>
+              <h3>Crossing lines</h3>
+              <p>
+                Crossing means the ordering of values differs between two neighbouring variables.
+                It does <strong>not</strong> by itself prove correlation, causation or data leakage;
+                read crossings as a prompt to inspect the variables, not as a finding.
+              </p>
+            </div>
+            <div>
+              <h3>Brushing a range</h3>
+              <p>
+                Drag vertically on a rail to select values between two positions. The selection
+                count updates immediately, selected rows turn copper and appear in{' '}
+                <strong>Row evidence</strong>, and the same rows highlight in Scatter, the scatter
+                matrix and distributions. Drag again over the same range to remove that brush.
+              </p>
+            </div>
+          </div>
+          <svg
+            className="xpc__example"
+            viewBox="0 0 320 96"
+            role="img"
+            aria-label="Annotated example: two rails, low and high values, with two lines crossing between them"
+          >
+            <line x1="70" y1="12" x2="70" y2="76" stroke="var(--rs-line-strong)" />
+            <line x1="250" y1="12" x2="250" y2="76" stroke="var(--rs-line-strong)" />
+            <text x="70" y="8" textAnchor="middle" className="xpc__tick">variable A</text>
+            <text x="250" y="8" textAnchor="middle" className="xpc__tick">variable B</text>
+            <text x="62" y="16" textAnchor="end" className="xpc__tick">high</text>
+            <text x="62" y="80" textAnchor="end" className="xpc__tick">low</text>
+            <path d="M70 22 L250 68" stroke="var(--rs-teal)" strokeWidth="1.6" fill="none" />
+            <path d="M70 68 L250 22" stroke="var(--rs-copper)" strokeWidth="1.6" fill="none" />
+            <text x="160" y="92" textAnchor="middle" className="xpc__tick">
+              two rows crossing: opposite value order
+            </text>
+          </svg>
+          <p className="xpc__examplecaption">
+            The teal and copper lines are two observations. They cross because the row that is high
+            on A is low on B. This chart is exploratory: it displays values you selected, and it does
+            not estimate effects or detect leakage.
+          </p>
+          <p className="xpc__helpnote">
+            Drawn density is the render sample stated above, not the whole dataset. Axis ranges cover
+            the active (filtered) population. Use the reorder controls below the canvas to compare
+            adjacent variables, and “Reset brushes” to return to the full population.
+          </p>
+        </section>
+      )}
       <div className="xpc__canvas">
         <div ref={containerRef} className="xpc__plot">
         <svg
@@ -389,7 +478,8 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
                     width={14}
                     height={innerHeight}
                     fill="transparent"
-                    style={{ cursor: 'crosshair', touchAction: 'none' }}
+                    style={{ cursor: 'ns-resize', touchAction: 'none' }}
+                    aria-label={`Brush a value range on ${axis.column}`}
                     onPointerDown={(e) => onPointerDown(e, axis)}
                     onPointerMove={onPointerMove}
                     onPointerUp={onPointerUp}
@@ -534,6 +624,12 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
           </span>
         )}
       </div>
+      {selectedIds.size === 0 && (
+        <p className="xpc__emptyhint">
+          Nothing is selected yet. Drag vertically on any rail to brush a value range — selected rows
+          turn copper, appear in Row evidence, and stay highlighted in the other linked plots.
+        </p>
+      )}
     </figure>
   )
 })

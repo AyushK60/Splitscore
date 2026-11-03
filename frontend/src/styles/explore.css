@@ -261,6 +261,74 @@
   min-height: 380px;
 }
 
+/* ---- parallel coordinates: reading guidance ------------------------------- */
+
+.xpc__readhint {
+  margin: 0 0 8px;
+  font: 400 11px/1.55 var(--rs-mono);
+  color: var(--rs-soft);
+}
+
+.xpc__help {
+  border: 1px solid var(--rs-line);
+  border-left: 2px solid var(--rs-teal);
+  background: var(--rs-surface);
+  padding: 12px 14px;
+  margin: 0 0 12px;
+}
+
+.xpc__helpgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px 18px;
+}
+
+.xpc__helpgrid h3 {
+  margin: 0 0 2px;
+  font: 600 10.5px/1.4 var(--rs-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rs-ink);
+}
+
+.xpc__helpgrid p {
+  margin: 0;
+  font: 400 11.5px/1.55 var(--rs-mono);
+  color: var(--rs-ink-soft, var(--rs-soft));
+}
+
+.xpc__example {
+  display: block;
+  width: 320px;
+  height: 96px;
+  max-width: 100%;
+  margin: 12px 0 2px;
+}
+
+.xpc__examplecaption {
+  font: 400 10.5px/1.5 var(--rs-mono);
+  color: var(--rs-soft);
+  margin: 0;
+}
+
+.xpc__helpnote {
+  margin: 10px 0 0;
+  font: 400 10.5px/1.55 var(--rs-mono);
+  color: var(--rs-soft);
+}
+
+.xpc__count {
+  font: 600 10.5px/1.4 var(--rs-mono);
+  letter-spacing: 0.06em;
+  color: var(--rs-copper);
+}
+
+.xpc__emptyhint {
+  margin: 6px 0 0;
+  font: 400 10.5px/1.55 var(--rs-mono);
+  color: var(--rs-soft);
+}
+
 .xpc svg {
   display: block;
   max-width: 100%;
@@ -654,6 +722,17 @@
 .xfig__plot {
   position: relative;
   overflow-x: auto;
+}
+
+/* Scatter owns a definite plot height. The chart's ResizeObserver reads this
+   height; it must never be derived from the SVG inside, or the observer would
+   size the SVG from a container that the SVG itself sizes (S6-A regression). */
+.xfig__plot--sized {
+  height: clamp(340px, 46vh, 520px);
+}
+
+.xfig__plot > svg {
+  display: block;
 }
 
 .xfig__brushlayer {

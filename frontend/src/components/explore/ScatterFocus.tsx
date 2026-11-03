@@ -55,14 +55,33 @@ export function ScatterFocus({
 
   useEffect(() => {
     if (!plotEl) return
+    // Measure the container, but never let the container's height be derived
+    // from the SVG it contains. `.xfig__plot` owns a definite CSS height; the
+    // observer only reads it. The previous version fed `rect.height` back into
+    // the SVG's height, and because an inline SVG adds its line-box descent to
+    // the container, every callback grew the SVG by a few pixels and triggered
+    // the next callback — an unbounded document-growth loop that only the
+    // Scatter tab could reach. Height now comes from CSS, so the loop cannot
+    // re-form, and the equality guard stops any residual sub-pixel churn.
+    const applySize = (width: number, height: number) => {
+      // On phones the panel itself is narrower than the 420px floor; the plot
+      // scrolls horizontally instead of overflowing the page.
+      const floor = Math.min(420, window.innerWidth - 40)
+      const nextWidth = Math.max(floor, Math.round(width))
+      const nextHeight = Math.max(340, Math.round(height))
+      setSize((previous) =>
+        previous.width === nextWidth && previous.height === nextHeight
+          ? previous
+          : { width: nextWidth, height: nextHeight },
+      )
+    }
     const observer = new ResizeObserver((entries) => {
       const rect = entries[0].contentRect
-      // On phones the panel itself is narrower than the old 420px floor; the
-      // plot container scrolls horizontally instead of overflowing the page.
-      const floor = Math.min(420, window.innerWidth - 40)
-      setSize({ width: Math.max(floor, rect.width), height: Math.max(340, rect.height) })
+      applySize(rect.width, rect.height)
     })
     observer.observe(plotEl)
+    const initial = plotEl.getBoundingClientRect()
+    applySize(initial.width, initial.height)
     return () => observer.disconnect()
   }, [plotEl])
 
@@ -224,7 +243,7 @@ export function ScatterFocus({
       )}
 
       {series && xScale && yScale && (
-        <div ref={setPlotEl} className="xfig__plot">
+        <div ref={setPlotEl} className="xfig__plot xfig__plot--sized">
           <svg
             ref={svgRef}
             width={size.width}

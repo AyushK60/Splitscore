@@ -168,8 +168,8 @@ test('the pre-existing audit and study workflows still work after the explorer',
   await page.getByRole('tab', { name: 'Data dictionary' }).click()
   await expect(page.getByText(/tenure_months/i).first()).toBeVisible()
 
-  // The V1 audit path: Results runs the audit with the derived roles.
-  await page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: 'Results' }).click()
+  // The V1 audit path: the third stage runs the audit with the derived roles.
+  await page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: 'Audit results' }).click()
   await page.getByRole('button', { name: 'Run the audit now' }).click()
   await expect(
     page.getByText(/audit complete|findings|no findings|evaluated/i).first(),

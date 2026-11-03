@@ -248,7 +248,7 @@ a {
 .app-nav button {
   appearance: none;
   border: 0;
-  background: none;
+  background: transparent;
   font: inherit;
   font-size: 13.5px;
   color: var(--bone-dim);
@@ -263,15 +263,25 @@ a {
 }
 .app-nav button:hover:not(:disabled) {
   color: var(--bone);
+  /* The global control hover paints a pale accent-soft background; on the dark
+     masthead that produced pale text on a pale fill. Navigation keeps its own
+     transparent background so contrast never depends on cascade order. */
+  background: transparent;
   border-bottom-color: rgb(243 234 217 / 28%);
 }
 .app-nav button[aria-current='page'] {
   color: var(--bone);
   font-weight: 650;
+  background: transparent;
+  border-bottom-color: var(--celadon);
+}
+.app-nav button[aria-current='page']:hover:not(:disabled) {
+  background: transparent;
   border-bottom-color: var(--celadon);
 }
 .app-nav button:disabled {
   color: rgb(243 234 217 / 30%);
+  background: transparent;
   cursor: not-allowed;
 }
 .app-nav__step {
@@ -291,6 +301,105 @@ a {
 .app-nav button:disabled .app-nav__step {
   background: none;
   border-color: rgb(243 234 217 / 12%);
+}
+
+/* The masthead sits on the ink band: the global teal focus ring is too close
+   to the background luminance there, so focus uses the celadon rail instead. */
+.app-topbar button:focus-visible {
+  outline: 2px solid var(--celadon);
+  outline-offset: 2px;
+}
+
+/* The brand is a button for navigation; it must not inherit control chrome. */
+.app-header__brand--home:hover:not(:disabled),
+.app-header__brand--home:active:not(:disabled) {
+  background: transparent;
+  color: inherit;
+  border-color: transparent;
+  transform: none;
+}
+.app-header__brand--home:hover .app-header__title,
+.app-header__brand--home:hover .app-header__tagline {
+  color: var(--bone);
+}
+
+/* ---- breadcrumb and next-step guidance ---------------------------------- */
+
+.app-crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 18px;
+  padding: 6px var(--ws-gutter) 7px;
+  border-top: 1px solid rgb(243 234 217 / 10%);
+  font: 400 11.5px/1.5 var(--mono);
+  color: var(--bone-dim);
+}
+.app-crumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.app-crumb li + li::before {
+  content: '/ ';
+  color: rgb(243 234 217 / 34%);
+}
+.app-crumb__link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--bone-dim);
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.app-crumb__link:hover:not(:disabled) {
+  background: transparent;
+  color: var(--bone);
+}
+.app-crumb [aria-current='page'] {
+  color: var(--bone);
+}
+.app-crumb__next {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+.app-crumb__next .app-crumb__action {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--celadon);
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.app-crumb__next .app-crumb__action:hover:not(:disabled) {
+  background: transparent;
+  color: var(--bone);
+}
+.app-crumb__label {
+  color: rgb(243 234 217 / 52%);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+@media (max-width: 700px) {
+  .app-crumb {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 .app-main {

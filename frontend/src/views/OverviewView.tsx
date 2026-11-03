@@ -50,24 +50,24 @@ function SessionOverview({ onNavigate }: { onNavigate: (view: ViewId) => void })
       action: 'Verify split source and column roles',
     },
     {
+      id: 'audit',
+      title: 'Audit results',
+      state: audit
+        ? `Audit run — ${audit.result.findings.length} finding${audit.result.findings.length === 1 ? '' : 's'}`
+        : 'Not audited yet in this session',
+      action: audit ? 'Review findings and the risk scorecard' : 'Run the audit from Data',
+    },
+    {
       id: 'study',
       title: 'Study',
       state: dataset.dataset ? 'Data dictionary and profile available' : '',
-      action: 'Record the study card and methodology',
+      action: 'Record the study card and methodology (optional)',
     },
     {
       id: 'explore',
       title: 'Explore',
       state: `${integer(summary.row_count)} rows ready for the visual explorer`,
-      action: 'Inspect distributions and link selections',
-    },
-    {
-      id: 'audit',
-      title: 'Results',
-      state: audit
-        ? `Audit run — ${audit.result.findings.length} finding${audit.result.findings.length === 1 ? '' : 's'}`
-        : 'Not audited yet in this session',
-      action: audit ? 'Review findings and the risk scorecard' : 'Run the five leakage checks',
+      action: 'Inspect distributions and link selections (optional)',
     },
     {
       id: 'comparison',

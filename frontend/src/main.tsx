@@ -21,6 +21,57 @@ import { EvidenceView } from './views/EvidenceView'
 import { ComparisonView } from './views/ComparisonView'
 import { ExportView } from './views/ExportView'
 
+/** Stage names used by the breadcrumb. "Audit results" is the third stage. */
+const STAGE_LABEL: Record<ViewId, string> = {
+  home: 'Home',
+  overview: 'Start',
+  dataset: 'Data',
+  audit: 'Audit results',
+  study: 'Study',
+  explore: 'Explore',
+  evidence: 'Evidence',
+  comparison: 'Compare',
+  export: 'Export',
+}
+
+/**
+ * Contextual next steps. These are deliberately destinations that already
+ * exist, not a wizard: Study and Explore stay optional whether or not an audit
+ * has run, and no stage is marked complete by visiting another one.
+ */
+const NEXT_GUIDANCE: Record<ViewId, string> = {
+  home: '',
+  overview: 'Load a dataset, then confirm its split and roles in Data.',
+  dataset: 'Run the audit once the split and roles are confirmed. Study and Explore stay optional.',
+  audit: 'Open a finding\u2019s evidence, explore the data, or compare split strategies.',
+  evidence: 'Evidence belongs to the selected finding; the full audit lives in Audit results.',
+  study: 'Study metadata is optional context. Explore the dataset, or run the audit from Data.',
+  explore: 'Selections are analysis context, not findings. Inspect them, run the audit, or compare.',
+  comparison: 'A comparison shows consequences, not a winner. Inspect evidence or export the run.',
+  export: 'Exports contain the runs you actually executed; no dossier report exists in this stage.',
+}
+
+const NEXT_ACTIONS: Partial<Record<ViewId, Array<{ label: string; view: ViewId }>>> = {
+  dataset: [{ label: 'Review Study', view: 'study' }],
+  audit: [
+    { label: 'Explore data', view: 'explore' },
+    { label: 'Compare splits', view: 'comparison' },
+  ],
+  evidence: [{ label: 'Back to Audit results', view: 'audit' }],
+  study: [
+    { label: 'Explore data', view: 'explore' },
+    { label: 'Go to Data to run the audit', view: 'dataset' },
+  ],
+  explore: [
+    { label: 'Run the audit', view: 'audit' },
+    { label: 'Compare splits', view: 'comparison' },
+  ],
+  comparison: [
+    { label: 'Audit results', view: 'audit' },
+    { label: 'Export', view: 'export' },
+  ],
+}
+
 function Shell() {
   const [view, navigate] = useHashRoute()
   const { status, busyLabel, dismissStatus, dataset, audit, comparison } = useApp()
@@ -62,16 +113,16 @@ function Shell() {
     view === 'export' ? <ExportView onNavigate={navigate} /> :
     <OverviewView onNavigate={navigate} />
 
-  // The navigation follows the user's progress: steps appear as they become
-  // usable, so the bar always reads as a short journey rather than a menu of
-  // equally weighted destinations. "Evidence" is deliberately absent — it is
-  // reached by opening a finding, not on its own.
+  // The navigation follows the order of the actual work: the audit is the third
+  // stage and is reachable directly from Data. Study and Explore are optional
+  // research activities shown after it, not gates in front of it. "Evidence" is
+  // deliberately absent — it is reached by opening a finding.
   const steps: Array<{ id: ViewId; label: string; step: number }> = [
     { id: 'overview', label: 'Start', step: 1 },
     { id: 'dataset', label: 'Data', step: 2 },
-    ...(dataset ? [{ id: 'study' as ViewId, label: 'Study', step: 3 }] : []),
-    ...(dataset ? [{ id: 'explore' as ViewId, label: 'Explore', step: 4 }] : []),
-    ...(dataset ? [{ id: 'audit' as ViewId, label: 'Results', step: 5 }] : []),
+    ...(dataset ? [{ id: 'audit' as ViewId, label: 'Audit results', step: 3 }] : []),
+    ...(dataset ? [{ id: 'study' as ViewId, label: 'Study', step: 4 }] : []),
+    ...(dataset ? [{ id: 'explore' as ViewId, label: 'Explore', step: 5 }] : []),
     ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 6 }] : []),
     ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 7 }] : []),
   ]
@@ -124,6 +175,41 @@ function Shell() {
             ))}
           </div>
         </nav>
+
+        <div className="app-crumb">
+          <nav aria-label="Breadcrumb">
+            <ol>
+              <li>
+                {view === 'overview' ? (
+                  'Workspace'
+                ) : (
+                  <button
+                    type="button"
+                    className="app-crumb__link"
+                    onClick={() => navigate('overview')}
+                  >
+                    Workspace
+                  </button>
+                )}
+              </li>
+              <li aria-current="page">{STAGE_LABEL[view]}</li>
+            </ol>
+          </nav>
+          <p className="app-crumb__next">
+            <span className="app-crumb__label">Next</span>
+            <span>{NEXT_GUIDANCE[view]}</span>
+            {(NEXT_ACTIONS[view] ?? []).map((action) => (
+              <button
+                key={action.view + action.label}
+                type="button"
+                className="app-crumb__action"
+                onClick={() => navigate(action.view)}
+              >
+                {action.label}
+              </button>
+            ))}
+          </p>
+        </div>
       </div>
 
       <main id="main" ref={mainRef} className="app-main" tabIndex={-1}>
