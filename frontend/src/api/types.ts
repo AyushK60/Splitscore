@@ -1005,3 +1005,147 @@ export interface SelectionOverlay {
   population: number
   box?: BoxStatsDto | null
 }
+
+// --------------------------------------------------------------------------
+// S6 Model Lab — statistical workbench (F09)
+// --------------------------------------------------------------------------
+
+export type StatisticsTask = 'ols' | 'logistic'
+
+export interface StatisticsRequest {
+  task: StatisticsTask
+  outcome: string
+  predictors: string[]
+  missing_policy: 'complete_case' | 'fail'
+  intercept: boolean
+  positive_level: string | null
+  categorical_references: Record<string, string>
+  alpha: number
+}
+
+export interface StatisticalCoefficient {
+  term: string
+  kind: 'intercept' | 'coefficient'
+  estimate: number
+  std_error: number
+  ci_low: number
+  ci_high: number
+  statistic: number | null
+  p_value: number | null
+  odds_ratio?: number
+  odds_ratio_ci_low?: number
+  odds_ratio_ci_high?: number
+}
+
+export interface ModelWarning {
+  code: string
+  severity: 'low' | 'medium' | 'high'
+  message: string
+}
+
+export interface StatisticalModelResult {
+  run_id: string
+  created_at_utc: string
+  kind: 'statistical_model'
+  task: StatisticsTask
+  specification: {
+    task: StatisticsTask
+    task_label: string
+    outcome: string
+    predictors: string[]
+    intercept: boolean
+    missing_policy: 'complete_case' | 'fail'
+    alpha: number
+    positive_level: string | null
+    formula: string
+    coding: Array<{
+      column: string
+      kind: 'continuous' | 'categorical'
+      reference: string | null
+      levels: string[] | null
+      missing_count: number
+      unparsable_count: number
+    }>
+    outcome_coding: {
+      kind: 'continuous' | 'binary'
+      positive_level: string | null
+      negative_level?: string | null
+      levels: string[] | null
+      positive_count?: number
+      negative_count?: number
+      missing_count: number
+      unparsable_count: number
+    }
+    notes: string[]
+  }
+  dataset: {
+    dataset_id: string
+    name: string
+    sha256: string
+    row_count: number
+    column_count: number
+  }
+  population: {
+    rows_total: number
+    analyzed: number
+    excluded: number
+    excluded_missing_by_column: Record<string, number>
+    policy: 'complete_case' | 'fail'
+    complete_case_note: string
+  }
+  coefficients: StatisticalCoefficient[]
+  fit: {
+    n: number
+    method: string
+    df_model?: number
+    df_resid?: number
+    r_squared?: number
+    adjusted_r_squared?: number
+    f_statistic?: number | null
+    f_p_value?: number | null
+    sigma?: number | null
+    log_likelihood?: number
+    null_log_likelihood?: number
+    likelihood_ratio?: number
+    likelihood_ratio_p_value?: number | null
+    mcfadden_pseudo_r_squared?: number
+    aic?: number
+    bic?: number
+    converged?: boolean
+  }
+  diagnostics: {
+    vif: Array<{ term: string; vif: number | null; note?: string }>
+    condition_number: number
+    sample: {
+      method: string
+      stride: number
+      drawn_rows: number
+      analyzed_rows: number
+      description: string
+      rows: Array<{
+        row_id: string
+        observed: number
+        fitted: number
+        residual?: number
+        probability?: number
+      }>
+    }
+    residual_summary?: Record<string, number | null>
+    fitted_summary?: Record<string, number | null>
+    probability_summary?: Record<string, number | null>
+  }
+  warnings: ModelWarning[]
+  versions: Record<string, string>
+}
+
+export interface ModelRunListResponse {
+  dataset_id: string
+  runs: Array<{
+    run_id: string
+    kind: string
+    dataset_id: string
+    label: string
+    created_seconds_ago: number
+  }>
+  note: string
+}

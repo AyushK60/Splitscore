@@ -25,6 +25,7 @@ from app.api.error_handlers import register_error_handlers
 from app.api.routes_audit import router as audit_router
 from app.api.routes_datasets import router as datasets_router
 from app.api.routes_explore import router as explore_router
+from app.api.routes_models import router as models_router
 from app.api.routes_reports import router as reports_router
 from app.api.routes_research import router as research_router
 from app.core.config import get_settings
@@ -69,6 +70,7 @@ def create_app() -> FastAPI:
     app.include_router(reports_router)
     app.include_router(research_router)
     app.include_router(explore_router)
+    app.include_router(models_router)
 
     @app.get("/api", include_in_schema=False)
     def api_root() -> JSONResponse:

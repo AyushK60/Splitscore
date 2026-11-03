@@ -7,6 +7,7 @@ import './styles/landing.css'
 import './styles/s3.css'
 import './styles/research.css'
 import './styles/explore.css'
+import './styles/models.css'
 
 import { AppProvider, useApp } from './state/AppState'
 import { useHashRoute, type ViewId } from './lib/router'
@@ -16,6 +17,7 @@ import { OverviewView } from './views/OverviewView'
 import { DatasetView } from './views/DatasetView'
 import { StudyView } from './views/StudyView'
 import { ExploreView } from './views/ExploreView'
+import { ModelLabView } from './views/ModelLabView'
 import { AuditView } from './views/AuditView'
 import { EvidenceView } from './views/EvidenceView'
 import { ComparisonView } from './views/ComparisonView'
@@ -29,6 +31,7 @@ const STAGE_LABEL: Record<ViewId, string> = {
   audit: 'Audit results',
   study: 'Study',
   explore: 'Explore',
+  models: 'Model Lab',
   evidence: 'Evidence',
   comparison: 'Compare',
   export: 'Export',
@@ -47,6 +50,7 @@ const NEXT_GUIDANCE: Record<ViewId, string> = {
   evidence: 'Evidence belongs to the selected finding; the full audit lives in Audit results.',
   study: 'Study metadata is optional context. Explore the dataset, or run the audit from Data.',
   explore: 'Selections are analysis context, not findings. Inspect them, run the audit, or compare.',
+  models: 'A statistical fit describes the analysed rows; it does not prove predictive validity.',
   comparison: 'A comparison shows consequences, not a winner. Inspect evidence or export the run.',
   export: 'Exports contain the runs you actually executed; no dossier report exists in this stage.',
 }
@@ -65,6 +69,10 @@ const NEXT_ACTIONS: Partial<Record<ViewId, Array<{ label: string; view: ViewId }
   explore: [
     { label: 'Run the audit', view: 'audit' },
     { label: 'Compare splits', view: 'comparison' },
+  ],
+  models: [
+    { label: 'Run the audit', view: 'audit' },
+    { label: 'Explore data', view: 'explore' },
   ],
   comparison: [
     { label: 'Audit results', view: 'audit' },
@@ -107,6 +115,7 @@ function Shell() {
         <ExploreView onNavigate={navigate} />
       </ExploreProvider>
     ) :
+    view === 'models' ? <ModelLabView onNavigate={navigate} /> :
     view === 'audit' ? <AuditView onNavigate={navigate} /> :
     view === 'evidence' ? <EvidenceView onNavigate={navigate} /> :
     view === 'comparison' ? <ComparisonView onNavigate={navigate} /> :
@@ -123,8 +132,9 @@ function Shell() {
     ...(dataset ? [{ id: 'audit' as ViewId, label: 'Audit results', step: 3 }] : []),
     ...(dataset ? [{ id: 'study' as ViewId, label: 'Study', step: 4 }] : []),
     ...(dataset ? [{ id: 'explore' as ViewId, label: 'Explore', step: 5 }] : []),
-    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 6 }] : []),
-    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 7 }] : []),
+    ...(dataset ? [{ id: 'models' as ViewId, label: 'Model Lab', step: 6 }] : []),
+    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 7 }] : []),
+    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 8 }] : []),
   ]
 
   return (
@@ -147,7 +157,7 @@ function Shell() {
                 </svg>
               </span>
               <span className="app-header__title">SplitScope</span>
-              <span className="app-header__tagline">— leakage assurance workbench · audit · study · explore · compare</span>
+              <span className="app-header__tagline">— research workbench · audit · study · explore · model · compare</span>
             </button>
             {busyLabel ? (
               <p className="app-header__meta" role="status" aria-live="polite">

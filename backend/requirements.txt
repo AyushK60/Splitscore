@@ -16,5 +16,9 @@ pandas==3.0.6
 numpy==2.4.6
 scikit-learn==1.9.1
 
+# S6 statistical inference (OLS, logistic regression). Every coefficient, standard
+# error, interval and p-value reported by the Model Lab comes from statsmodels.
+statsmodels==0.15.0
+
 # HTTP client used by the test suite (TestClient) and by scripts/evaluate_checks.py
 httpx==0.28.1

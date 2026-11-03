@@ -1,0 +1,318 @@
+/* S6 Model Lab — statistical workbench.
+   Uses the S5 workspace tokens; the layout is a three-region instrument at
+   desktop width and a single column below 1200px. No new palette. */
+
+.mlab {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mlab__grid {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr) 300px;
+  gap: 14px;
+  align-items: start;
+}
+
+.mlab__controls,
+.mlab__results,
+.mlab__context {
+  border: 1px solid var(--rs-line);
+  border-radius: 3px;
+  background: var(--rs-surface);
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.mlab__results {
+  padding: 16px 20px;
+}
+
+.mlab__context {
+  font-size: 12px;
+}
+
+.mlab__group {
+  border: 0;
+  border-top: 1px solid var(--rs-line);
+  margin: 0 0 14px;
+  padding: 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mlab__group:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.mlab__group legend {
+  font: 600 10px/1.3 var(--rs-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rs-soft);
+  padding: 0;
+}
+
+.mlab__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font: 600 10px/1.3 var(--rs-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rs-soft);
+}
+
+.mlab__field .xselect {
+  width: 100%;
+  text-transform: none;
+  letter-spacing: 0;
+  font: 400 12px/1.4 var(--sans);
+}
+
+.mlab__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 12px/1.4 var(--sans);
+  color: var(--rs-ink);
+}
+
+.mlab__hint {
+  margin: 0;
+  font: 400 10.5px/1.55 var(--rs-mono);
+  color: var(--rs-soft);
+}
+
+.mlab__hint--warn {
+  color: var(--rs-bad);
+}
+
+.mlab__run {
+  width: 100%;
+}
+
+.mlab__placeholder {
+  border: 1px dashed var(--rs-line-strong);
+  padding: 22px;
+  color: var(--rs-soft);
+  font: 400 12.5px/1.65 var(--rs-mono);
+}
+
+.mlab__placeholdertitle {
+  margin: 0 0 6px;
+  color: var(--rs-ink);
+  font-weight: 600;
+}
+
+.mlab__resulthead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1px solid var(--rs-line);
+  padding-bottom: 10px;
+}
+
+.mlab__formula {
+  margin: 0;
+  font: 600 14px/1.4 var(--rs-mono);
+  color: var(--rs-ink);
+  overflow-wrap: anywhere;
+}
+
+.mlab__meta {
+  margin: 3px 0 0;
+  font: 400 10.5px/1.5 var(--rs-mono);
+  color: var(--rs-soft);
+}
+
+.mlab__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+.mlab__stat {
+  border: 1px solid var(--rs-line);
+  background: var(--rs-paper);
+  padding: 7px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mlab__statlabel {
+  font: 500 9px/1.3 var(--rs-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rs-soft);
+}
+
+.mlab__statvalue {
+  font: 600 14px/1.2 var(--rs-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--rs-ink);
+}
+
+.mlab__h2 {
+  font: 600 10px/1.4 var(--rs-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rs-soft);
+  margin: 16px 0 6px;
+}
+
+.mlab__tablewrap {
+  overflow-x: auto;
+  border: 1px solid var(--rs-line);
+}
+
+.mlab__table {
+  border-collapse: collapse;
+  width: 100%;
+  font: 400 12px/1.45 var(--rs-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.mlab__table caption {
+  caption-side: top;
+  text-align: left;
+  padding: 6px 8px;
+  font: 400 10.5px/1.5 var(--rs-mono);
+  color: var(--rs-soft);
+}
+
+.mlab__table th,
+.mlab__table td {
+  border-bottom: 1px solid var(--rs-line);
+  padding: 6px 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.mlab__table thead th {
+  background: var(--rs-paper);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rs-soft);
+}
+
+.mlab__table .num {
+  text-align: right;
+}
+
+.mlab__table tbody tr:last-child th,
+.mlab__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.mlab__table--compact {
+  font-size: 11px;
+}
+
+.mlab__figure {
+  margin: 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mlab__figure figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.mlab__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rs-line);
+  background: var(--rs-paper);
+}
+
+.mlab__facts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  margin: 0 0 8px;
+}
+
+.mlab__facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px dotted var(--rs-line);
+  padding-bottom: 3px;
+}
+
+.mlab__facts dt {
+  font: 500 10px/1.4 var(--rs-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rs-soft);
+  margin: 0;
+}
+
+.mlab__facts dd {
+  margin: 0;
+  font: 500 11px/1.4 var(--rs-mono);
+  color: var(--rs-ink);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.mlab__warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mlab__warnings .callout {
+  padding: 7px 9px;
+  font-size: 11px;
+}
+
+.mlab__warnings .callout__title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mlab__coding {
+  margin: 0;
+  padding-left: 16px;
+  font: 400 11px/1.6 var(--rs-mono);
+  color: var(--rs-ink-soft, var(--rs-ink));
+}
+
+.mlab__details {
+  margin: 6px 0 0;
+  font: 400 11px/1.5 var(--rs-mono);
+  overflow-x: auto;
+  max-height: 220px;
+  background: var(--bg-sunken);
+  padding: 8px;
+}
+
+@media (max-width: 1300px) {
+  .mlab__grid {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+  .mlab__context {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .mlab__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

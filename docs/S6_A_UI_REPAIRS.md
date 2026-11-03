@@ -228,6 +228,14 @@ Evidence: `docs/screenshots/s6/after/pc-help.png`.
 
 ## Honest limitations
 
+## S6-B update to the stage order
+
+S6-B inserted the Model Lab after Explore, so the current primary path is
+Start 1 · Data 2 · Audit results 3 · Study 4 · Explore 5 · **Model Lab 6** ·
+Compare 7 · Export 8. The S6-A ordering rule is unchanged — the audit is still
+the third stage and is still reachable directly from Data; Study and Explore
+remain optional. The S6-A browser test now asserts the extended sequence.
+
 * Contrast is computed for the normal (non-forced-colours) rendering. Windows
   High Contrast / `forced-colors` was not exercised; the app's colours are
   author-defined, so forced-colours mode will substitute system colours.

@@ -271,3 +271,26 @@ export const exploreApi = {
   rows: (datasetId: string, ids: string[], columns?: string[]) =>
     request<RowsResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/explore/rows`, postInit({ ids, columns })),
 }
+
+// --------------------------------------------------------------------------
+// S6 Model Lab — statistical workbench
+// --------------------------------------------------------------------------
+
+import type {
+  ModelRunListResponse,
+  StatisticalModelResult,
+  StatisticsRequest,
+} from './types'
+
+export const modelsApi = {
+  fitStatistics: (datasetId: string, body: StatisticsRequest) =>
+    request<StatisticalModelResult>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/models/statistics`,
+      postInit(body),
+    ),
+
+  runs: (datasetId: string) =>
+    request<ModelRunListResponse>(`/api/datasets/${encodeURIComponent(datasetId)}/models/runs`),
+
+  runExportPath: (runId: string) => `/api/models/runs/${encodeURIComponent(runId)}/export`,
+}

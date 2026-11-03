@@ -34,7 +34,7 @@ from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-RunKind = Literal["audit", "comparison"]
+RunKind = Literal["audit", "comparison", "model"]
 
 ASSIGNMENT_LIMIT_MULTIPLIER = 8
 
