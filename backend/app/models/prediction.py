@@ -34,6 +34,7 @@ from sklearn.dummy import DummyClassifier, DummyRegressor
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge
+from scipy import stats as scipy_stats
 from sklearn.metrics import (
     accuracy_score,
     average_precision_score,
@@ -41,6 +42,7 @@ from sklearn.metrics import (
     confusion_matrix,
     mean_absolute_error,
     mean_squared_error,
+    precision_recall_curve,
     r2_score,
     roc_auc_score,
     roc_curve,
@@ -89,6 +91,12 @@ MAX_CLASSES = 20
 MAX_CATEGORIES = 30
 MAX_TEST_PREDICTIONS = 2_000
 MAX_ROC_POINTS = 100
+MAX_QQ_POINTS = 200
+MAX_INFLUENCE_POINTS = 500
+MAX_IMPORTANCE_ROWS = 2_000
+MAX_IMPORTANCE_PREDICTORS = 20
+IMPORTANCE_REPEATS = 5
+Z_95 = 1.959963984540054
 MIN_FIT_ROWS = 20
 MIN_VALIDATION_ROWS = 5
 MIN_TEST_ROWS = 5
@@ -118,6 +126,35 @@ def _role_column(roles: dict[str, list[str]], role: str) -> str | None:
         if role in assigned:
             return column
     return None
+
+
+def _wilson_interval(successes: int, total: int, z: float = Z_95) -> tuple[float | None, float | None]:
+    """Wilson score interval for a binomial proportion.
+
+    Used only for descriptive held-out accuracy. It is not a causal interval and
+    it does not adjust for multiple subgroup comparisons.
+    """
+    if total <= 0:
+        return None, None
+    proportion = successes / total
+    denominator = 1.0 + z * z / total
+    centre = (proportion + z * z / (2.0 * total)) / denominator
+    margin = (
+        z
+        * math.sqrt(proportion * (1.0 - proportion) / total + z * z / (4.0 * total * total))
+        / denominator
+    )
+    return max(0.0, centre - margin), min(1.0, centre + margin)
+
+
+def _term_label(raw: str, categorical_columns: list[str]) -> str:
+    """Turn a ColumnTransformer output name into a readable model term."""
+    name = raw.split("__", 1)[-1]
+    for column in categorical_columns:
+        prefix = f"{column}_"
+        if name.startswith(prefix):
+            return f"{column}={name[len(prefix):]}"
+    return name
 
 
 def _missing_mask(raw: pd.Series) -> np.ndarray:
@@ -327,7 +364,12 @@ def _carve_validation(
 
 
 def _classification_metrics(
-    y_true: np.ndarray, y_pred: np.ndarray, probabilities: np.ndarray | None, labels: list[str]
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    probabilities: np.ndarray | None,
+    labels: list[str],
+    *,
+    positive_index: int = 1,
 ) -> dict[str, Any]:
     matrix = confusion_matrix(y_true, y_pred, labels=list(range(len(labels))))
     support = matrix.sum(axis=1)
@@ -371,15 +413,22 @@ def _classification_metrics(
             }
         )
 
+    binary = len(labels) == 2
+    positive_count = int(np.sum(y_true == positive_index)) if binary else None
+    negative_count = int(total - positive_count) if positive_count is not None else None
+    prevalence = (positive_count / total) if positive_count is not None and total else None
     roc_auc: float | None = None
+    average_precision: float | None = None
     pr_auc: float | None = None
     roc_points: dict[str, Any] | None = None
-    if len(labels) == 2 and probabilities is not None and len(present) == 2:
-        positive = probabilities
+    pr_points: dict[str, Any] | None = None
+    if binary and probabilities is not None and len(present) == 2:
+        y_binary = (y_true == positive_index).astype(int)
         try:
-            roc_auc = float(roc_auc_score(y_true, positive))
-            pr_auc = float(average_precision_score(y_true, positive))
-            fpr, tpr, thresholds = roc_curve(y_true, positive)
+            roc_auc = float(roc_auc_score(y_binary, probabilities))
+            average_precision = float(average_precision_score(y_binary, probabilities))
+            pr_auc = average_precision
+            fpr, tpr, thresholds = roc_curve(y_binary, probabilities)
             # sklearn starts the threshold grid at +inf. JSON has no infinity,
             # so keep only finite thresholds; the plotted curve is unaffected.
             finite = [index for index, value in enumerate(thresholds) if math.isfinite(float(value))]
@@ -391,16 +440,31 @@ def _classification_metrics(
                 "thresholds": [round(float(thresholds[index]), 6) for index in kept],
                 "auc": roc_auc,
             }
+            precision_values, recall_values, _ = precision_recall_curve(y_binary, probabilities)
+            stride = max(1, math.ceil(len(precision_values) / MAX_ROC_POINTS))
+            kept = sorted(
+                set(range(0, len(precision_values), stride)) | {len(precision_values) - 1}
+            )
+            pr_points = {
+                "precision": [round(float(precision_values[index]), 6) for index in kept],
+                "recall": [round(float(recall_values[index]), 6) for index in kept],
+                "average_precision": average_precision,
+                "positive_count": positive_count,
+                "negative_count": negative_count,
+                "prevalence": prevalence,
+                "n_points": len(kept),
+                "method": "sklearn.metrics.precision_recall_curve on the sealed test partition",
+            }
         except ValueError as exc:
-            undefined.append({"metric": "ROC-AUC", "reason": str(exc)})
+            undefined.append({"metric": "ROC-AUC / precision-recall", "reason": str(exc)})
     else:
         reason = (
-            "ROC-AUC requires a binary outcome and probabilities"
-            if len(labels) != 2
+            "ROC and precision-recall curves require a binary outcome and probabilities"
+            if not binary
             else "both classes must be present in the test partition"
         )
         undefined.append({"metric": "ROC-AUC", "reason": reason})
-        undefined.append({"metric": "PR-AUC", "reason": reason})
+        undefined.append({"metric": "PR-AUC / average precision", "reason": reason})
 
     return {
         "accuracy": float(accuracy_score(y_true, y_pred)),
@@ -410,7 +474,16 @@ def _classification_metrics(
         "per_class": per_class,
         "roc_auc": roc_auc,
         "pr_auc": pr_auc,
+        "average_precision": average_precision,
+        "pr_auc_definition": (
+            "PR-AUC is average precision: sum over recall thresholds of "
+            "(recall_n - recall_n-1) * precision_n. It is not trapezoidal area."
+        ),
+        "prevalence": prevalence,
+        "positive_count": positive_count,
+        "negative_count": negative_count,
         "roc_curve": roc_points,
+        "pr_curve": pr_points,
         "undefined": undefined,
         "n": total,
     }
@@ -449,23 +522,411 @@ def _summary(values: np.ndarray) -> dict[str, Any]:
     }
 
 
-def _calibration(y_true: np.ndarray, probabilities: np.ndarray, bins: int = 10) -> list[dict[str, Any]]:
+def _calibration(
+    y_binary: np.ndarray, probabilities: np.ndarray, bins: int = 10
+) -> list[dict[str, Any]]:
     edges = np.linspace(0.0, 1.0, bins + 1)
     slots = np.clip(np.digitize(probabilities, edges[1:-1], right=True), 0, bins - 1)
     entries: list[dict[str, Any]] = []
     for index in range(bins):
         mask = slots == index
         count = int(mask.sum())
+        successes = int(np.sum(y_binary[mask] == 1)) if count else 0
+        low, high = _wilson_interval(successes, count)
         entries.append(
             {
                 "bin_low": round(float(edges[index]), 3),
                 "bin_high": round(float(edges[index + 1]), 3),
                 "count": count,
                 "mean_predicted": float(probabilities[mask].mean()) if count else None,
-                "observed_rate": float(y_true[mask].mean()) if count else None,
+                "observed_rate": float(y_binary[mask].mean()) if count else None,
+                "observed_rate_low": low,
+                "observed_rate_high": high,
             }
         )
     return entries
+
+
+def _calibration_summary(
+    entries: list[dict[str, Any]],
+    y_binary: np.ndarray,
+    probabilities: np.ndarray,
+) -> dict[str, Any]:
+    n = int(y_binary.size)
+    finite = np.isfinite(probabilities)
+    brier = float(np.mean((probabilities[finite] - y_binary[finite]) ** 2)) if finite.any() else None
+    ece = 0.0
+    mce = 0.0
+    used = 0
+    for entry in entries:
+        count = int(entry["count"])
+        if not count or entry["mean_predicted"] is None or entry["observed_rate"] is None:
+            continue
+        gap = abs(float(entry["observed_rate"]) - float(entry["mean_predicted"]))
+        ece += (count / n) * gap if n else 0.0
+        mce = max(mce, gap)
+        used += count
+    return {
+        "n": n,
+        "bins": len(entries),
+        "prevalence": float(np.mean(y_binary)) if n else None,
+        "brier_score": brier,
+        "expected_calibration_error": float(ece),
+        "max_calibration_error": float(mce),
+        "rows_in_bins": used,
+        "method": (
+            "Ten equal-width probability bins. ECE is the count-weighted mean absolute gap "
+            "between observed positive rate and mean predicted probability; MCE is the largest "
+            "non-empty bin gap. Brier score is the mean squared probability error."
+        ),
+        "note": (
+            "Calibration describes this sealed test partition. Empty bins are not filled in, and "
+            "per-bin intervals are Wilson 95% intervals."
+        ),
+    }
+
+
+def _qq(residual: np.ndarray) -> dict[str, Any]:
+    """Normal Q–Q coordinates for regression test residuals.
+
+    Raw residuals are ordered and plotted against normal plotting positions
+    ``(i - 0.5) / n``. The reference line uses the residual mean and standard
+    deviation. This is a visual check, not a formal normality test.
+    """
+    finite = residual[np.isfinite(residual)]
+    n = int(finite.size)
+    if n < 3:
+        return {
+            "applicable": False,
+            "reason": "Q–Q needs at least three finite test residuals.",
+            "n": n,
+        }
+    ordered = np.sort(finite)
+    mean = float(np.mean(ordered))
+    sd = float(np.std(ordered, ddof=1))
+    if not math.isfinite(sd) or sd <= 0:
+        return {
+            "applicable": False,
+            "reason": "Q–Q is undefined because the residuals have zero variance.",
+            "n": n,
+        }
+    probabilities = (np.arange(1, n + 1) - 0.5) / n
+    theoretical = scipy_stats.norm.ppf(probabilities)
+    if not np.all(np.isfinite(theoretical)):
+        return {"applicable": False, "reason": "Q–Q quantiles were not finite.", "n": n}
+    stride = max(1, math.ceil(n / MAX_QQ_POINTS))
+    positions = sorted(set(range(0, n, stride)) | {n - 1})
+    return {
+        "applicable": True,
+        "partition": "test",
+        "n": n,
+        "plotted_points": len(positions),
+        "theoretical": [round(float(theoretical[index]), 6) for index in positions],
+        "sample": [round(float(ordered[index]), 6) for index in positions],
+        "reference_intercept": round(mean, 6),
+        "reference_slope": round(sd, 6),
+        "method": (
+            "Normal Q–Q of raw test residuals; plotting positions (i − 0.5)/n; "
+            "reference line mean + SD × theoretical quantile."
+        ),
+        "note": (
+            "Residual normality is an assumption of classical OLS inference, not a requirement "
+            "for predictive accuracy. Points are sampled only when the count exceeds "
+            f"{MAX_QQ_POINTS}."
+        ),
+    }
+
+
+def _linear_influence(
+    *,
+    pipeline: Pipeline,
+    design_frame: pd.DataFrame,
+    y: np.ndarray,
+    indices: np.ndarray,
+    dataset: Dataset,
+    task: Task,
+    family: str,
+    categorical_columns: list[str],
+) -> dict[str, Any]:
+    """Leverage and Cook's distance for the selected OLS refit.
+
+    These are in-sample regression diagnostics on the refit rows, not held-out
+    performance. The formulas assume an ordinary least-squares fit with an
+    intercept and independent, homoskedastic errors. They are never computed for
+    dummy, ridge, random-forest or classification models.
+    """
+    if task != "regression":
+        return {
+            "applicable": False,
+            "reason": "Leverage and Cook's distance are regression diagnostics only.",
+        }
+    if family != "linear":
+        return {
+            "applicable": False,
+            "reason": (
+                "Leverage and Cook's distance are reported only for the unpenalised OLS "
+                f"candidate; the selected model is {family!r}."
+            ),
+        }
+    try:
+        preprocessor = pipeline.named_steps["pre"]
+        model = pipeline.named_steps["model"]
+        design = np.asarray(preprocessor.transform(design_frame.iloc[indices]), dtype=float)
+    except Exception as exc:  # noqa: BLE001 - a diagnostic must not crash the fit
+        return {"applicable": False, "reason": f"The transformed design could not be built: {exc}"}
+    if design.ndim != 2:
+        return {"applicable": False, "reason": "The transformed design is not two-dimensional."}
+    if bool(getattr(model, "fit_intercept", False)):
+        design = np.column_stack([np.ones(design.shape[0]), design])
+    n = int(design.shape[0])
+    rank = int(np.linalg.matrix_rank(design))
+    parameters = int(design.shape[1])
+    if rank < parameters:
+        return {
+            "applicable": False,
+            "reason": (
+                f"The refit design is rank-deficient (rank {rank} < {parameters} parameters), "
+                "so leverage and Cook's distance are not defined."
+            ),
+        }
+    residual_df = n - rank
+    if residual_df <= 0:
+        return {
+            "applicable": False,
+            "reason": "The refit has no residual degrees of freedom.",
+        }
+    beta = np.asarray(model.coef_, dtype=float)
+    if bool(getattr(model, "fit_intercept", False)):
+        beta = np.concatenate([[float(model.intercept_)], beta])
+    y_final = np.asarray(y, dtype=float)[indices]
+    if not np.all(np.isfinite(y_final)) or not np.all(np.isfinite(beta)):
+        return {"applicable": False, "reason": "The refit coefficients or outcome were not finite."}
+    fitted = design @ beta
+    residual = y_final - fitted
+    rss = float(np.sum(residual**2))
+    mse = rss / residual_df
+    if not math.isfinite(mse) or mse <= 0:
+        return {
+            "applicable": False,
+            "reason": "The refit residual variance is zero or non-finite.",
+        }
+    xtx_inv = np.linalg.pinv(design.T @ design)
+    hat = np.einsum("ij,jk,ik->i", design, xtx_inv, design)
+    if np.any(hat >= 1.0 - 1e-12):
+        return {
+            "applicable": False,
+            "reason": "At least one refit row has leverage numerically equal to 1.",
+        }
+    leverage = np.clip(hat, 0.0, 1.0 - 1e-12)
+    denominator = 1.0 - leverage
+    standardized = residual / np.sqrt(mse * denominator)
+    cooks = (residual**2 / (parameters * mse)) * (leverage / denominator**2)
+    if not (
+        np.all(np.isfinite(standardized))
+        and np.all(np.isfinite(cooks))
+        and np.all(np.isfinite(leverage))
+    ):
+        return {"applicable": False, "reason": "Influence values were not finite."}
+
+    terms = ["const"] if bool(getattr(model, "fit_intercept", False)) else []
+    try:
+        feature_names = list(preprocessor.get_feature_names_out())
+    except Exception:
+        feature_names = [f"term_{index}" for index in range(design.shape[1] - len(terms))]
+    terms.extend(_term_label(str(name), categorical_columns) for name in feature_names)
+    if len(terms) != design.shape[1]:
+        return {"applicable": False, "reason": "The design terms could not be aligned to coefficients."}
+
+    covariance = mse * xtx_inv
+    variances = np.clip(np.diag(covariance), 0.0, None)
+    standard_errors = np.sqrt(variances)
+    critical = float(scipy_stats.t.ppf(0.975, residual_df))
+    coefficients: list[dict[str, Any]] = []
+    for index, term in enumerate(terms):
+        estimate = float(beta[index])
+        se = float(standard_errors[index])
+        if not math.isfinite(se) or se <= 0:
+            coefficients.append(
+                {
+                    "term": term,
+                    "estimate": estimate,
+                    "std_error": None,
+                    "ci_low": None,
+                    "ci_high": None,
+                    "statistic": None,
+                    "p_value": None,
+                }
+            )
+            continue
+        statistic = estimate / se
+        p_value = float(2.0 * scipy_stats.t.sf(abs(statistic), residual_df))
+        coefficients.append(
+            {
+                "term": term,
+                "estimate": estimate,
+                "std_error": se,
+                "ci_low": estimate - critical * se,
+                "ci_high": estimate + critical * se,
+                "statistic": statistic,
+                "p_value": p_value,
+            }
+        )
+
+    points: list[dict[str, Any]] = []
+    for position, index in enumerate(indices):
+        points.append(
+            {
+                "row_id": dataset.row_ids[int(index)],
+                "fitted": float(fitted[position]),
+                "residual": float(residual[position]),
+                "leverage": float(leverage[position]),
+                "standardized_residual": float(standardized[position]),
+                "cooks_distance": float(cooks[position]),
+            }
+        )
+    order = np.argsort(-cooks, kind="stable")
+    top_indices = order[:15]
+    stride = max(1, math.ceil(n / MAX_INFLUENCE_POINTS))
+    keep = sorted(set(range(0, n, stride)) | set(int(index) for index in top_indices))
+    kept_points = [points[index] for index in keep[:MAX_INFLUENCE_POINTS]]
+    leverage_2p = 2.0 * parameters / n
+    leverage_3p = 3.0 * parameters / n
+    cooks_4n = 4.0 / n
+    condition_number = float(np.linalg.cond(design))
+    return {
+        "applicable": True,
+        "partition": "fit + validation (refit rows)",
+        "model": "OLS linear regression",
+        "n": n,
+        "parameters": parameters,
+        "residual_df": residual_df,
+        "rank": rank,
+        "condition_number": condition_number if math.isfinite(condition_number) else None,
+        "thresholds": {
+            "leverage_2p_over_n": leverage_2p,
+            "leverage_3p_over_n": leverage_3p,
+            "cooks_4_over_n": cooks_4n,
+            "cooks_1": 1.0,
+        },
+        "counts": {
+            "above_leverage_2p": int(np.sum(leverage > leverage_2p)),
+            "above_leverage_3p": int(np.sum(leverage > leverage_3p)),
+            "above_cooks_4_over_n": int(np.sum(cooks > cooks_4n)),
+            "above_cooks_1": int(np.sum(cooks > 1.0)),
+        },
+        "max_leverage": float(np.max(leverage)),
+        "max_cooks": float(np.max(cooks)),
+        "coefficients": coefficients,
+        "points": kept_points,
+        "top_influence": [points[int(index)] for index in top_indices],
+        "method": (
+            "Ordinary least-squares leverage h_ii = x_iᵀ(XᵀX)⁻¹x_i and Cook's distance "
+            "D_i = r_i² h_i / (p · MSE · (1 − h_i)²), computed on the transformed refit design."
+        ),
+        "note": (
+            "In-sample OLS diagnostics on the refit (fit + validation) rows. They describe "
+            "model influence and classical coefficient uncertainty, not held-out accuracy or "
+            "causal effects. Ridge, tree and dummy models are not eligible."
+        ),
+    }
+
+
+def _permutation_importance(
+    *,
+    pipeline: Pipeline,
+    design_frame: pd.DataFrame,
+    y_test: np.ndarray,
+    predictors: tuple[str, ...],
+    task: Task,
+    seed: int,
+    baseline_prediction: np.ndarray,
+    family: str,
+) -> dict[str, Any]:
+    """Descriptive test-partition permutation importance.
+
+    Computed after the single sealed-test evaluation. It is never used for model
+    selection. Correlated predictors can share or mask importance, and the values
+    are not causal effects.
+    """
+    if family == "baseline":
+        return {
+            "applicable": False,
+            "reason": "Permutation importance is not informative for a dummy baseline.",
+        }
+    n = int(design_frame.shape[0])
+    if n > MAX_IMPORTANCE_ROWS:
+        return {
+            "applicable": False,
+            "reason": (
+                f"Permutation importance is limited to {MAX_IMPORTANCE_ROWS} test rows for "
+                f"interactive use; this test partition has {n}."
+            ),
+        }
+    if len(predictors) > MAX_IMPORTANCE_PREDICTORS:
+        return {
+            "applicable": False,
+            "reason": (
+                f"Permutation importance is limited to {MAX_IMPORTANCE_PREDICTORS} predictors; "
+                f"{len(predictors)} were supplied."
+            ),
+        }
+    if task == "classification":
+        baseline_metric = float(balanced_accuracy_score(y_test, baseline_prediction))
+        metric = "balanced_accuracy_drop"
+    else:
+        baseline_metric = float(math.sqrt(mean_squared_error(y_test, baseline_prediction)))
+        metric = "rmse_increase"
+    rng = np.random.default_rng(seed + 17)
+    rows: list[dict[str, Any]] = []
+    try:
+        for predictor in predictors:
+            values: list[float] = []
+            for _ in range(IMPORTANCE_REPEATS):
+                frame = design_frame.copy()
+                frame[predictor] = frame[predictor].to_numpy()[rng.permutation(n)]
+                prediction = pipeline.predict(frame)
+                if task == "classification":
+                    score = float(balanced_accuracy_score(y_test, prediction))
+                    values.append(baseline_metric - score)
+                else:
+                    score = float(math.sqrt(mean_squared_error(y_test, prediction)))
+                    values.append(score - baseline_metric)
+            mean = float(np.mean(values))
+            sd = float(np.std(values, ddof=1)) if len(values) > 1 else None
+            rows.append(
+                {
+                    "feature": predictor,
+                    "importance_mean": mean,
+                    "importance_sd": sd,
+                }
+            )
+    except Exception as exc:  # noqa: BLE001
+        return {"applicable": False, "reason": f"Permutation importance failed: {exc}"}
+    if not all(
+        math.isfinite(row["importance_mean"])
+        and (row["importance_sd"] is None or math.isfinite(row["importance_sd"]))
+        for row in rows
+    ):
+        return {"applicable": False, "reason": "Permutation importance was not finite."}
+    rows.sort(key=lambda row: row["importance_mean"], reverse=True)
+    return {
+        "applicable": True,
+        "partition": "test",
+        "n": n,
+        "repeats": IMPORTANCE_REPEATS,
+        "metric": metric,
+        "baseline_score": baseline_metric,
+        "rows": rows,
+        "method": (
+            "Each predictor is permuted within the sealed test partition, "
+            f"{IMPORTANCE_REPEATS} times with a fixed seed; the reported value is the mean "
+            "drop in balanced accuracy or increase in RMSE."
+        ),
+        "note": (
+            "Descriptive only, computed after the single test evaluation and never used for "
+            "selection. Correlated predictors can share or mask importance; not causal."
+        ),
+    }
 
 
 def _subgroups(
@@ -477,6 +938,7 @@ def _subgroups(
     y_pred: np.ndarray,
     labels: list[str] | None,
     task: Task,
+    positive_index: int = 1,
 ) -> dict[str, Any] | None:
     column = config.subgroup_column
     if not column:
@@ -532,6 +994,12 @@ def _subgroups(
         if bool(missing.any()):
             groups.append(("(missing)", np.asarray(missing, dtype=bool)))
 
+    binary = task == "classification" and labels is not None and len(labels) == 2
+    outcome_measure = (
+        ("positive-class rate" if binary else "not defined for multiclass")
+        if task == "classification"
+        else "outcome mean"
+    )
     total = int(test_indices.size)
     rows: list[dict[str, Any]] = []
     for label, mask in groups:
@@ -541,36 +1009,79 @@ def _subgroups(
                 {
                     "group": label,
                     "n": 0,
+                    "metric_denominator": 0,
                     "share": 0.0,
+                    "metric_name": "accuracy" if task == "classification" else "MAE",
                     "metric": None,
+                    "ci_low": None,
+                    "ci_high": None,
+                    "ci_level": 0.95,
+                    "ci_method": None,
+                    "outcome_mean": None,
+                    "outcome_measure": outcome_measure,
+                    "positive_count": None,
+                    "negative_count": None,
                     "warning": "empty subgroup",
                 }
             )
             continue
         truth = y_true[mask]
         prediction = y_pred[mask]
+        warning_parts: list[str] = []
         if task == "classification":
-            metric = float(accuracy_score(truth, prediction))
+            correct = int(np.sum(truth == prediction))
+            metric = correct / n
             metric_name = "accuracy"
+            ci_low, ci_high = _wilson_interval(correct, n)
+            ci_method = "Wilson score interval (95%)"
+            positive_count = int(np.sum(truth == positive_index)) if binary else None
+            negative_count = (n - positive_count) if positive_count is not None else None
+            outcome_mean = (positive_count / n) if positive_count is not None else None
+            correct_value: int | None = correct
         else:
-            metric = float(mean_absolute_error(truth, prediction))
+            absolute_error = np.abs(truth - prediction)
+            metric = float(np.mean(absolute_error))
             metric_name = "MAE"
-        warning = None
+            if n > 1:
+                standard_error = float(np.std(absolute_error, ddof=1) / math.sqrt(n))
+                ci_low = max(0.0, metric - Z_95 * standard_error)
+                ci_high = metric + Z_95 * standard_error
+                ci_method = "Normal approximation for mean absolute error (95%)"
+            else:
+                ci_low = None
+                ci_high = None
+                ci_method = None
+                warning_parts.append("interval undefined: fewer than two rows")
+            positive_count = None
+            negative_count = None
+            outcome_mean = float(np.mean(truth))
+            correct_value = None
         if n < MIN_SUBGROUP_ROWS or n / total < SUBGROUP_SHARE_WARNING:
-            warning = (
+            warning_parts.append(
                 f"small subgroup: {n} test row(s), below "
                 f"{MIN_SUBGROUP_ROWS} rows or {SUBGROUP_SHARE_WARNING:.0%} of the test partition"
             )
-        entry: dict[str, Any] = {
-            "group": label,
-            "n": n,
-            "share": round(n / total, 6) if total else 0.0,
-            "metric_name": metric_name,
-            "metric": metric,
-            "warning": warning,
-        }
-        entry["outcome_mean"] = float(np.mean(truth))
-        rows.append(entry)
+        warning = "; ".join(warning_parts) if warning_parts else None
+        rows.append(
+            {
+                "group": label,
+                "n": n,
+                "metric_denominator": n,
+                "share": round(n / total, 6) if total else 0.0,
+                "metric_name": metric_name,
+                "metric": metric,
+                "ci_low": ci_low,
+                "ci_high": ci_high,
+                "ci_level": 0.95,
+                "ci_method": ci_method,
+                "outcome_mean": outcome_mean,
+                "outcome_measure": outcome_measure,
+                "positive_count": positive_count,
+                "negative_count": negative_count,
+                "correct": correct_value,
+                "warning": warning,
+            }
+        )
 
     return {
         "column": column,
@@ -579,10 +1090,16 @@ def _subgroups(
         "grouped_rows": int(sum(row["n"] for row in rows)),
         "outside_bins": outside,
         "minimum_recommended_rows": MIN_SUBGROUP_ROWS,
+        "interval_level": 0.95,
+        "outcome_measure": outcome_measure,
         "rows": rows,
+        "comparison_note": (
+            "Intervals are unadjusted 95% intervals for single subgroups. They are not "
+            "multiplicity-adjusted, and differences between groups are not causal effects."
+        ),
         "note": (
-            "Subgroup metrics describe predictive error in the sealed test partition. They are not "
-            "causal effect heterogeneity."
+            "Subgroup metrics describe predictive error in the sealed test partition. "
+            "They are not causal effect heterogeneity."
         ),
     }
 
@@ -898,24 +1415,48 @@ def fit_prediction(
         except Exception:
             probabilities = None
 
+    positive_index = 1
+    if config.task == "classification":
+        labels_for_positive = outcome_meta["labels"]
+        if len(labels_for_positive) == 2 and config.positive_level:
+            positive_index = int(
+                np.where(np.array(labels_for_positive) == config.positive_level)[0][0]
+            )
+        outcome_meta["positive_class"] = labels_for_positive[positive_index]
+        outcome_meta["positive_index"] = positive_index
+
+    y_test = y[test_indices].astype(int) if config.task == "classification" else y[test_indices].astype(float)
+    importance = _permutation_importance(
+        pipeline=final_pipeline,
+        design_frame=X.iloc[test_indices],
+        y_test=y_test,
+        predictors=config.predictors,
+        task=config.task,
+        seed=config.seed,
+        baseline_prediction=test_prediction,
+        family=best["family"],
+    )
+
     if config.task == "classification":
         binary_probabilities: np.ndarray | None = None
         if probabilities is not None and probabilities.ndim == 2 and probabilities.shape[1] == 2:
-            positive_index = (
-                int(np.where(np.array(outcome_meta["labels"]) == config.positive_level)[0][0])
-                if config.positive_level
-                else 1
-            )
             binary_probabilities = probabilities[:, positive_index]
         metrics = _classification_metrics(
-            y[test_indices].astype(int),
+            y_test,
             test_prediction.astype(int),
             binary_probabilities,
             outcome_meta["labels"],
+            positive_index=positive_index,
         )
+        y_binary = (y_test == positive_index).astype(int)
         calibrated = (
-            _calibration(y[test_indices].astype(float), binary_probabilities)
+            _calibration(y_binary, binary_probabilities)
             if binary_probabilities is not None
+            else None
+        )
+        calibration_summary = (
+            _calibration_summary(calibrated, y_binary, binary_probabilities)
+            if calibrated is not None and binary_probabilities is not None
             else None
         )
         predicted_ids = [
@@ -925,20 +1466,39 @@ def fit_prediction(
             dataset, test_indices, y, test_prediction, binary_probabilities, outcome_meta["labels"]
         )
         diagnostics = {
+            "partition": "test",
             "confusion_matrix": metrics["confusion_matrix"],
             "per_class": metrics["per_class"],
             "roc_curve": metrics["roc_curve"],
+            "pr_curve": metrics["pr_curve"],
             "calibration": calibrated,
+            "calibration_summary": calibration_summary,
+            "permutation_importance": importance,
             "errors": error_rows,
             "error_count": len(predicted_ids),
             "undefined": metrics["undefined"],
         }
     else:
-        metrics = _regression_metrics(y[test_indices].astype(float), test_prediction.astype(float))
-        residuals = y[test_indices].astype(float) - test_prediction.astype(float)
+        metrics = _regression_metrics(y_test, test_prediction.astype(float))
+        residuals = y_test - test_prediction.astype(float)
+        qq = _qq(residuals)
+        influence = _linear_influence(
+            pipeline=final_pipeline,
+            design_frame=X,
+            y=y,
+            indices=final_indices,
+            dataset=dataset,
+            task=config.task,
+            family=best["family"],
+            categorical_columns=categorical_columns,
+        )
         diagnostics = {
+            "partition": "test",
             "residual_summary": metrics["residual_summary"],
             "sample": _regression_sample(dataset, test_indices, y, test_prediction, residuals),
+            "qq": qq,
+            "influence": influence,
+            "permutation_importance": importance,
             "undefined": metrics["undefined"],
         }
 
@@ -950,6 +1510,7 @@ def fit_prediction(
         y_pred=test_prediction,
         labels=outcome_meta.get("labels"),
         task=config.task,
+        positive_index=positive_index,
     )
 
     # ---- preprocessing provenance (learned on fit/validation only) ---------- #
@@ -1012,6 +1573,40 @@ def fit_prediction(
                 "code": "candidate_estimator_failed",
                 "severity": "low",
                 "message": "At least one candidate estimator failed to fit; see the candidate table.",
+            }
+        )
+    if config.task == "regression" and diagnostics.get("influence", {}).get("applicable"):
+        warnings.append(
+            {
+                "code": "influence_is_in_sample",
+                "severity": "low",
+                "message": (
+                    "Leverage and Cook's distance are in-sample diagnostics on the OLS refit "
+                    "rows, not held-out performance. Ridge, tree and dummy models are not eligible."
+                ),
+            }
+        )
+    if diagnostics.get("permutation_importance", {}).get("applicable"):
+        warnings.append(
+            {
+                "code": "permutation_importance_is_descriptive",
+                "severity": "low",
+                "message": (
+                    "Permutation importance was computed on the sealed test partition after the "
+                    "single evaluation. It is descriptive, not causal, and correlated predictors "
+                    "can share or mask importance."
+                ),
+            }
+        )
+    if subgroup and any(row.get("warning") for row in subgroup["rows"]):
+        warnings.append(
+            {
+                "code": "subgroup_uncertainty",
+                "severity": "medium",
+                "message": (
+                    "At least one subgroup is small or empty. Intervals are unadjusted and "
+                    "between-group differences are not causal effects."
+                ),
             }
         )
     warnings.append(

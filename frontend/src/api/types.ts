@@ -1193,15 +1193,160 @@ export interface PredictionPerClass {
   accuracy: number | null
 }
 
+export interface PredictionPrCurve {
+  precision: number[]
+  recall: number[]
+  average_precision: number | null
+  positive_count: number | null
+  negative_count: number | null
+  prevalence: number | null
+  n_points: number
+  method: string
+}
+
+export interface PredictionCalibrationEntry {
+  bin_low: number
+  bin_high: number
+  count: number
+  mean_predicted: number | null
+  observed_rate: number | null
+  observed_rate_low?: number | null
+  observed_rate_high?: number | null
+}
+
+export interface PredictionCalibrationSummary {
+  n: number
+  bins: number
+  prevalence: number | null
+  brier_score: number | null
+  expected_calibration_error: number
+  max_calibration_error: number
+  rows_in_bins: number
+  method: string
+  note: string
+}
+
+export interface PredictionQq {
+  applicable: boolean
+  reason?: string
+  partition?: string
+  n: number
+  plotted_points?: number
+  theoretical?: number[]
+  sample?: number[]
+  reference_intercept?: number
+  reference_slope?: number
+  method?: string
+  note?: string
+}
+
+export interface PredictionInfluencePoint {
+  row_id: string
+  fitted: number
+  residual: number
+  leverage: number
+  standardized_residual: number
+  cooks_distance: number
+}
+
+export interface PredictionInfluenceCoefficient {
+  term: string
+  estimate: number
+  std_error: number | null
+  ci_low: number | null
+  ci_high: number | null
+  statistic: number | null
+  p_value: number | null
+}
+
+export interface PredictionInfluence {
+  applicable: boolean
+  reason?: string
+  partition?: string
+  model?: string
+  n?: number
+  parameters?: number
+  residual_df?: number
+  rank?: number
+  condition_number?: number | null
+  thresholds?: Record<string, number>
+  counts?: Record<string, number>
+  max_leverage?: number
+  max_cooks?: number
+  coefficients?: PredictionInfluenceCoefficient[]
+  points?: PredictionInfluencePoint[]
+  top_influence?: PredictionInfluencePoint[]
+  method?: string
+  note?: string
+}
+
+export interface PredictionImportanceRow {
+  feature: string
+  importance_mean: number
+  importance_sd: number | null
+}
+
+export interface PredictionImportance {
+  applicable: boolean
+  reason?: string
+  partition?: string
+  n?: number
+  repeats?: number
+  metric?: string
+  baseline_score?: number
+  rows?: PredictionImportanceRow[]
+  method?: string
+  note?: string
+}
+
+export interface PredictionSubgroupRow {
+  group: string
+  n: number
+  metric_denominator?: number
+  share: number
+  metric_name?: string
+  metric: number | null
+  ci_low?: number | null
+  ci_high?: number | null
+  ci_level?: number
+  ci_method?: string | null
+  outcome_mean?: number
+  outcome_measure?: string
+  positive_count?: number | null
+  negative_count?: number | null
+  correct?: number | null
+  warning: string | null
+}
+
+export interface PredictionSubgroup {
+  column: string
+  partition: 'test'
+  test_rows: number
+  grouped_rows: number
+  outside_bins: number
+  minimum_recommended_rows: number
+  interval_level?: number
+  outcome_measure?: string
+  comparison_note?: string
+  rows: PredictionSubgroupRow[]
+  note: string
+}
+
 export interface PredictionMetrics {
   n: number
   accuracy?: number
   balanced_accuracy?: number | null
   roc_auc?: number | null
   pr_auc?: number | null
+  average_precision?: number | null
+  pr_auc_definition?: string
+  prevalence?: number | null
+  positive_count?: number | null
+  negative_count?: number | null
   classes?: string[]
   confusion_matrix?: number[][]
   per_class?: PredictionPerClass[]
+  pr_curve?: PredictionPrCurve | null
   mae?: number
   rmse?: number
   r2?: number | null
@@ -1247,6 +1392,8 @@ export interface PredictionResult {
     kind: 'classification' | 'regression'
     labels?: string[]
     positive_level?: string | null
+    positive_class?: string
+    positive_index?: number
     class_counts?: Record<string, number>
     mean?: number
     std?: number
@@ -1281,6 +1428,7 @@ export interface PredictionResult {
     n: number
     metrics: PredictionMetrics
     diagnostics: {
+      partition?: string
       confusion_matrix?: number[][]
       per_class?: PredictionPerClass[]
       roc_curve?: {
@@ -1289,13 +1437,12 @@ export interface PredictionResult {
         thresholds: number[]
         auc: number
       } | null
-      calibration?: Array<{
-        bin_low: number
-        bin_high: number
-        count: number
-        mean_predicted: number | null
-        observed_rate: number | null
-      }> | null
+      pr_curve?: PredictionPrCurve | null
+      calibration?: PredictionCalibrationEntry[] | null
+      calibration_summary?: PredictionCalibrationSummary | null
+      qq?: PredictionQq | null
+      influence?: PredictionInfluence | null
+      permutation_importance?: PredictionImportance | null
       errors?: Array<{
         row_id: string
         observed: string
@@ -1331,24 +1478,7 @@ export interface PredictionResult {
       cap: number
     }
   }
-  subgroups: null | {
-    column: string
-    partition: 'test'
-    test_rows: number
-    grouped_rows: number
-    outside_bins: number
-    minimum_recommended_rows: number
-    rows: Array<{
-      group: string
-      n: number
-      share: number
-      metric_name?: string
-      metric: number | null
-      outcome_mean?: number
-      warning: string | null
-    }>
-    note: string
-  }
+  subgroups: PredictionSubgroup | null
   warnings: ModelWarning[]
   versions: Record<string, string>
 }

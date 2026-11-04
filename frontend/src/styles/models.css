@@ -388,3 +388,78 @@
   overflow-wrap: anywhere;
   white-space: normal;
 }
+
+.plab__diagcontext {
+  border-left: 2px solid var(--rs-line-strong);
+  padding-left: 10px;
+}
+
+.plab__pr,
+.plab__reliability,
+.plab__qq,
+.plab__influence {
+  display: block;
+  width: min(100%, 520px);
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.plab__importance td:last-child {
+  width: 42%;
+}
+
+.plab__importancebar {
+  display: block;
+  height: 8px;
+  min-width: 2px;
+  background: var(--rs-teal);
+  border-radius: 1px;
+}
+
+.plab__importancebar--neg {
+  background: var(--rs-line-strong);
+}
+
+.plab__subgroups {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 620px;
+}
+
+.plab__subgroups th,
+.plab__subgroups td {
+  padding-left: 6px;
+  padding-right: 6px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+.plab__subgroups th:nth-child(1) {
+  width: 15%;
+}
+
+.plab__subgroups th:nth-child(2) {
+  width: 6%;
+}
+
+.plab__subgroups th:nth-child(3) {
+  width: 9%;
+}
+
+.plab__subgroups th:nth-child(4) {
+  width: 16%;
+}
+
+.plab__subgroups th:nth-child(5) {
+  width: 20%;
+}
+
+.plab__subgroups th:nth-child(6) {
+  width: 13%;
+}
+
+.plab__subgroups th:nth-child(7) {
+  width: 21%;
+}

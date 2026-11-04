@@ -18,6 +18,14 @@ import type {
   PredictionResult,
   PredictionTask,
 } from '../api/types'
+import {
+  ImportanceSection,
+  InfluenceSection,
+  PrPlot,
+  QqPlot,
+  ReliabilityPlot,
+  SubgroupTable,
+} from '../components/PredictiveDiagnostics'
 import type { ViewId } from '../lib/router'
 import { useApp } from '../state/AppState'
 
@@ -50,6 +58,11 @@ function fmt(value: number | null | undefined, digits = 4): string {
 function pct(value: number | null | undefined): string {
   if (value === null || value === undefined || !Number.isFinite(value)) return '—'
   return `${(value * 100).toFixed(1)}%`
+}
+
+function intervalText(low: number | null | undefined, high: number | null | undefined, format = fmt): string {
+  if (low === null || low === undefined || high === null || high === undefined) return '—'
+  return `${format(low)} – ${format(high)}`
 }
 
 function severityClass(severity: string): string {
@@ -643,7 +656,13 @@ function PredictionReport({ result, onExport }: { result: PredictionResult; onEx
   const metrics = result.evaluation.metrics
   const classification = result.task === 'classification'
   const roc = result.evaluation.diagnostics.roc_curve
+  const pr = result.evaluation.diagnostics.pr_curve ?? metrics.pr_curve ?? null
   const calibration = result.evaluation.diagnostics.calibration
+  const calibrationSummary = result.evaluation.diagnostics.calibration_summary ?? null
+  const nonEmptyCalibrationBins = (calibration ?? []).filter((entry) => entry.count > 0).length
+  const qq = result.evaluation.diagnostics.qq ?? null
+  const influence = result.evaluation.diagnostics.influence ?? null
+  const importance = result.evaluation.diagnostics.permutation_importance ?? null
   const errors = result.evaluation.diagnostics.errors ?? []
   const classes = metrics.classes ?? []
   const matrix = metrics.confusion_matrix ?? []
@@ -673,6 +692,12 @@ function PredictionReport({ result, onExport }: { result: PredictionResult; onEx
         {result.split.partitions.validation.toLocaleString('en-US')} · test{' '}
         {result.split.partitions.test.toLocaleString('en-US')}. The test partition was evaluated once,
         after selection.
+      </p>
+
+      <p className="mlab__hint plab__diagcontext">
+        Diagnostic curves and tables describe the sealed test partition unless a section says
+        otherwise. The only in-sample diagnostic is the OLS influence panel, which is labelled
+        explicitly. No diagnostic below was used to select the model.
       </p>
 
       <div className="mlab__stats plab__teststats">
@@ -852,9 +877,59 @@ function PredictionReport({ result, onExport }: { result: PredictionResult; onEx
             </>
           ) : null}
 
+          <h2 className="mlab__h2">Precision–recall curve</h2>
+          {pr ? (
+            <figure className="mlab__figure">
+              <PrPlot curve={pr} />
+              <figcaption>
+                Test partition, positive class {result.outcome.positive_class ?? '—'}. Average
+                precision (AP) = {fmt(pr.average_precision)}; prevalence = {pct(pr.prevalence)};{' '}
+                {pr.positive_count ?? '—'} positive and {pr.negative_count ?? '—'} negative rows.{' '}
+                {metrics.pr_auc_definition ??
+                  'AP is the step-wise area under the precision–recall curve.'}
+              </figcaption>
+            </figure>
+          ) : (
+            <p className="mlab__hint">
+              Not computed for this outcome. A precision–recall curve requires a binary outcome and
+              predicted probabilities.
+            </p>
+          )}
+
           {calibration ? (
             <>
-              <h2 className="mlab__h2">Calibration</h2>
+              <h2 className="mlab__h2">Calibration and reliability</h2>
+              <figure className="mlab__figure">
+                <ReliabilityPlot entries={calibration} />
+                <figcaption>
+                  Test partition. Points are equal-width probability bins; vertical lines are
+                  Wilson 95% intervals for the observed positive rate. The diagonal is perfect
+                  calibration. Empty bins are omitted.
+                  {nonEmptyCalibrationBins < 2
+                    ? ' Only one non-empty bin was returned, so the shape of the calibration curve cannot be assessed.'
+                    : ''}
+                </figcaption>
+              </figure>
+              {calibrationSummary ? (
+                <dl className="mlab__facts plab__calibrationsummary">
+                  <div>
+                    <dt>Prevalence</dt>
+                    <dd>{pct(calibrationSummary.prevalence)}</dd>
+                  </div>
+                  <div>
+                    <dt>Expected calibration error</dt>
+                    <dd>{fmt(calibrationSummary.expected_calibration_error)}</dd>
+                  </div>
+                  <div>
+                    <dt>Maximum bin gap</dt>
+                    <dd>{fmt(calibrationSummary.max_calibration_error)}</dd>
+                  </div>
+                  <div>
+                    <dt>Brier score</dt>
+                    <dd>{fmt(calibrationSummary.brier_score)}</dd>
+                  </div>
+                </dl>
+              ) : null}
               <div className="mlab__tablewrap">
                 <table className="mlab__table mlab__table--compact">
                   <caption>
@@ -873,6 +948,9 @@ function PredictionReport({ result, onExport }: { result: PredictionResult; onEx
                       <th scope="col" className="num">
                         Observed rate
                       </th>
+                      <th scope="col" className="num">
+                        95% interval
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -884,13 +962,23 @@ function PredictionReport({ result, onExport }: { result: PredictionResult; onEx
                         <td className="num">{entry.count}</td>
                         <td className="num">{fmt(entry.mean_predicted)}</td>
                         <td className="num">{fmt(entry.observed_rate)}</td>
+                        <td className="num">
+                          {intervalText(entry.observed_rate_low, entry.observed_rate_high, pct)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+              {calibrationSummary ? (
+                <p className="mlab__hint">{calibrationSummary.method} {calibrationSummary.note}</p>
+              ) : null}
             </>
-          ) : null}
+          ) : (
+            <p className="mlab__hint">
+              Calibration is not available because this run has no binary predicted probabilities.
+            </p>
+          )}
 
           <h2 className="mlab__h2">Error cohort</h2>
           <p className="mlab__hint">
@@ -940,6 +1028,20 @@ function PredictionReport({ result, onExport }: { result: PredictionResult; onEx
                   observed − predicted.
                 </figcaption>
               </figure>
+              {qq?.applicable ? (
+                <figure className="mlab__figure">
+                  <QqPlot qq={qq} />
+                  <figcaption>
+                    Normal Q–Q of raw test residuals (n = {qq.n}). The reference line uses the
+                    residual mean and SD; a straight line indicates approximate normality. This is a
+                    visual check, not a formal test, and it is not required for predictive accuracy.
+                  </figcaption>
+                </figure>
+              ) : (
+                <p className="mlab__hint">
+                  Q–Q not computed: {qq?.reason ?? 'no residual diagnostic was returned.'}
+                </p>
+              )}
               <div className="mlab__tablewrap">
                 <table className="mlab__table mlab__table--compact">
                   <caption>Largest absolute test residuals from the stored sample.</caption>
@@ -996,58 +1098,18 @@ function PredictionReport({ result, onExport }: { result: PredictionResult; onEx
               </div>
             </dl>
           ) : null}
+          <InfluenceSection influence={influence} />
         </>
       )}
+
+      <ImportanceSection importance={importance} />
 
       {subgroup ? (
         <>
           <h2 className="mlab__h2">Preliminary subgroups</h2>
           <p className="mlab__hint">{subgroup.note}</p>
-          <div className="mlab__tablewrap">
-            <table className="mlab__table plab__subgroups">
-              <caption>
-                {subgroup.column} on the test partition: {subgroup.grouped_rows} grouped of{' '}
-                {subgroup.test_rows} rows
-                {subgroup.outside_bins
-                  ? `; ${subgroup.outside_bins} row(s) fell outside the stated bins`
-                  : ''}
-                .
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Group</th>
-                  <th scope="col" className="num">
-                    n
-                  </th>
-                  <th scope="col" className="num">
-                    Share
-                  </th>
-                  <th scope="col" className="num">
-                    Test metric
-                  </th>
-                  <th scope="col" className="num">
-                    Outcome mean
-                  </th>
-                  <th scope="col">Warning</th>
-                </tr>
-              </thead>
-              <tbody>
-                {subgroup.rows.map((entry) => (
-                  <tr key={entry.group}>
-                    <th scope="row">{entry.group}</th>
-                    <td className="num">{entry.n}</td>
-                    <td className="num">{pct(entry.share)}</td>
-                    <td className="num">
-                      {entry.metric_name ? `${entry.metric_name} ` : ''}
-                      {fmt(entry.metric)}
-                    </td>
-                    <td className="num">{fmt(entry.outcome_mean)}</td>
-                    <td>{entry.warning ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {subgroup.comparison_note ? <p className="mlab__hint">{subgroup.comparison_note}</p> : null}
+          <SubgroupTable subgroup={subgroup} />
         </>
       ) : null}
 

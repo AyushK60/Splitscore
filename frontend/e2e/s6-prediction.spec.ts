@@ -50,16 +50,26 @@ async function exportRun(page: Page) {
         confusion_matrix: number[][]
         accuracy: number
         roc_auc: number | null
+        average_precision?: number | null
+        prevalence?: number | null
+        pr_curve?: { average_precision: number; positive_count: number } | null
         mae?: number
         rmse?: number
       }
-      diagnostics: { roc_curve: { auc: number } | null; sample?: { drawn_rows: number } }
+      diagnostics: {
+        roc_curve: { auc: number } | null
+        calibration_summary?: { rows_in_bins: number; prevalence: number } | null
+        qq?: { applicable: boolean; n: number } | null
+        influence?: { applicable: boolean; reason?: string } | null
+        permutation_importance?: { applicable: boolean; reason?: string } | null
+        sample?: { drawn_rows: number }
+      }
       predictions: { rows: Array<Record<string, unknown>>; test_rows: number; truncated: boolean }
     }
     subgroups: {
       test_rows: number
       grouped_rows: number
-      rows: Array<{ n: number; metric: number | null }>
+      rows: Array<{ n: number; metric: number | null; ci_low?: number | null; ci_high?: number | null }>
     } | null
   }
 }
@@ -79,6 +89,11 @@ test('classification journey reports sealed-test metrics and exports the same ru
   await expect(stats).toContainText('ROC-AUC')
   await expect(page.locator('.plab__matrix')).toBeVisible()
   await expect(page.locator('.plab__roc')).toBeVisible()
+  await expect(page.locator('.plab__pr')).toBeVisible()
+  await expect(page.locator('.plab__reliability')).toBeVisible()
+  await expect(page.getByText(/Average precision \(AP\)/)).toBeVisible()
+  await expect(page.locator('.plab__calibrationsummary')).toContainText('Expected calibration error')
+  await expect(page.locator('.plab__subgroups').getByRole('columnheader', { name: '95% interval' })).toBeVisible()
   await expect(page.getByText('Candidate comparison')).toBeVisible()
 
   const payload = await exportRun(page)
@@ -97,6 +112,9 @@ test('classification journey reports sealed-test metrics and exports the same ru
   expect(payload.evaluation.predictions.rows.length).toBe(payload.evaluation.n)
   expect(payload.evaluation.predictions.truncated).toBe(false)
   expect(payload.evaluation.diagnostics.roc_curve?.auc).toBeGreaterThanOrEqual(0)
+  expect(payload.evaluation.metrics.pr_curve?.average_precision).toBeGreaterThanOrEqual(0)
+  expect(payload.evaluation.metrics.prevalence).toBeGreaterThanOrEqual(0)
+  expect(payload.evaluation.diagnostics.calibration_summary?.rows_in_bins).toBe(payload.evaluation.n)
 
   for (const candidate of payload.candidates) {
     expect(candidate).not.toHaveProperty('test')
@@ -107,6 +125,14 @@ test('classification journey reports sealed-test metrics and exports the same ru
   expect(payload.subgroups?.grouped_rows).toBe(payload.evaluation.n)
   const grouped = (payload.subgroups?.rows ?? []).reduce((total, row) => total + row.n, 0)
   expect(grouped).toBe(payload.evaluation.n)
+  for (const row of payload.subgroups?.rows ?? []) {
+    if (row.n > 0) {
+      expect(row.ci_low).not.toBeNull()
+      expect(row.ci_high).not.toBeNull()
+      expect(row.ci_low as number).toBeLessThanOrEqual(row.metric as number)
+      expect(row.metric as number).toBeLessThanOrEqual(row.ci_high as number)
+    }
+  }
 })
 
 test('regression journey reports MAE, RMSE and R-squared with residual diagnostics', async ({
@@ -124,6 +150,9 @@ test('regression journey reports MAE, RMSE and R-squared with residual diagnosti
   await expect(stats).toContainText('Test R²')
   await expect(page.locator('.plab__residuals')).toBeVisible()
   await expect(page.locator('.plab__residuals circle')).toHaveCount(60)
+  await expect(page.locator('.plab__qq')).toBeVisible()
+  await expect(page.getByText('Influence diagnostics not applicable')).toBeVisible()
+  await expect(page.getByText('Permutation importance not computed')).toBeVisible()
 
   const payload = await exportRun(page)
   expect(payload.task).toBe('regression')
@@ -132,6 +161,34 @@ test('regression journey reports MAE, RMSE and R-squared with residual diagnosti
   expect(payload.evaluation.metrics.mae).toBeGreaterThanOrEqual(0)
   expect(payload.evaluation.metrics.rmse).toBeGreaterThanOrEqual(payload.evaluation.metrics.mae ?? 0)
   expect(payload.evaluation.diagnostics.sample?.drawn_rows).toBe(payload.evaluation.n)
+  expect(payload.evaluation.diagnostics.qq?.applicable).toBe(true)
+  expect(payload.evaluation.diagnostics.influence?.applicable).toBe(false)
+  expect(payload.evaluation.diagnostics.permutation_importance?.applicable).toBe(false)
   expect(payload.evaluation.predictions.rows.length).toBe(payload.evaluation.n)
   expect(payload.selected.family).toBeTruthy()
+})
+
+test('signal-bearing regression renders OLS influence and permutation importance', async ({ page }) => {
+  await loadDemoFromEntry(page, 'Drifting sensor stream split at random')
+  await page
+    .getByRole('navigation', { name: 'Primary' })
+    .getByRole('button', { name: 'Model Lab' })
+    .click()
+  await page.getByRole('tab', { name: 'Predictive ML' }).click()
+  await page.getByLabel('Prediction task').selectOption('regression')
+  await page.getByLabel('Prediction outcome').selectOption('throughput')
+  await page.getByRole('button', { name: 'Evaluate predictions' }).click()
+
+  await expect(page.locator('.plab__qq')).toBeVisible()
+  await expect(page.getByText('OLS influence (in-sample)')).toBeVisible()
+  await expect(page.locator('.plab__influence')).toBeVisible()
+  await expect(page.getByText('Permutation importance — test partition')).toBeVisible()
+  await expect(page.locator('.plab__importance')).toBeVisible()
+
+  const payload = await exportRun(page)
+  expect(payload.task).toBe('regression')
+  expect(payload.selected.family).toBe('linear')
+  expect(payload.evaluation.diagnostics.qq?.applicable).toBe(true)
+  expect(payload.evaluation.diagnostics.influence?.applicable).toBe(true)
+  expect(payload.evaluation.diagnostics.permutation_importance?.applicable).toBe(true)
 })

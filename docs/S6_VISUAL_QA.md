@@ -1,7 +1,9 @@
 # S6 visual QA
 
 All screenshots are real Chromium captures of the production build served by the
-FastAPI backend. No mock data is used inside the application.
+FastAPI backend. No mock data is used inside the application. Screenshots were
+reviewed at 1920 × 1080, 1366 × 900 and 390 × 844; the new predictive diagnostics
+were captured after the final styling changes.
 
 ## S6-A — repairs
 
@@ -24,7 +26,7 @@ before: 2174 2324 2474 2630 2774 2930   (SVG 2092 px)
 after : 1396 1396 1396 1396 1396 1396   (SVG 414 px)
 ```
 
-## S6-B — Model Lab
+## S6-B — statistical Model Lab
 
 | Screenshot | Shows |
 |---|---|
@@ -39,25 +41,51 @@ Visual review notes:
 * Warnings are semantic callouts with text, never colour alone.
 * The plot canvases have visible axis labels, a zero reference line and a
   caption stating the sampled population.
-* The header tagline now names the Model Lab.
-* Statistics are rendered in the product’s monospace face; long formulas and
-  sha256 values wrap rather than overflow.
+* The header tagline names the Model Lab.
+
+## S6-D/E — predictive diagnostics
+
+| Screenshot | Viewport | Shows |
+|---|---|---|
+| `docs/screenshots/s6/after/diagnostics-pr-1920.png` | 1920 × 1080 | PR curve with average precision, prevalence line, positive/negative counts and the step-wise AP definition |
+| `docs/screenshots/s6/after/diagnostics-calibration-1366.png` | 1366 × 900 | Reliability plot, Brier/ECE/MCE summary, ten-bin table with Wilson intervals, and the one-bin caveat |
+| `docs/screenshots/s6/after/diagnostics-subgroups-1366.png` | 1366 × 900 | Subgroup table at 1366 px: denominators, accuracy, Wilson intervals, support and wrapped small-group warning |
+| `docs/screenshots/s6/after/diagnostics-influence-1920.png` | 1920 × 1080 | OLS leverage/Cook's plot, coefficient table with 95% intervals, and largest-influence rows on the refit partition |
+| `docs/screenshots/s6/after/diagnostics-importance-1920.png` | 1920 × 1080 | Sealed-test permutation importance with RMSE increase, repeat SD and relative-magnitude bars |
+| `docs/screenshots/s6/mobile/diagnostics-pr.png` | 390 × 844 | PR curve and caption at mobile width; no horizontal page overflow |
+
+### What was reviewed and fixed
+
+| Observation | Resolution |
+|---|---|
+| PR plot's AP label collided with the vertical “precision” axis label | Moved AP to the top-right; moved prevalence to a clear position above the baseline |
+| Diagnostic SVGs scaled to nearly the full results column, producing very large type | Capped predictive plots at 520 px and centred them; mobile remains fluid |
+| Subgroup warning column clipped at 1366 px | Fixed-layout subgroup table with wrapped cells and explicit column proportions |
+| Permutation-importance caption called baseline RMSE a “baseline rmse_increase” | Caption now says “Baseline RMSE” and the column says “Mean RMSE increase” |
+| One-bin dummy calibration could look like a full reliability curve | Added an explicit caption note that a single non-empty bin cannot describe calibration shape |
+| Influence section was initially captured mid-scroll | Recaptured with instant scroll anchoring; no layout defect remained |
+
+The signal-bearing regression screenshots use the bundled
+`chronology_violation` demo (`sensor_a`/`sensor_b` → `throughput`, 360 rows,
+98 test rows). The clean-control classification screenshots intentionally show
+one non-empty calibration bin because the selected dummy predicts a constant
+probability; this is the real result, not a plotting failure.
 
 ## Viewports exercised
 
 | Size | Result |
 |---|---|
-| 1440 × 900 / 1440 × 950 | Three-region layout; all S6 tests run here |
-| 1920 × 1080 | Not captured in this session; layout is max-width bounded (`--ws-max`) |
-| 1366 × 768 | Not captured; the 1300 px breakpoint collapses the context column below the results |
-| 768 × 1024 | Captured for Scatter; Model Lab collapses to one column at ≤900 px by CSS (not screenshotted) |
-| 390 × 844 | Captured for Scatter; horizontal overflow 0 px |
+| 1920 × 1080 | New PR, Q–Q, influence and importance views captured and reviewed |
+| 1440 × 900 / 1440 × 950 | All S6 Playwright journeys run here |
+| 1366 × 900 | Calibration and subgroup views captured; subgroup table fits without clipping |
+| 768 × 1024 | Scatter captured; Model Lab CSS collapses to one column at ≤900 px |
+| 390 × 844 | PR diagnostic captured; Scatter and predictive controls/results captured previously |
 
 ## Limitations
 
 * Chromium only. Firefox/WebKit were not installed for this session.
-* Windows forced-colours mode was not tested.
-* Screenshots were taken after `Fit model`; the page is scrolled to the top
-  programmatically so the masthead and specification controls are visible.
-* The Model Lab at 1366 px and 1920 px widths was reviewed by CSS breakpoint and
-  typecheck, not by a captured image. A future pass should capture them.
+* Windows forced-colours mode and screen readers were not tested.
+* The 1920 and 1366 screenshots are viewport captures, not full-page captures;
+  they show the relevant panel rather than the entire document.
+* The calibration screenshot shows a deliberately uninformative dummy model.
+  The signal-bearing importance/influence views are captured separately.

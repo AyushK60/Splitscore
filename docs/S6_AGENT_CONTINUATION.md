@@ -1,16 +1,17 @@
 # S6 agent continuation
 
-**Written:** 2026-11-03. This file is the durable handoff; do not assume any chat
+**Written:** 2026-11-04. This file is the durable handoff; do not assume any chat
 context is available.
 
 ## Repository and exact state
 
 * **Authoritative repository:** `E:\Splitscore V2`
 * **Branch:** `v2-premium-visual-foundation`
-* **HEAD:** the S6-C commit that adds this file. Its parent is `3e1e3fb`
-  (S6 handoff), before that `aec75e9` (S6-B) and `52a2ef9` (S6-A).
-* **Uncommitted work:** none, apart from pre-existing untracked files that must
-  be preserved and are not S6:
+* **Starting HEAD:** `3867199` (S6-C). The S6-D/E completion is the commit that
+  adds this revision; its parent is `3867199`.
+* **S6 status:** PASS for the approved S6-D/E exit gate. S7 has not started.
+* **Uncommitted work:** none after the S6-D/E commit, apart from pre-existing
+  untracked files that must be preserved and are not S6:
   `docs/screenshots/s3/_preview/`, `docs/screenshots/s5/_preview/`,
   `import requests.txt`, `scripts/_patch_s3_hero.py`.
 * **Stash:** one pre-existing `stash@{0}: S3 checkpoint: all S3 work staged,
@@ -25,18 +26,21 @@ pre-S3 copy. Work in `E:\Splitscore V2`.
 cd "/e/Splitscore V2"
 export PATH="/e/Splitscore V2/.venv/Scripts:$PATH"   # REQUIRED for Playwright
 
-cd backend && python -m pytest -q                     # 360 passed
-cd .. && python scripts/evaluate_synthetic.py         # 41/41 cases, 61/61 checks
+cd backend
+python -m pytest -q                                    # 363 passed, 3 warnings
+python -m pytest tests/test_models_prediction.py -q    # 11 passed
+cd ..
+python scripts/evaluate_synthetic.py                   # 41/41 cases, 61/61 checks
 
 cd frontend
-npm run test                                          # 82 passed
+npm test -- --run                                      # 90 passed (9 files)
 npm run typecheck && npm run lint && npm run build
-SPLITSCOPE_E2E_PORT=8188 npx playwright test          # 20 passed
+SPLITSCOPE_E2E_PORT=8194 npx playwright test           # 21 passed
 ```
 
 Why the `PATH` line: the Playwright `webServer` runs `python -m app.main`, and
 `statsmodels`/`scikit-learn` are installed only in the repository `.venv`.
-Port 8123 is held by an unrelated process; `8180`–`8188` were used successfully.
+Port 8123 is held by an unrelated process; `8180`–`8194` were used successfully.
 
 Python 3.11.9 · pandas 3.0.6 · numpy 2.4.6 · scikit-learn 1.9.1 · scipy 1.17.1 ·
 statsmodels 0.15.0 · Node 24.22.0.
@@ -53,57 +57,71 @@ statsmodels OLS/logistic with coefficients, intervals, p-values, odds ratios,
 fit statistics, VIF/condition diagnostics, residual plot, coding, population,
 warnings, bounded run storage and export. 11 numerical oracles.
 
-**S6-C/S6-D — F10 predictive engine and core diagnostics: PASS.**
-`backend/app/models/prediction.py` now implements:
+**S6-C — F10 predictive engine: PASS.**
+`backend/app/models/prediction.py` implements typed configuration, split
+resolution, a validation carve, leakage-safe `Pipeline`/`ColumnTransformer`,
+one sealed test evaluation after validation selection, candidate comparison,
+classification/regression metrics with undefined states, confusion/per-class/
+ROC/calibration/error-cohort/residual/subgroup diagnostics, provenance, run
+storage and strict-JSON export.
 
-* typed `PredictionConfig`;
-* split resolution from the confirmed study split or generated
-  random/stratified/group/chronological strategies;
-* a validation carve inside the training rows using the same strategy family;
-* scikit-learn `Pipeline`/`ColumnTransformer` fitted on fit rows only; a final
-  refit on fit + validation; the test partition is read exactly once;
-* dummy baselines plus logistic/random forest (classification) and
-  linear/ridge/random forest (regression);
-* classification and regression metrics with undefined values marked;
-* confusion matrix, per-class metrics, ROC curve, calibration bins, error
-  cohort, residual sample/summary, preliminary subgroup table;
-* strict-JSON export, provenance, row-membership digests and warnings.
+**S6-D/E — F11 prioritised diagnostics and F15 preliminary uncertainty: PASS.**
 
-API: `POST /api/datasets/{id}/models/prediction`; runs and export reuse
-`GET /api/models/runs/{id}[/export]`.
+* Binary PR curve and average precision, with AP defined as step-wise
+  `Σ (R_n − R_{n−1})P_n`; prevalence and positive/negative counts.
+* Ten-bin calibration/reliability with Wilson 95% intervals, Brier, ECE and MCE;
+  empty-bin and one-bin states honest.
+* Regression Q–Q of test residuals and fitted-vs-residual.
+* OLS leverage/Cook's distance, thresholds, counts, top rows and classical
+  coefficient 95% intervals only for a selected unpenalised linear model, on the
+  fit+validation refit design (in-sample).
+* Test-partition permutation importance, five fixed-seed repeats, descriptive;
+  never used for selection.
+* Subgroups with Wilson/normal-approximation 95% intervals, exact denominators,
+  support counts, empty/undefined states and unadjusted-comparison caveat.
+* `frontend/src/components/PredictiveDiagnostics.tsx` and dedicated unit tests;
+  three Playwright predictive journeys; six new screenshots.
+* Backend **363 passed**; frontend **90 passed**; Playwright **21 passed**;
+  synthetic oracle **41/41 cases, 61/61 checks**; typecheck/lint/build clean.
 
-UI: `frontend/src/views/PredictiveLabView.tsx`, reachable from the Model Lab
-tabs (statistical inference / predictive ML), with evaluation design, candidate
-comparison, test metrics, diagnostics, subgroups, provenance and export.
+Key files:
+
+* `backend/app/models/prediction.py` — diagnostics and importance.
+* `backend/tests/test_models_prediction.py` — 11 independent predictive oracles.
+* `backend/tests/test_models_prediction_api.py` — HTTP/strict-JSON regression.
+* `frontend/src/views/PredictiveLabView.tsx` — wiring and captions.
+* `frontend/src/components/PredictiveDiagnostics.tsx` — reusable charts/tables.
+* `frontend/tests/PredictiveDiagnostics.test.tsx` — 8 component tests.
+* `frontend/e2e/s6-prediction.spec.ts` — 3 journeys.
+* `docs/S6_{MODEL_DIAGNOSTICS,NUMERICAL_VALIDATION,VISUAL_QA,VERIFICATION,HANDOFF}.md`.
 
 ## What is NOT implemented (do not claim otherwise)
 
-* **F11 remainder:** Q–Q, leverage/Cook's distance/influence, learning curves,
-  permutation importance, partial dependence, PR curve plot, calibration plot,
-  threshold analysis, multiclass ROC, statistical tests on error cohorts.
-* **F15 confirmatory:** confidence intervals, multiplicity control, formal
-  heterogeneity tests. Current subgroups are descriptive and flagged when small.
-* **Robustness:** no cross-validation, repeated splits, nested tuning or
-  hyperparameter search. One validation holdout is used.
-* **Predictive frontend unit tests:** none; Playwright and typecheck cover it.
-* **S7:** not started, by instruction.
+* Learning curves.
+* Threshold exploration/table; the classification threshold is fixed at 0.5 and
+  no test-set threshold tuning exists.
+* Breusch–Pagan/White heteroskedasticity tests and robust/cluster SEs.
+* Partial dependence and local explanations.
+* Multiclass ROC/PR/calibration.
+* Multiplicity-adjusted subgroup intervals or formal heterogeneity tests.
+* Cross-validation, repeated holdouts, nested tuning or hyperparameter search.
+* Causal CATE/heterogeneity analysis.
+* S7: not started, by instruction.
+
+These are later-scope capabilities. They are not S6 gate blockers under the
+approved prioritised F11 scope (A: PR/AP + calibration; B: Q–Q/residual +
+supported OLS influence/uncertainty; C: test-partition permutation importance).
 
 ## Exact next action for a new agent
 
-1. Extend F11 with the remaining diagnostics, each computed from the stored
-   fitted pipeline or the sealed test partition and labelled with its partition:
-   * Q–Q and scale-location for regression;
-   * leverage/Cook's distance only if the design matrix is retained safely;
-   * permutation importance on test **only** with the partition stated, or skip
-     it rather than implying causality;
-   * PR curve and calibration plot for binary classification;
-   * threshold table if added.
-2. Add oracles for every new number before displaying it. Reuse the fixture and
-   strict-JSON discipline in `tests/test_models_prediction.py`.
-3. Then, and only then, extend F15 beyond descriptive subgroups. Do not convert
-   subgroup error differences into causal claims.
-4. Update `S6_VERIFICATION.md`, this file and `S6_HANDOFF.md`; rerun the full
-   verification block above; commit.
+1. If asked to continue S6 polish, add only the deferred diagnostics above,
+   each with an independent oracle before display. Do not rewrite the predictive
+   engine or move preprocessing outside the training-fitted pipeline.
+2. If asked to start S7, begin the causal DAG/identification stage. Do not reuse
+   predictive coefficients as causal effects, and do not convert subgroup error
+   differences into treatment-effect heterogeneity.
+3. Before any commit, rerun the verification block above and inspect
+   `git status`; preserve the pre-existing untracked files and stash.
 
 ## Architecture decisions to preserve
 
@@ -113,6 +131,13 @@ comparison, test metrics, diagnostics, subgroups, provenance and export.
   fit + validation and evaluated once on test. Never tune on test.
 * A statistical fit and a predictive evaluation are different products and stay
   visually separate.
+* Influence and OLS coefficient intervals are in-sample on the refit rows and are
+  never labelled held-out or causal.
+* PR/AP are binary-only. AP is step-wise average precision, not trapezoidal area.
+* Permutation importance is computed after the single test evaluation, on the
+  stated test partition, and is descriptive only.
+* Subgroup intervals are unadjusted; small/empty groups are flagged, not
+  presented as discoveries.
 * Refuse rather than silently alter a specification. Count every exclusion.
 * Undefined metrics are named with a reason, never defaulted.
 * Strict JSON: no NaN/infinity in a stored or exported payload.
@@ -126,13 +151,14 @@ comparison, test metrics, diagnostics, subgroups, provenance and export.
 
 ## Browser QA findings
 
-* Real Chromium journeys: classification and regression both pass and export
-  strict JSON.
-* Fixed during review: candidate settings clipped at 1366 px; colliding
-  constant-prediction axis labels; stage guidance that mentioned only
-  statistical fits.
-* Captures: `docs/screenshots/s6/after/predictive-classification-{1366,1920}.png`,
-  `predictive-regression.png`, `docs/screenshots/s6/mobile/predictive-{controls,results}.png`.
+* Real Chromium journeys: classification diagnostics/export, clean regression
+  unsupported states, and signal-bearing regression influence/importance pass.
+* Fixed during review: PR label collision; oversized diagnostic charts; subgroup
+  warning clipping at 1366; ambiguous importance baseline wording; missing
+  one-bin calibration caveat; mid-scroll captures.
+* Captures: `docs/screenshots/s6/after/diagnostics-{pr-1920,calibration-1366,
+  subgroups-1366,influence-1920,importance-1920}.png`,
+  `docs/screenshots/s6/mobile/diagnostics-pr.png`.
 * Not covered: Firefox/WebKit, forced-colours, screen readers.
 
 ## Known warnings / non-failures
