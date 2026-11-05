@@ -1,6 +1,20 @@
 # SplitScope — Status Report
 
 **Date:** 2026-10-18 (finalization added; Stages 4a–4d recorded below)
+**S9A (2026-11-06):** COMPLETE — scientific causal effect estimation shipped on
+branch `v2-premium-visual-foundation`: a mandatory S8C identification gate
+(fingerprint match, structural re-validation, exact backdoor verdict on the
+client-named adjustment set), explicit cohort/treatment/outcome preparation
+with full row accounting, three estimators (g-computation regression
+adjustment, Hájek IPW, cross-fitted AIPW on leakage-safe sklearn pipelines),
+influence-function and fully-refitting bootstrap uncertainty, pre/post-weighting
+covariate balance and overlap/positivity diagnostics, a shared-cohort three-way
+comparison, and five API routes with stored, staleness-rechecked runs.
+45 new backend tests (499 total passing), including known-effect synthetic
+fixtures, independent statsmodels/formula cross-checks and a cross-fit leakage
+detection test; synthetic oracle still 41/41 (61 checks), frontend 145 unit
+tests, 29 Playwright journeys. No estimation UI yet (S9B), no sensitivity or
+subgroup analysis (S9C). See `docs/S9A_HANDOFF.md`.
 **S8C (2026-11-06):** COMPLETE — graphical causal identification shipped on
 branch `v2-premium-visual-foundation`: exact Bayes-ball d-separation (verified
 against an independent moralization oracle over all 543 labelled 4-node DAGs,
