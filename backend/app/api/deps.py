@@ -11,6 +11,7 @@ from dataclasses import dataclass
 
 from app.core.config import Settings, get_settings
 from app.core.store import Store
+from app.causal.registry import CausalGraphRegistry
 from app.research.studies import StudyRegistry
 
 
@@ -19,11 +20,17 @@ class AppContext:
     settings: Settings
     store: Store
     studies: StudyRegistry
+    causal_graphs: CausalGraphRegistry
 
     @classmethod
     def create(cls, settings: Settings | None = None) -> AppContext:
         resolved = settings or get_settings()
-        return cls(settings=resolved, store=Store(resolved.store), studies=StudyRegistry())
+        return cls(
+            settings=resolved,
+            store=Store(resolved.store),
+            studies=StudyRegistry(),
+            causal_graphs=CausalGraphRegistry(),
+        )
 
 
 _context: AppContext | None = None

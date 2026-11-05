@@ -1,6 +1,11 @@
 # SplitScope — Status Report
 
 **Date:** 2026-10-18 (finalization added; Stages 4a–4d recorded below)
+**S8A (2026-11-05):** COMPLETE — causal-graph foundation delivered on branch
+`v2-premium-visual-foundation`: validated versioned DAG specs, structural validation
+engine, assumption registry, dataset-scoped graph API and 33 new backend tests
+(406 total passing); no identification or estimation yet (S8C), no editor (S8B).
+See `docs/S8A_HANDOFF.md`.
 **Stage 3e:** COMPLETE — the live API journey and the actual browser workflow both pass.
 **Stage 4a:** COMPLETE — reproducible Playwright E2E against the production build, plus
 stale-build-artifact prevention.
