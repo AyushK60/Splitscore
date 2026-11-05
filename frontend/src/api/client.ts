@@ -328,6 +328,10 @@ import type {
   CausalGraphListResponse,
   CausalGraphPayload,
   CausalGraphSpec,
+  CausalAdjustmentEvaluationResponse,
+  CausalAdjustmentSearchResponse,
+  CausalDSeparationResponse,
+  CausalIdentificationResponse,
   CausalValidationResponse,
 } from './types'
 
@@ -397,6 +401,71 @@ export const causalApi = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ export_file: exportFile }),
+      },
+    ),
+
+  // S8C — read-only identification queries. None of these mutate the graph;
+  // every response carries the graph's scientific fingerprint.
+  dSeparation: (datasetId: string, graphId: string, x: string, y: string, conditioning: string[]) =>
+    request<CausalDSeparationResponse>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}/d-separation`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ x, y, conditioning }),
+      },
+    ),
+
+  evaluateAdjustment: (
+    datasetId: string,
+    graphId: string,
+    adjustmentSet: string[],
+    scope?: { treatment?: string | null; outcome?: string | null },
+  ) =>
+    request<CausalAdjustmentEvaluationResponse>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}/adjustment-evaluation`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adjustment_set: adjustmentSet,
+          treatment: scope?.treatment ?? null,
+          outcome: scope?.outcome ?? null,
+        }),
+      },
+    ),
+
+  searchAdjustment: (
+    datasetId: string,
+    graphId: string,
+    scope?: { treatment?: string | null; outcome?: string | null },
+  ) =>
+    request<CausalAdjustmentSearchResponse>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}/adjustment-search`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          treatment: scope?.treatment ?? null,
+          outcome: scope?.outcome ?? null,
+        }),
+      },
+    ),
+
+  identify: (
+    datasetId: string,
+    graphId: string,
+    scope?: { treatment?: string | null; outcome?: string | null },
+  ) =>
+    request<CausalIdentificationResponse>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}/identification`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          treatment: scope?.treatment ?? null,
+          outcome: scope?.outcome ?? null,
+        }),
       },
     ),
 }

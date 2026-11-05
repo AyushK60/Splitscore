@@ -1,6 +1,15 @@
 # SplitScope — Status Report
 
 **Date:** 2026-10-18 (finalization added; Stages 4a–4d recorded below)
+**S8C (2026-11-06):** COMPLETE — graphical causal identification shipped on
+branch `v2-premium-visual-foundation`: exact Bayes-ball d-separation (verified
+against an independent moralization oracle over all 543 labelled 4-node DAGs,
+13,032 exhaustive queries), classical backdoor evaluation and bounded honest
+adjustment-set search, identification status API (four read-only endpoints),
+and an Authoring | Identification mode in the Causal Lab with scientific-signature
+staleness handling. 48 new backend tests (454 total passing), 9 new frontend
+unit tests (145 total), 4 new real-backend Playwright journeys (29 total).
+No effect estimation yet (S9). See `docs/S8C_HANDOFF.md`.
 **S8B (2026-11-06):** COMPLETE — the interactive Causal Lab shipped on branch
 `v2-premium-visual-foundation`: `@xyflow/react` DAG canvas, dataset-scoped graph
 authoring against the S8A API (create/save/validate/import/export), assumption

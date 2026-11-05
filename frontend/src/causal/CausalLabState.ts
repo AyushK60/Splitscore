@@ -86,6 +86,30 @@ export function edgeKey(source: string, target: string): string {
   return `${source}->${target}`
 }
 
+/**
+ * Canonical signature of the *scientific* content of a draft (S8C staleness).
+ *
+ * Identification results are tied to the exact content that produced them.
+ * The signature covers edges, the analysis scope and per-node observed status
+ * — the things that change what d-separation and the backdoor criterion
+ * answer. Deliberately excluded: layout positions (dragging is not a
+ * scientific edit), labels, names, descriptions and assumption prose, which
+ * the identification mathematics never reads.
+ */
+export function scientificSignature(draft: CausalDraft): string {
+  const nodes = draft.nodes
+    .map((node) => ({ id: node.node_id, observed: node.observed }))
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+  const edges = draft.edges
+    .map((edge) => `${edge.source}->${edge.target}`)
+    .sort()
+  return JSON.stringify({
+    nodes,
+    edges,
+    analysis: { treatment: draft.analysis.treatment, outcome: draft.analysis.outcome },
+  })
+}
+
 export function emptyDraft(datasetId: string): CausalDraft {
   void datasetId // kept for call-site symmetry; the dataset id lives in toSpec
   return {

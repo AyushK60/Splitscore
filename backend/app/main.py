@@ -24,6 +24,7 @@ from app.api.deps import get_context
 from app.api.error_handlers import register_error_handlers
 from app.api.routes_audit import router as audit_router
 from app.api.routes_causal import router as causal_router
+from app.api.routes_causal_identification import router as causal_identification_router
 from app.api.routes_datasets import router as datasets_router
 from app.api.routes_explore import router as explore_router
 from app.api.routes_models import router as models_router
@@ -73,6 +74,7 @@ def create_app() -> FastAPI:
     app.include_router(explore_router)
     app.include_router(models_router)
     app.include_router(causal_router)
+    app.include_router(causal_identification_router)
 
     @app.get("/api", include_in_schema=False)
     def api_root() -> JSONResponse:

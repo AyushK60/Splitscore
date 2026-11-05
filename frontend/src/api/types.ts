@@ -1946,3 +1946,104 @@ export interface CausalExportEnvelope {
   }
   note: string
 }
+
+// S8C Causal Lab — graphical identification (d-separation, backdoor criterion)
+// ----------------------------------------------------------------------------
+
+export interface CausalAlgorithmMeta {
+  name: string
+  version: string
+  reference: string
+}
+
+export interface CausalDSeparationResponse {
+  graph_id: string
+  dataset_id: string
+  revision: number
+  spec_fingerprint_sha256: string
+  schema_version: string
+  x: string
+  y: string
+  conditioning: string[]
+  d_separated: boolean
+  interpretation: string
+  algorithm: CausalAlgorithmMeta
+  interpretation_note: string
+}
+
+export interface CausalAdjustmentViolation {
+  code: string
+  node_id: string | null
+  message: string
+}
+
+export interface CausalAdjustmentEvaluationResponse {
+  graph_id: string
+  dataset_id: string
+  revision: number
+  spec_fingerprint_sha256: string
+  schema_version: string
+  treatment: string
+  outcome: string
+  adjustment_set: string[]
+  valid: boolean
+  violations: CausalAdjustmentViolation[]
+  open_backdoor_paths: string[][]
+  path_listing_bounded: boolean
+  interpretation: string
+  interpretation_note: string
+}
+
+export interface CausalAdjustmentSetCandidate {
+  set: string[]
+  verification: string
+  inclusion_minimal: boolean | null
+}
+
+export interface CausalAdjustmentSearchResponse {
+  graph_id: string
+  dataset_id: string
+  revision: number
+  spec_fingerprint_sha256: string
+  schema_version: string
+  treatment: string
+  outcome: string
+  search_status: 'complete' | 'incomplete'
+  sets: CausalAdjustmentSetCandidate[]
+  forbidden_variables: string[]
+  eligible_candidates: string[]
+  candidates_considered: number
+  bounds: Record<string, number>
+  status_reason?: string
+  interpretation_note: string
+}
+
+export interface CausalExplanation {
+  code: string
+  title: string
+  body: string
+  node_ids: string[]
+}
+
+export interface CausalIdentificationResponse {
+  graph_id: string
+  dataset_id: string
+  revision: number
+  spec_fingerprint_sha256: string
+  schema_version: string
+  identification_version: string
+  status:
+    | 'backdoor_adjustment_available'
+    | 'no_eligible_backdoor_set'
+    | 'search_incomplete'
+    | 'invalid_graph'
+    | 'invalid_scope'
+    | 'missing_dataset_variables'
+    | 'unsupported_identification_method'
+  treatment: string | null
+  outcome: string | null
+  explanations: CausalExplanation[]
+  caveats: string[]
+  search?: CausalAdjustmentSearchResponse
+  interpretation_note: string
+}

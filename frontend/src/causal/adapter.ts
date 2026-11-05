@@ -31,6 +31,8 @@ export interface VariableNodeData extends Record<string, unknown> {
   isTreatment: boolean
   isOutcome: boolean
   isSelected: boolean
+  /** In the currently tested adjustment set (S8C identification highlight). */
+  isAdjustment: boolean
   hasIssue: boolean
   issueCount: number
 }
@@ -39,6 +41,7 @@ export function toFlowNodes(
   draft: CausalDraft,
   errorsByNode: Map<string, number>,
   selectedNodeId: string | null = null,
+  adjustmentIds: Set<string> | null = null,
 ): Node<VariableNodeData>[] {
   return draft.nodes.map((node, index) => {
     const position = node.layout ?? autoPosition(index)
@@ -54,6 +57,7 @@ export function toFlowNodes(
         isTreatment: draft.analysis.treatment === node.node_id,
         isOutcome: draft.analysis.outcome === node.node_id,
         isSelected: selectedNodeId === node.node_id,
+        isAdjustment: adjustmentIds?.has(node.node_id) ?? false,
         hasIssue: errorsByNode.has(node.node_id),
         issueCount: errorsByNode.get(node.node_id) ?? 0,
       },

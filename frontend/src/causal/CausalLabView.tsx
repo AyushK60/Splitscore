@@ -18,9 +18,11 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 
 import { ApiError, causalApi, downloadExport } from '../api/client'
 import type {
+  CausalAdjustmentEvaluationResponse,
   CausalAssumptionSpec,
-  CausalIssue,
+  CausalDSeparationResponse,
   CausalGraphSummary,
+  CausalIssue,
   CausalValidation,
 } from '../api/types'
 import type { ViewId } from '../lib/router'
@@ -29,6 +31,7 @@ import {
   initialLabState,
   isDirty,
   localEdgeProblems,
+  scientificSignature,
   slugifyNodeId,
   causalLabReducer,
   type CausalDraft,
@@ -37,9 +40,12 @@ import {
 import { teachingExample } from './adapter'
 import { CausalCanvas } from './CausalCanvas'
 import { CausalInspector, selectionToView, type InspectorView } from './CausalInspector'
+import { IdentificationPanel, type IdentificationResultState } from './Identification'
 import { VariableRail } from './VariableRail'
 
 type Props = { onNavigate: (view: ViewId) => void }
+
+type LabMode = 'authoring' | 'identification'
 
 /** Rebuilds a CausalValidation from a 422 error envelope's details. */
 function validationFromDetails(details: Record<string, unknown>): CausalValidation | null {
@@ -72,6 +78,13 @@ export function CausalLabView({ onNavigate }: Props) {
   const [confirmDeleteGraph, setConfirmDeleteGraph] = useState(false)
   const [connectError, setConnectError] = useState<string | null>(null)
   const [validationViewOpen, setValidationViewOpen] = useState(false)
+  // S8C identification mode: results are tied to an exact scientific signature
+  // of the draft at run time; any scientific edit (edges, scope, observed
+  // status) marks them visibly stale. Layout drags never do.
+  const [mode, setMode] = useState<LabMode>('authoring')
+  const [identification, setIdentification] = useState<IdentificationResultState | null>(null)
+  const [identificationRunId, setIdentificationRunId] = useState(0)
+  const [highlightIds, setHighlightIds] = useState<Set<string>>(new Set())
   const fitViewRef = useRef<(() => void) | null>(null)
   const importInputRef = useRef<HTMLInputElement>(null)
   const loadedForDataset = useRef<string | null>(null)
@@ -361,6 +374,71 @@ export function CausalLabView({ onNavigate }: Props) {
     [],
   )
 
+  // -- S8C identification ------------------------------------------------------ //
+
+  const runIdentification = useCallback(async () => {
+    if (!datasetId || !state.graphId || dirty) return
+    setBusy('Running identification')
+    try {
+      const payload = await causalApi.identify(datasetId, state.graphId)
+      setIdentification({
+        graphId: state.graphId,
+        fingerprint: payload.spec_fingerprint_sha256,
+        signature: scientificSignature(state.draft),
+        identification: payload,
+      })
+      setIdentificationRunId((value) => value + 1)
+      setHighlightIds(new Set())
+    } catch (caught) {
+      dispatch({
+        type: 'error',
+        title: 'Identification failed',
+        message:
+          caught instanceof ApiError ? caught.message : 'The backend could not be reached.',
+      })
+    } finally {
+      setBusy(null)
+    }
+  }, [datasetId, state.graphId, dirty, state.draft])
+
+  const evaluateAdjustmentSet = useCallback(
+    async (variables: string[]): Promise<CausalAdjustmentEvaluationResponse> => {
+      if (!datasetId || !state.graphId) throw new Error('The graph is not saved yet.')
+      return causalApi.evaluateAdjustment(datasetId, state.graphId, variables)
+    },
+    [datasetId, state.graphId],
+  )
+
+  const probeDSeparation = useCallback(
+    async (x: string, y: string, conditioning: string[]): Promise<CausalDSeparationResponse> => {
+      if (!datasetId || !state.graphId) throw new Error('The graph is not saved yet.')
+      return causalApi.dSeparation(datasetId, state.graphId, x, y, conditioning)
+    },
+    [datasetId, state.graphId],
+  )
+
+  const toggleHighlight = useCallback((nodeId: string) => {
+    setHighlightIds((current) => {
+      const next = new Set(current)
+      if (next.has(nodeId)) next.delete(nodeId)
+      else next.add(nodeId)
+      return next
+    })
+  }, [])
+
+  const setHighlights = useCallback((variables: string[]) => {
+    setHighlightIds(new Set(variables))
+  }, [])
+
+  // Loading (or creating) a different graph invalidates any identification
+  // results outright — they belonged to another structure.
+  useEffect(() => {
+    if (identification && identification.graphId !== state.graphId) {
+      setIdentification(null)
+      setHighlightIds(new Set())
+    }
+  }, [state.graphId, identification])
+
   const loadExample = useCallback((kind: 'chain' | 'fork' | 'collider') => {
     const example = teachingExample(kind)
     // The example lands in the draft as regular editable content — it is not a
@@ -417,9 +495,16 @@ export function CausalLabView({ onNavigate }: Props) {
     ? [...state.validation.errors, ...state.validation.warnings]
     : []
   const structure = state.payload?.validation.derived.nodes ?? null
-  const inspectorView: InspectorView | null = validationViewOpen
-    ? { kind: 'validation' }
-    : selectionToView(state.selected)
+  const identificationStale = identification
+    ? identification.graphId !== state.graphId ||
+      scientificSignature(state.draft) !== identification.signature
+    : false
+  const inspectorView: InspectorView | null =
+    mode === 'identification'
+      ? null
+      : validationViewOpen
+        ? { kind: 'validation' }
+        : selectionToView(state.selected)
   const addedColumns = useMemo(
     () => new Set(state.draft.nodes.map((node) => node.column).filter((column): column is string => Boolean(column))),
     [state.draft.nodes],
@@ -531,6 +616,28 @@ export function CausalLabView({ onNavigate }: Props) {
           <span className="clab-revision" aria-live="polite">
             {busy ?? (savedNote ?? (state.graphId ? `revision ${state.revision}` : 'unsaved draft'))}
           </span>
+          <div className="clab__mode-switch" role="tablist" aria-label="Lab mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'authoring'}
+              data-testid="mode-authoring"
+              className={mode === 'authoring' ? 'clab__mode-tab clab__mode-tab--on' : 'clab__mode-tab'}
+              onClick={() => setMode('authoring')}
+            >
+              Authoring
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'identification'}
+              data-testid="mode-identification"
+              className={mode === 'identification' ? 'clab__mode-tab clab__mode-tab--on' : 'clab__mode-tab'}
+              onClick={() => setMode('identification')}
+            >
+              Identification
+            </button>
+          </div>
         </div>
         <div className="clab__toolbar-group">
           <button
@@ -656,6 +763,7 @@ export function CausalLabView({ onNavigate }: Props) {
                them. */
             issues={state.validation?.errors ?? []}
             selected={state.selected}
+            highlightIds={highlightIds}
             onConnect={handleFlowConnect}
             onMoveNode={(nodeId, x, y) => dispatch({ type: 'moveNode', nodeId, x, y })}
             onSelect={(selection: Selection) => {
@@ -667,7 +775,38 @@ export function CausalLabView({ onNavigate }: Props) {
             }}
             emptyState={emptyState}
           />
+          {mode === 'identification' ? (
+            <div className="clab-legend" aria-label="Graph legend">
+              <span className="clab-legend__item"><span className="clab-legend__dot clab-legend__dot--treatment" /> treatment</span>
+              <span className="clab-legend__item"><span className="clab-legend__dot clab-legend__dot--outcome" /> outcome</span>
+              <span className="clab-legend__item"><span className="clab-legend__dot clab-legend__dot--adjustment" /> in tested adjustment set</span>
+              <span className="clab-legend__item"><span className="clab-legend__dot clab-legend__dot--unobserved" /> unobserved</span>
+            </div>
+          ) : null}
         </div>
+
+        {mode === 'identification' ? (
+          <aside className="clab__inspector" aria-label="Identification">
+            <IdentificationPanel
+              draft={state.draft}
+              datasetId={datasetId}
+              graphId={state.graphId}
+              dirty={dirty}
+              busy={busy}
+              result={identification}
+              stale={identificationStale}
+              highlighted={highlightIds}
+              runId={identificationRunId}
+              onSetAnalysis={(patch) => dispatch({ type: 'setAnalysis', patch })}
+              onRunIdentification={() => void runIdentification()}
+              onSaveRequest={() => void save()}
+              onEvaluateSet={evaluateAdjustmentSet}
+              onProbeDSeparation={probeDSeparation}
+              onHighlight={setHighlights}
+              onToggleHighlight={toggleHighlight}
+            />
+          </aside>
+        ) : null}
 
         {inspectorView ? (
           <CausalInspector
@@ -709,7 +848,8 @@ export function CausalLabView({ onNavigate }: Props) {
 
       <p className="clab-scope-note">
         A structurally valid DAG is not a scientifically justified causal model: validation checks
-        form, not truth. No causal effect is estimated anywhere in this workspace.
+        form, not truth. Identification results are statements about the assumed graph only. No
+        causal effect is estimated anywhere in this workspace.
       </p>
     </section>
   )

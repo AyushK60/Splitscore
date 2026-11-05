@@ -62,6 +62,7 @@ function VariableNode({ data, id }: NodeProps<VariableFlowNode>) {
         data.isSelected ? 'cnode--selected' : '',
         data.isTreatment ? 'cnode--treatment' : '',
         data.isOutcome ? 'cnode--outcome' : '',
+        data.isAdjustment ? 'cnode--adjustment' : '',
         data.hasIssue ? 'cnode--issue' : '',
         data.observed ? '' : 'cnode--unobserved',
       ].join(' ')}
@@ -138,6 +139,8 @@ export interface CausalCanvasProps {
   draft: CausalDraft
   issues: CausalIssue[]
   selected: Selection
+  /** Nodes in the currently tested adjustment set (S8C identification). */
+  highlightIds?: Set<string>
   onConnect: (connection: Connection) => void
   onMoveNode: (nodeId: string, x: number, y: number) => void
   onSelect: (selection: Selection) => void
@@ -154,8 +157,9 @@ function CanvasInner(props: CausalCanvasProps) {
         props.draft,
         byNode,
         props.selected?.kind === 'node' ? props.selected.id : null,
+        props.highlightIds ?? null,
       ),
-    [props.draft, props.selected, byNode],
+    [props.draft, props.selected, byNode, props.highlightIds],
   )
   const edges = useMemo(
     () =>

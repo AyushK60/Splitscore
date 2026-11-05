@@ -919,3 +919,313 @@
     animation-duration: 0.01ms !important;
   }
 }
+
+/* -- S8C identification mode ------------------------------------------------- */
+
+.clab__mode-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--bg-sunken, transparent);
+}
+
+.clab__mode-tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 5px 12px;
+  border-radius: calc(var(--radius) - 4px);
+  font: 600 11px/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.clab__mode-tab--on {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* The global `button:hover` rule paints every button accent-soft; on a
+   segmented switch that would make the *selected* tab look unselected while
+   the pointer rests on it. Hover feedback here is a subtle deepening instead,
+   and the selected tab keeps its solid fill under any pointer state. */
+.clab__mode-tab:hover:not(:disabled) {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink);
+}
+
+.clab__mode-tab--on:hover:not(:disabled) {
+  background: var(--accent-deep);
+  color: var(--accent-ink);
+}
+
+/* Identification highlight on the canvas: a quiet copper ring, distinct from
+   the strong selection state. */
+.cnode--adjustment {
+  outline: 2px dashed var(--accent);
+  outline-offset: 3px;
+}
+
+.cnode--adjustment .cnode__bar {
+  background: var(--accent);
+}
+
+.clab-legend {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 15;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 6px 10px;
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 2px);
+  box-shadow: var(--shadow);
+  font: 400 10.5px/1.4 var(--mono);
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+.clab-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.clab-legend__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-raised);
+}
+
+.clab-legend__dot--treatment {
+  background: var(--accent);
+}
+
+.clab-legend__dot--outcome {
+  background: var(--rs-copper);
+}
+
+.clab-legend__dot--adjustment {
+  background: transparent;
+  outline: 1.5px dashed var(--accent);
+  outline-offset: 1px;
+}
+
+.clab-legend__dot--unobserved {
+  background: transparent;
+  border-style: dashed;
+}
+
+.clab-stale {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--muted);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  background: var(--bg-raised);
+}
+
+.clab-stale p {
+  margin: 0;
+}
+
+.clab-stale--active {
+  border-left-color: var(--medium);
+  color: var(--ink);
+}
+
+.clab-ident-status {
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 10px 12px;
+}
+
+.clab-ident-status h4 {
+  margin: 0 0 4px;
+  font: 600 12.5px/1.4 var(--sans, inherit);
+}
+
+.clab-ident-status--ok {
+  border-left: 3px solid var(--ok);
+}
+
+.clab-ident-status--warn {
+  border-left: 3px solid var(--medium);
+}
+
+.clab-ident-status--error {
+  border-left: 3px solid var(--high);
+}
+
+.clab-ident-status--quiet {
+  border-left: 3px solid var(--line-strong);
+}
+
+.clab-ident-section {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clab-ident-section h4 {
+  margin: 0;
+  font: 600 11px/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.clab-ident-set {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.clab-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.clab-chip {
+  appearance: none;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-raised);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font: 500 11.5px/1.3 var(--sans, inherit);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.clab-chip--on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.clab-check-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 6px 8px;
+}
+
+.clab-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  padding: 3px 0;
+  cursor: pointer;
+}
+
+.clab-check input {
+  accent-color: var(--accent);
+}
+
+.clab-ident-verdict {
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.clab-ident-verdict h4 {
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.clab-ident-verdict--ok {
+  border-left: 3px solid var(--ok);
+}
+
+.clab-ident-verdict--error {
+  border-left: 3px solid var(--high);
+}
+
+.clab-ident-verdict--warn {
+  border-left: 3px solid var(--medium);
+}
+
+.clab-ident-violation {
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.clab-ident-explanation {
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 2px);
+  overflow: hidden;
+}
+
+.clab-ident-explanation__toggle {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 8px 12px;
+  font: 600 12.5px/1.4 var(--sans, inherit);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.clab-ident-explanation__toggle::after {
+  content: '▾';
+  float: right;
+  color: var(--muted);
+}
+
+.clab-ident-explanation__toggle[aria-expanded='true']::after {
+  content: '▴';
+}
+
+.clab-ident-explanation__body {
+  padding: 0 12px 10px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.clab-ident-explanation__body p {
+  margin: 0;
+}
+
+.clab-scope-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.clab-note--warn {
+  color: var(--medium);
+}
+
+@media (max-width: 760px) {
+  .clab-legend {
+    max-width: calc(100% - 20px);
+  }
+}
