@@ -2485,5 +2485,8 @@ details.disclosure[open] > summary {
   }
   .app-context .app-crumb__next {
     justify-content: flex-start;
+    /* Column direction turns the 860px flex *basis* into a height and
+       stretches the context band to ~860px on every view (fixed during S8B). */
+    flex: 0 1 auto;
   }
 }

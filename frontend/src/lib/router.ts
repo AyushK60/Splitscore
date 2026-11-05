@@ -8,6 +8,7 @@ export type ViewId =
   | 'explore'
   | 'audit'
   | 'models'
+  | 'causal'
   | 'evidence'
   | 'comparison'
   | 'export'
@@ -20,6 +21,7 @@ const KNOWN: ViewId[] = [
   'explore',
   'audit',
   'models',
+  'causal',
   'evidence',
   'comparison',
   'export',

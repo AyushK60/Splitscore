@@ -222,7 +222,8 @@ test('workflow: the audit is the third stage and Data runs it directly', async (
     { step: '4', label: 'Study' },
     { step: '5', label: 'Explore' },
     { step: '6', label: 'Model Lab' },
-    { step: '7', label: 'Compare' },
+    { step: '7', label: 'Causal Lab' },
+    { step: '8', label: 'Compare' },
   ])
 
   // The breadcrumb names the current stage and offers real next steps.

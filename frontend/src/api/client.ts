@@ -318,3 +318,85 @@ export const reportsApi = {
     request<DossierReport>(dossierPath(datasetId, 'json'), postInit(body)),
   exportPath: dossierPath,
 }
+
+// --------------------------------------------------------------------------
+// S8 Causal Lab — causal graph authoring against the S8A backend
+// --------------------------------------------------------------------------
+
+import type {
+  CausalExportEnvelope,
+  CausalGraphListResponse,
+  CausalGraphPayload,
+  CausalGraphSpec,
+  CausalValidationResponse,
+} from './types'
+
+function causalGraphBody(spec: CausalGraphSpec): RequestInit {
+  return {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ graph: spec }),
+  }
+}
+
+export const causalApi = {
+  list: (datasetId: string) =>
+    request<CausalGraphListResponse>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs`,
+    ),
+
+  create: (datasetId: string, spec: CausalGraphSpec) =>
+    request<CausalGraphPayload>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs`,
+      causalGraphBody(spec),
+    ),
+
+  get: (datasetId: string, graphId: string) =>
+    request<CausalGraphPayload>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}`,
+    ),
+
+  update: (datasetId: string, graphId: string, spec: CausalGraphSpec) =>
+    request<CausalGraphPayload>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ graph: spec }),
+      },
+    ),
+
+  delete: (datasetId: string, graphId: string) =>
+    request<{ deleted: boolean; graph_id: string; dataset_id: string }>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}`,
+      { method: 'DELETE' },
+    ),
+
+  validate: (datasetId: string, graphId: string) =>
+    request<CausalValidationResponse>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(
+        graphId,
+      )}/validation`,
+    ),
+
+  exportPath: (datasetId: string, graphId: string) =>
+    `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}/export`,
+
+  /** Fetches an export envelope as a JSON object (for import into any dataset). */
+  fetchExport: (datasetId: string, graphId: string) =>
+    request<CausalExportEnvelope>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(
+        graphId,
+      )}/export`,
+    ),
+
+  import: (datasetId: string, exportFile: CausalExportEnvelope) =>
+    request<CausalGraphPayload>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/import`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ export_file: exportFile }),
+      },
+    ),
+}

@@ -1,4 +1,4 @@
-import { StrictMode, useEffect, useRef } from 'react'
+import { StrictMode, Suspense, lazy, useEffect, useRef } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import './styles/app.css'
@@ -9,6 +9,7 @@ import './styles/research.css'
 import './styles/explore.css'
 import './styles/models.css'
 import './styles/s7.css'
+import './styles/s8.css'
 
 import { AppProvider, useApp } from './state/AppState'
 import { useHashRoute, type ViewId } from './lib/router'
@@ -24,6 +25,16 @@ import { EvidenceView } from './views/EvidenceView'
 import { ComparisonView } from './views/ComparisonView'
 import { ExportView } from './views/ExportView'
 
+/**
+ * The Causal Lab (S8B) is code-split: the graph editor is the largest single
+ * workspace and is not needed on the other stages, so it is loaded only when
+ * its route is opened. The CSS is small and stays eager so the first paint of
+ * the route is not unstyled.
+ */
+const CausalLabView = lazy(() =>
+  import('./causal/CausalLabView').then((module) => ({ default: module.CausalLabView })),
+)
+
 /** Stage names used by the breadcrumb. "Audit results" is the third stage. */
 const STAGE_LABEL: Record<ViewId, string> = {
   home: 'Home',
@@ -33,6 +44,7 @@ const STAGE_LABEL: Record<ViewId, string> = {
   study: 'Study',
   explore: 'Explore',
   models: 'Model Lab',
+  causal: 'Causal Lab',
   evidence: 'Evidence',
   comparison: 'Compare',
   export: 'Export',
@@ -52,6 +64,7 @@ const NEXT_GUIDANCE: Record<ViewId, string> = {
   study: 'Study metadata is optional context. Explore the dataset, or run the audit from Data.',
   explore: 'Selections are analysis context, not findings. Inspect them, run the audit, or compare.',
   models: 'Statistical fits describe analysed rows; predictive metrics describe a held-out split. Neither proves causation.',
+  causal: 'Draw assumed relationships, document assumptions and validate the structure. A valid DAG is not evidence the assumptions are true.',
   comparison: 'A comparison shows consequences, not a winner. Assemble the evidence you have actually produced in the Export studio.',
   export: 'Compose a dossier from the runs in this session, then download JSON or a printable HTML artifact.',
 }
@@ -78,6 +91,10 @@ const NEXT_ACTIONS: Partial<Record<ViewId, Array<{ label: string; view: ViewId }
   comparison: [
     { label: 'Audit results', view: 'audit' },
     { label: 'Export', view: 'export' },
+  ],
+  causal: [
+    { label: 'Explore data', view: 'explore' },
+    { label: 'Audit results', view: 'audit' },
   ],
   export: [
     { label: 'Audit results', view: 'audit' },
@@ -123,6 +140,17 @@ function Shell() {
       </ExploreProvider>
     ) :
     view === 'models' ? <ModelLabView onNavigate={navigate} /> :
+    view === 'causal' ? (
+      <Suspense
+        fallback={
+          <div className="card" style={{ padding: 'var(--space-6)' }}>
+            <p className="muted" style={{ margin: 0 }} role="status">Loading the Causal Lab…</p>
+          </div>
+        }
+      >
+        <CausalLabView onNavigate={navigate} />
+      </Suspense>
+    ) :
     view === 'audit' ? <AuditView onNavigate={navigate} /> :
     view === 'evidence' ? <EvidenceView onNavigate={navigate} /> :
     view === 'comparison' ? <ComparisonView onNavigate={navigate} /> :
@@ -140,8 +168,9 @@ function Shell() {
     ...(dataset ? [{ id: 'study' as ViewId, label: 'Study', step: 4 }] : []),
     ...(dataset ? [{ id: 'explore' as ViewId, label: 'Explore', step: 5 }] : []),
     ...(dataset ? [{ id: 'models' as ViewId, label: 'Model Lab', step: 6 }] : []),
-    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 7 }] : []),
-    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 8 }] : []),
+    ...(dataset ? [{ id: 'causal' as ViewId, label: 'Causal Lab', step: 7 }] : []),
+    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 8 }] : []),
+    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 9 }] : []),
   ]
 
   return (

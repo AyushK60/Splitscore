@@ -1752,3 +1752,197 @@ export interface DossierReport {
   reproducibility: DossierReproducibility
   section_catalogue: Array<{ id: string; title: string; description: string }>
 }
+
+// --------------------------------------------------------------------------
+// S8 Causal Lab — causal graph authoring (S8A backend contract, schema 1.0.0)
+// --------------------------------------------------------------------------
+
+export type CausalNodeKind =
+  | 'treatment'
+  | 'outcome'
+  | 'covariate'
+  | 'mediator'
+  | 'effect_modifier'
+  | 'unobserved'
+
+export type CausalAssumptionCategory =
+  | 'temporal_ordering'
+  | 'causal_relationships'
+  | 'unmeasured_confounding'
+  | 'consistency'
+  | 'exchangeability'
+  | 'positivity'
+  | 'selection'
+  | 'measurement'
+  | 'target_population'
+
+export type CausalAssumptionStatus =
+  | 'declared'
+  | 'not_assessed'
+  | 'flagged_for_review'
+  | 'unsupported'
+
+/** Display-only canvas position. Never part of the scientific fingerprint. */
+export interface CausalLayout {
+  x: number
+  y: number
+}
+
+export interface CausalNodeSpec {
+  node_id: string
+  label: string
+  column: string | null
+  observed: boolean
+  kind: CausalNodeKind
+  description: string | null
+  layout: CausalLayout | null
+}
+
+export interface CausalEdgeSpec {
+  source: string
+  target: string
+  rationale: string | null
+  reference: string | null
+}
+
+export interface CausalAnalysisScope {
+  treatment: string | null
+  outcome: string | null
+}
+
+export interface CausalAssumptionSpec {
+  assumption_id: string
+  category: CausalAssumptionCategory
+  status: CausalAssumptionStatus
+  source: string | null
+  rationale: string | null
+}
+
+export interface CausalGraphSpec {
+  schema_version: string
+  name: string
+  description: string | null
+  dataset_id: string
+  nodes: CausalNodeSpec[]
+  edges: CausalEdgeSpec[]
+  analysis: CausalAnalysisScope
+  assumptions: CausalAssumptionSpec[]
+}
+
+export interface CausalStructureNode {
+  parents: string[]
+  children: string[]
+  ancestors: string[]
+  descendants: string[]
+  is_collider: boolean
+  on_directed_treatment_outcome_path: boolean
+}
+
+export interface CausalDerivedStructure {
+  node_count: number
+  edge_count: number
+  is_dag: boolean
+  has_directed_treatment_outcome_path: boolean
+  path_enumeration_bounded: boolean
+  treatment: string | null
+  outcome: string | null
+  nodes: Record<string, CausalStructureNode>
+  note: string
+}
+
+export interface CausalIssue {
+  code: string
+  severity: 'error' | 'warning'
+  message: string
+  hint: string | null
+  node_id: string | null
+  edge_index: number | null
+  assumption_id: string | null
+}
+
+export interface CausalValidation {
+  ok: boolean
+  error_count: number
+  warning_count: number
+  errors: CausalIssue[]
+  warnings: CausalIssue[]
+  derived: CausalDerivedStructure
+}
+
+export interface CausalAssumptionPayload extends CausalAssumptionSpec {
+  category_label: string
+  status_label: string
+}
+
+export interface CausalNodePayload extends CausalNodeSpec {
+  resolved_column_type: string | null
+  derived_structure: CausalStructureNode
+}
+
+export interface CausalGraphPayload {
+  graph_id: string
+  dataset_id: string
+  dataset_name: string
+  dataset_fingerprint_sha256: string
+  schema_version: string
+  revision: number
+  created_at_utc: string
+  updated_at_utc: string
+  spec_fingerprint_sha256: string
+  name: string
+  description: string | null
+  nodes: CausalNodePayload[]
+  edges: CausalEdgeSpec[]
+  analysis: CausalAnalysisScope
+  assumptions: CausalAssumptionPayload[]
+  validation: CausalValidation
+  validation_scope_note: string
+  storage_note: string
+  app: { name: string; version: string }
+}
+
+export interface CausalGraphSummary {
+  graph_id: string
+  name: string
+  description: string | null
+  revision: number
+  node_count: number
+  edge_count: number
+  analysis: CausalAnalysisScope
+  spec_fingerprint_sha256: string
+  created_at_utc: string
+  updated_at_utc: string
+  validation_ok: boolean
+  error_count: number
+  warning_count: number
+}
+
+export interface CausalGraphListResponse {
+  dataset_id: string
+  schema_version: string
+  graphs: CausalGraphSummary[]
+  storage_note: string
+}
+
+export interface CausalValidationResponse {
+  graph_id: string
+  revision: number
+  schema_version: string
+  validation: CausalValidation
+  validation_scope_note: string
+}
+
+export interface CausalExportEnvelope {
+  export_kind: string
+  causal_graph_schema_version: string
+  exported_at_utc: string
+  graph: CausalGraphSpec
+  origin?: {
+    source_graph_id: string
+    source_revision: number
+    dataset_name: string
+    dataset_fingerprint_sha256: string
+    spec_fingerprint_sha256: string
+  }
+  note: string
+}

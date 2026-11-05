@@ -1,6 +1,12 @@
 # SplitScope — Status Report
 
 **Date:** 2026-10-18 (finalization added; Stages 4a–4d recorded below)
+**S8B (2026-11-06):** COMPLETE — the interactive Causal Lab shipped on branch
+`v2-premium-visual-foundation`: `@xyflow/react` DAG canvas, dataset-scoped graph
+authoring against the S8A API (create/save/validate/import/export), assumption
+registry UI, 32 new unit tests and 3 real-backend Playwright journeys
+(25 browser journeys total passing). No identification or estimation yet (S8C).
+See `docs/S8B_HANDOFF.md`.
 **S8A (2026-11-05):** COMPLETE — causal-graph foundation delivered on branch
 `v2-premium-visual-foundation`: validated versioned DAG specs, structural validation
 engine, assumption registry, dataset-scoped graph API and 33 new backend tests
