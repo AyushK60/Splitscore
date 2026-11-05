@@ -386,7 +386,35 @@ def prepare_cohort(
         covariates.append(spec)
         parsed_columns[column] = parsed
 
-    keep = ~(treat_missing | outcome_missing)
+    # Non-finite parsed values (e.g. "inf") are invalid data, not missing data:
+    # they are excluded and counted regardless of the missing-data policy,
+    # because no imputation can give them meaning.
+    invalid_covariate_positions = np.zeros(len(frame), dtype=bool)
+    invalid_per_column: dict[str, int] = {}
+    for spec in covariates:
+        if spec.kind != NUMERIC_KIND:
+            continue
+        parsed = parsed_columns[spec.column]
+        numeric_values = parsed.to_numpy(dtype="float64")
+        invalid = ~np.isnan(numeric_values) & ~np.isfinite(numeric_values)
+        if invalid.any():
+            invalid_per_column[spec.column] = int(invalid.sum())
+            invalid_covariate_positions |= invalid
+            parsed_columns[spec.column] = parsed.mask(invalid)  # NaN, like missing
+    if invalid_per_column:
+        exclusions.append(
+            ExclusionReason(
+                reason="invalid_covariate_value",
+                detail="Rows whose covariate value is not a finite number (e.g. 'inf'). "
+                "Per-column counts: "
+                + ", ".join(f"{col}={count}" for col, count in sorted(invalid_per_column.items()))
+                + ". These rows are excluded under every missing-data policy.",
+                count=int(invalid_covariate_positions.sum()),
+                sample_row_ids=_sample(row_ids, invalid_covariate_positions),
+            )
+        )
+
+    keep = ~(treat_missing | outcome_missing | invalid_covariate_positions)
 
     if request.missing_data_policy == "complete_case":
         per_column: dict[str, int] = {}

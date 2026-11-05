@@ -1,5 +1,10 @@
 # S9A verification record
 
+> **Note (post-audit):** this file preserves the implementation-stage
+> verification exactly as run. The final post-audit tree results are in
+> `docs/S9A_FINAL_VERIFICATION.md`; the independent audit itself is in
+> `docs/S9A_INDEPENDENT_AUDIT.md`.
+
 All numbers below are from actual runs in this session. Commands use the
 repository virtual environment (`E:\Splitscore V2\.venv`, Python 3.11.9).
 

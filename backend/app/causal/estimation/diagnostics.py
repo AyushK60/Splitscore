@@ -34,9 +34,12 @@ EXTREME_HIGH = 0.99
 
 BALANCE_NOTE = (
     "Standardized mean differences are descriptive summaries of covariate balance in this "
-    "sample. No SMD threshold (conventional or otherwise) constitutes a test of exchangeability "
-    "or proof that confounding has been removed; balance can only be assessed relative to the "
-    "adjustment set that graphical identification licensed."
+    "sample. Denominator convention: the pooled term uses the population-form (non-debiased) "
+    "variance, (squared treated SD + squared control SD) / 2, applied identically to the "
+    "unweighted and weighted comparisons so pre/post values are mutually consistent. No SMD "
+    "threshold (conventional or otherwise) constitutes a test of exchangeability or proof that "
+    "confounding has been removed; balance can only be assessed relative to the adjustment set "
+    "that graphical identification licensed."
 )
 
 POSITIVITY_NOTE = (

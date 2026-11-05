@@ -42,13 +42,14 @@ from app.causal.estimation.contracts import (
 )
 from app.causal.estimation.diagnostics import balance_payload, overlap_payload
 from app.causal.estimation.estimators import (
+    MISSING_CATEGORY,
     EstimationFailure,
     EstimatorOutput,
     estimate_aipw,
     estimate_ipw,
     estimate_regression_adjustment,
 )
-from app.causal.estimation.preparation import PreparedData, prepare_cohort
+from app.causal.estimation.preparation import NUMERIC_KIND, PreparedData, prepare_cohort
 from app.causal.estimation.uncertainty import (
     bootstrap_interval,
     influence_function_interval,
@@ -286,6 +287,29 @@ def _uncertainty_for(
     )
 
 
+def _diagnostic_frame(prepared: PreparedData) -> pd.DataFrame:
+    """The frame balance diagnostics are computed on.
+
+    Under ``median_mode`` the fitted pipelines impute inside their folds, but
+    the prepared frame still carries raw NaNs — balance SMDs on raw NaNs would
+    all report null even though the estimators used imputed values. This
+    mirror-imputation (column medians for numeric, the explicit missing level
+    for categorical) reproduces what the models saw, and the payload records
+    that it was applied. Under ``complete_case`` the frame has no missing
+    values and the frame is returned untouched.
+    """
+    if prepared.missing_policy != "median_mode":
+        return prepared.frame
+    frame = prepared.frame.copy()
+    for spec in prepared.covariates:
+        series = frame[spec.column]
+        if spec.kind == NUMERIC_KIND:
+            frame[spec.column] = series.fillna(series.median())
+        else:
+            frame[spec.column] = series.fillna(MISSING_CATEGORY)
+    return frame
+
+
 def _estimator_payload(
     estimator_name: str,
     output: EstimatorOutput,
@@ -299,7 +323,14 @@ def _estimator_payload(
         weights = prepared.treatment / np.maximum(propensity, eps) + (1.0 - prepared.treatment) / np.maximum(
             1.0 - propensity, eps
         )
-    balance = balance_payload(prepared.frame, prepared.treatment, prepared.covariates, weights)
+    diagnostic_frame = _diagnostic_frame(prepared)
+    balance = balance_payload(diagnostic_frame, prepared.treatment, prepared.covariates, weights)
+    if prepared.missing_policy == "median_mode":
+        balance["diagnostic_imputation"] = (
+            "Balance diagnostics are computed on median/mode-imputed covariate values, "
+            "mirroring what the fitted models see; the missingness summary reports the "
+            "raw missing counts."
+        )
     overlap = (
         overlap_payload(
             propensity,
@@ -424,6 +455,25 @@ def run_estimation(
                     "estimator": name,
                     "status": "failed",
                     "failure": {"reason": error.message, "details": error.details},
+                }
+            )
+            continue
+        except ValueError as error:
+            # Degenerate numeric data can still surface as a library-level
+            # ValueError after the structured guards above (scikit-learn
+            # raises ValueError for unsolvable fits). A data-driven failure
+            # is reported per-estimator; it is never a 500.
+            results.append(
+                {
+                    "estimator": name,
+                    "status": "failed",
+                    "failure": {
+                        "reason": (
+                            "The estimator could not be fitted on this data: "
+                            f"{error}"
+                        ),
+                        "details": {"library_error": type(error).__name__},
+                    },
                 }
             )
             continue

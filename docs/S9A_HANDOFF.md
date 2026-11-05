@@ -1,9 +1,30 @@
 # S9A handoff
 
-**Status: COMPLETE for the S9A exit gate.**
+**Status: COMPLETE for the S9A exit gate — independently audited.**
 **Branch:** `v2-premium-visual-foundation` · **Starting HEAD:** `0c5bf2d` (S8C) ·
-**Implementation commit:** the single commit adding the S9A files (hash in
-`git log` and the final response).
+**Implementation commit:** `158c833` · **Audit-repair commit:** the commit
+adding `docs/S9A_INDEPENDENT_AUDIT.md` (hash in `git log`).
+
+## Independent audit outcome (2026-11-06)
+
+A separate audit pass (`docs/S9A_INDEPENDENT_AUDIT.md`) re-derived every
+estimator formula, built an independent numpy/statsmodels reference harness
+(16 tests), and ran an adversarial suite (15 tests). Four defects were
+confirmed and repaired, each with a permanent regression test:
+
+* **HIGH** — non-finite covariate values reached scikit-learn and caused a 500;
+  now excluded with reason `invalid_covariate_value`.
+* **HIGH** — `GroupKFold` with fewer groups than splits caused a 500; now a
+  structured per-estimator failure.
+* **HIGH** — a single-class cross-fitting propensity fold caused a 500; now a
+  structured per-estimator failure (plus a safety net converting residual
+  library `ValueError`s from the estimator layer into `failed` results).
+* **MEDIUM** — balance SMDs reported null under `median_mode`; now computed on
+  the imputed values the models see, with a `diagnostic_imputation` disclosure.
+
+Final verification on the post-audit tree: backend **530 passed**, synthetic
+oracle **41/41 / 61 checks**, frontend **145**, typecheck clean, Playwright
+**29 passed**, ruff clean on all S9A files (`docs/S9A_FINAL_VERIFICATION.md`).
 
 ## What shipped
 
@@ -71,13 +92,27 @@ new/changed files. Details: `docs/S9A_VERIFICATION.md`.
 
 ## S9B readiness
 
-**Ready.** Everything the workbench needs is already structured and stable:
-per-estimator results with `status`/`failure`, `units`, uncertainty blocks
-(including unavailable states), balance rows (`column`, `level`,
-`smd_unweighted`, `smd_weighted`), overlap blocks (propensity quantiles,
-extremes, ESS, warnings), row accounting, comparison block, and
-`stale`/`staleness_reason` on stored runs. The frontend only needs typed API
-contracts; the payloads contain no pre-rendered graphs.
+**GO.** Everything the workbench needs is structured, stable, and now
+independently audited. Verified endpoints and response structures S9B can
+rely on (full shapes in `docs/S9A_API_CONTRACT.md`):
+
+* `POST /api/datasets/{id}/causal-graphs/{gid}/estimation/validate` →
+  `{readiness, gate, cohort_preview, limits}` (estimates and stores nothing).
+* `POST …/estimation/run` → one result entry: `{status: "estimated"|"failed",
+  estimator, estimate, units, treated_mean, control_mean, sample_size,
+  uncertainty: {status, method, standard_error, ci_lower, ci_upper,
+  bootstrap, assumptions}, diagnostics: {balance: {covariates[...],
+  diagnostic_imputation?}, overlap: {...}}, warnings}` + `run_id`.
+* `POST …/estimation/compare` → three result entries + `comparison`
+  (`estimates`, `max_pairwise_difference`, `interpretation`,
+  `shared_analysis`).
+* `GET /api/datasets/{id}/estimation-runs` and
+  `GET …/estimation-runs/{run_id}` → stored runs with `stale` /
+  `staleness_reason` (layout drags never stale; structural edits always do).
+* Error surface S9B must branch on: 409 `infeasible_operation` (fingerprint
+  mismatch), 410 `expired_or_evicted`, 422 `validation_error` (gate/schema,
+  with `details.verification.violations` or `details.unmatched_values_with_counts`),
+  404 `not_found`, 413 `limit_exceeded`.
 
 ## S9C readiness
 

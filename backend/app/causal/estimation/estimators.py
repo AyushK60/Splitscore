@@ -387,6 +387,18 @@ def _crossfit_folds(
     splits = request.cross_fit.splits
     if request.cross_fit.group_column:
         groups = frame[request.cross_fit.group_column].to_numpy()
+        unique_groups = pd.unique(groups)
+        if len(unique_groups) < splits:
+            raise EstimationFailure(
+                "The group column has fewer distinct entities than cross_fit.splits, so "
+                "group-aware folds cannot be formed.",
+                details={
+                    "unique_groups": int(len(unique_groups)),
+                    "splits": splits,
+                    "fix": "Reduce cross_fit.splits, or drop the group column (recording "
+                    "that folds are then not group-aware).",
+                },
+            )
         splitter = GroupKFold(n_splits=splits)
         return list(splitter.split(np.zeros((n_rows, 1)), groups=groups))
     splitter = KFold(n_splits=splits, shuffle=True, random_state=request.uncertainty.seed or 0)
@@ -460,9 +472,21 @@ def estimate_aipw(
     fold_counts: list[int] = []
     for train_idx, test_idx in folds:
         fold_counts.append(int(len(test_idx)))
+        train_t = treatment[train_idx]
+        if train_t.min() == train_t.max():
+            raise EstimationFailure(
+                "A cross-fitting training fold contains only one treatment class, so the "
+                "propensity model is not defined on it.",
+                details={
+                    "fold_treated_rows": int((train_t == 1).sum()),
+                    "fold_control_rows": int((train_t == 0).sum()),
+                    "fix": "Reduce cross_fit.splits, or rebalance/restrict the cohort. The "
+                    "estimator refused to substitute a degenerate model.",
+                },
+            )
         ps_model = _fit_propensity_model(
             frame.iloc[train_idx].reset_index(drop=True),
-            treatment[train_idx],
+            train_t,
             covariates,
             policy,
         )
@@ -484,6 +508,10 @@ def estimate_aipw(
     )
     truncated, truncation_payload, warnings = _apply_truncation(e_hat, truncation_spec)
     eps = np.finfo(float).eps
+    # Machine-epsilon guard against division by zero only — this is not
+    # statistical truncation (that lives in _apply_truncation, explicitly
+    # requested and reported). Extreme fitted scores remain extreme and are
+    # reported by the overlap diagnostics.
     e_safe = np.clip(truncated, eps, 1.0 - eps)
     psi = (
         m1_hat
