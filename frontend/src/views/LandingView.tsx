@@ -50,8 +50,17 @@ const CAPABILITIES: Capability[] = [
   {
     num: '01',
     title: 'Detect contamination',
-    body: 'Five evidence-based checks read the split from both sides. Each finding carries a severity, its denominators, the assumptions it depends on, and the exact rows behind it — a check that cannot run is listed as not run, never as a pass.',
-    checks: ['exact duplicates', 'entity overlap', 'chronology', 'target copy', 'near-duplicates'],
+    body: 'An evidence suite reads the split from both sides. Each finding carries a severity, its denominators, the assumptions it depends on, and the exact rows behind it — a check that cannot run is listed as not run, never as a pass.',
+    checks: [
+      'exact duplicates',
+      'near-duplicates',
+      'entity overlap',
+      'chronology',
+      'target copy',
+      'validation reuse',
+      'pipeline boundary',
+      'feature availability',
+    ],
     action: 'Open the audit workflow',
     view: 'overview',
   },
@@ -72,7 +81,7 @@ const CAPABILITIES: Capability[] = [
   {
     num: '04',
     title: 'Export and retrace',
-    body: 'Download a JSON report, a self-contained HTML file or per-strategy assignment CSVs, with role settings, check coverage and row identifiers intact.',
+    body: 'Compose one evidence dossier from the runs in this session, then download structured JSON, a self-contained printable HTML file or per-strategy assignment CSVs — with role settings, check coverage and row identifiers intact.',
     action: 'Go to reports',
     view: 'export',
   },
@@ -102,10 +111,10 @@ const STEPS = [
 ]
 
 const PROOF = [
-  { value: '252', label: 'backend tests', command: 'python -m pytest -q', span: 'span-5' },
-  { value: '70', label: 'frontend tests', command: 'npm run test', span: 'span-3' },
+  { value: '373', label: 'backend tests', command: 'python -m pytest -q', span: 'span-5' },
+  { value: '104', label: 'frontend tests', command: 'npm run test', span: 'span-3' },
   { value: '41 / 61', label: 'synthetic cases / checks', command: 'evaluate_synthetic.py', span: 'span-4' },
-  { value: '5', label: 'browser journeys', command: 'npm run test:e2e', span: 'span-4' },
+  { value: '22', label: 'browser tests', command: 'npm run test:e2e', span: 'span-4' },
   { value: '6', label: 'bundled synthetic demos', command: 'labelled synthetic throughout', span: 'span-4' },
   { value: '3', label: 'export formats', command: 'JSON · HTML · CSV', span: 'span-4' },
 ]
@@ -113,7 +122,7 @@ const PROOF = [
 const NEXT_STEPS = [
   'Choose a file or demo',
   'Confirm column roles',
-  'Run the five checks',
+  'Run the leakage checks',
   'Compare split strategies',
   'Export the evidence',
 ]
@@ -407,9 +416,9 @@ export function LandingView({ onNavigate }: LandingProps) {
               </div>
 
               <p className="lp-footnote" data-reveal="">
-                <span className="lp-footnote__label">Not in this build</span>
-                Planned for SplitScope V2: Visual Explorer · Model Lab · Causal Lab · Assumption
-                registry · Research dossier. Nothing on this page links to them.
+                <span className="lp-footnote__label">In this build</span>
+                Visual Explorer · Model Lab · and the Report / Export Studio are available from the
+                workbench. Causal Lab remains future work; nothing here claims a causal result.
               </p>
             </div>
           </div>

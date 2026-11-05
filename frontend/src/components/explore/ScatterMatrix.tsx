@@ -2,6 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { exploreApi } from '../../api/client'
 import type { ExploreSchema, SeriesResponse } from '../../api/types'
+import {
+  formatCorrelation,
+  groupColors,
+  isDiscreteAxis,
+  jitterOffset,
+  markStrokeWidth,
+  pearsonR,
+  pointOpacity,
+} from '../../explore/scatterMarks'
 import { FigureExport } from './FigureExport'
 
 /**
@@ -24,7 +33,7 @@ interface Props {
   onOpenPair: (x: string, y: string) => void
 }
 
-const PANEL = 190
+const PANEL = 218
 
 export function ScatterMatrix({ schema, selectedIds, colorColumn, colorLevels, onOpenPair }: Props) {
   const numeric = schema.numeric_columns
@@ -144,20 +153,47 @@ export function ScatterMatrix({ schema, selectedIds, colorColumn, colorLevels, o
       )}
 
       {series && (
-        <div className="xmatrix">
-          {pairs.map(({ x, y }) => (
-            <MatrixPanel
-              key={`${x}\u0000${y}`}
-              series={series}
-              x={x}
-              y={y}
-              selectedIds={selectedIds}
-              colorColumn={colorColumn}
-              colorLevels={colorLevels}
-              onOpen={() => onOpenPair(x, y)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="xmatrix">
+            {pairs.map(({ x, y }) => (
+              <MatrixPanel
+                key={`${x}\u0000${y}`}
+                series={series}
+                x={x}
+                y={y}
+                selectedIds={selectedIds}
+                colorColumn={colorColumn}
+                colorLevels={colorLevels}
+                onOpen={() => onOpenPair(x, y)}
+              />
+            ))}
+          </div>
+          {colorColumn && colorLevels.length > 1 && (
+            <div className="xpc__legend">
+              <span className="xpc__legendtitle">Colour: {colorColumn}</span>
+              {colorLevels.map((level, index) => (
+                <span key={level} className="xpc__legenditem">
+                  <span
+                    className="xpc__swatch"
+                    style={{ background: groupColors(colorLevels)[index] }}
+                  />
+                  {level}
+                </span>
+              ))}
+              {selectedIds.size > 0 && (
+                <span className="xpc__legenditem xpc__legenditem--selected">
+                  <span className="xpc__swatch xpc__swatch--selected" /> selected
+                </span>
+              )}
+            </div>
+          )}
+          <p className="xfig__note">
+            Each panel is the same render sample, not a separately filtered population. The
+            correlation shown is Pearson’s r on the drawn rows: a descriptive summary of this
+            sample, not a finding or a causal claim. Low-cardinality axes are offset by at most 4px
+            so repeated values remain countable; the values and r are unchanged.
+          </p>
+        </>
       )}
     </figure>
   )
@@ -191,35 +227,93 @@ function MatrixPanel({
   const px = (value: number) => 38 + ((value - xMin) / (xMax - xMin || 1)) * inner
   const py = (value: number) => 10 + inner - ((value - yMin) / (yMax - yMin || 1)) * inner
 
-  const unselected: string[] = []
+  const xValues = series.rows
+    .map((row) => row.values[x])
+    .filter((value): value is number => typeof value === 'number')
+  const yValues = series.rows
+    .map((row) => row.values[y])
+    .filter((value): value is number => typeof value === 'number')
+  const discreteX = isDiscreteAxis(xValues)
+  const discreteY = isDiscreteAxis(yValues)
+  const width = markStrokeWidth(series.drawn_rows)
+  const hasSelection = selectedIds.size > 0
+  const palette = groupColors(colorLevels)
+  const levelColor = (level: string) => {
+    const index = colorLevels.indexOf(level)
+    return index >= 0 ? palette[index] : '#6e6e6e'
+  }
+
+  const groups = new Map<string, string[]>()
   const selected: string[] = []
   for (const row of series.rows) {
     const xv = row.values[x]
     const yv = row.values[y]
     if (typeof xv !== 'number' || typeof yv !== 'number') continue
-    const dot = `M${px(xv).toFixed(1)} ${py(yv).toFixed(1)}h.01`
-    if (selectedIds.size > 0 && selectedIds.has(row.id)) selected.push(dot)
-    else unselected.push(dot)
+    const xOffset = discreteX ? jitterOffset(row.id, 'x') : 0
+    const yOffset = discreteY ? jitterOffset(row.id, 'y') : 0
+    const dot = `M${(px(xv) + xOffset).toFixed(1)} ${(py(yv) + yOffset).toFixed(1)}h.01`
+    if (hasSelection && selectedIds.has(row.id)) selected.push(dot)
+    else {
+      const key = colorColumn ? String(row.values[colorColumn] ?? '(missing)') : 'all'
+      const bucket = groups.get(key) ?? []
+      bucket.push(dot)
+      groups.set(key, bucket)
+    }
   }
+  const correlation = pearsonR(series.rows, x, y)
   const fmt = (v: number) => (Math.abs(v) >= 100 ? v.toFixed(0) : v.toPrecision(3))
 
   return (
-    <div className="xmatrix__panel">
+    <div
+      className="xmatrix__panel"
+      role="button"
+      tabIndex={0}
+      aria-label={`Scatter of ${x} against ${y}; ${formatCorrelation(correlation)}. Open full size.`}
+      onClick={onOpen}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onOpen()
+        }
+      }}
+    >
       <svg
         width={PANEL}
-        height={PANEL - 16}
+        height={PANEL}
         role="img"
         aria-label={`Scatter of ${x} against ${y}`}
-        style={{ cursor: 'pointer' }}
-        onClick={onOpen}
       >
         <title>
           {x} × {y} — click to open full size
         </title>
         <rect x={38} y={10} width={inner} height={inner} fill="none" stroke="var(--rs-line)" />
-        <path d={unselected.join('')} stroke="var(--rs-teal)" strokeWidth={1.6} strokeLinecap="round" opacity={0.5} fill="none" />
-        {selectedIds.size > 0 && (
-          <path d={selected.join('')} stroke="var(--rs-copper)" strokeWidth={2.6} strokeLinecap="round" fill="none" />
+        {[...groups.entries()].map(([level, dots]) => (
+          <path
+            key={`halo-${level}`}
+            d={dots.join('')}
+            stroke="var(--rs-surface)"
+            strokeWidth={width + 2}
+            strokeLinecap="round"
+            opacity={pointOpacity(series.drawn_rows, hasSelection) * 0.6}
+            fill="none"
+          />
+        ))}
+        {[...groups.entries()].map(([level, dots]) => (
+          <path
+            key={level}
+            d={dots.join('')}
+            stroke={colorColumn ? levelColor(level) : 'var(--rs-teal)'}
+            strokeWidth={hasSelection ? width * 0.82 : width}
+            strokeLinecap="round"
+            opacity={pointOpacity(series.drawn_rows, hasSelection)}
+            fill="none"
+          />
+        ))}
+        {hasSelection && (
+          <>
+            <path d={selected.join('')} stroke="var(--rs-surface)" strokeWidth={width + 2.8} strokeLinecap="round" fill="none" />
+            <path d={selected.join('')} stroke="var(--rs-copper)" strokeWidth={width + 0.4} strokeLinecap="round" fill="none" />
+          </>
         )}
         <text x={38 + inner / 2} y={PANEL - 14} textAnchor="middle" className="xfig__axislabel">
           {x}
@@ -237,10 +331,14 @@ function MatrixPanel({
         <text x={38 + inner} y={10 + inner + 10} textAnchor="end" className="xpc__tick">{fmt(xMax)}</text>
       </svg>
       <span className="xmatrix__pairs">
-        {Math.min(xScale.valid_count, yScale.valid_count).toLocaleString('en-US')} valid pairs
+        {Math.min(xScale.valid_count, yScale.valid_count).toLocaleString('en-US')} valid pairs ·{' '}
+        <span className="mono" title="Pearson correlation on the drawn render sample; descriptive only">
+          {formatCorrelation(correlation)}
+        </span>
+        {(discreteX || discreteY) ? ' · discrete-axis offset ≤4px' : ''}
       </span>
       {colorColumn && colorLevels.length > 1 && (
-        <span className="xmatrix__color">coloured by {colorColumn}</span>
+        <span className="xmatrix__color">colour marks: {colorColumn}</span>
       )}
     </div>
   )

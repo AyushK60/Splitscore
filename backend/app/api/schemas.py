@@ -195,6 +195,19 @@ class ReportRequest(_Model):
     run_id: str = Field(min_length=1)
 
 
+class DossierRequest(_Model):
+    """Explicit sources for a composite S7 dossier.
+
+    Nothing is inferred from "latest" state: the client names the run IDs it has
+    in scope. Sections are ordered server-side regardless of request order.
+    """
+
+    sections: list[str] | None = Field(default=None, max_length=10)
+    audit_run_id: str | None = Field(default=None, min_length=1, max_length=160)
+    comparison_run_id: str | None = Field(default=None, min_length=1, max_length=160)
+    model_run_ids: list[str] = Field(default_factory=list, max_length=8)
+
+
 class RunListResponse(_Model):
     runs: list[dict[str, Any]]
     store: dict[str, Any]
@@ -227,6 +240,7 @@ __all__ = [
     "CompareResponse",
     "DatasetDetailResponse",
     "DatasetLoadedResponse",
+    "DossierRequest",
     "ErrorResponse",
     "ExistingSplitSummaryResponse",
     "HealthResponse",

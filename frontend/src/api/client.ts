@@ -302,3 +302,19 @@ export const modelsApi = {
 
   runExportPath: (runId: string) => `/api/models/runs/${encodeURIComponent(runId)}/export`,
 }
+
+// --------------------------------------------------------------------------
+// S7 evidence dossier
+// --------------------------------------------------------------------------
+
+import type { DossierReport, DossierRequest } from './types'
+
+export function dossierPath(datasetId: string, format: 'json' | 'html' = 'json'): string {
+  return `/api/datasets/${encodeURIComponent(datasetId)}/reports/dossier?format=${format}`
+}
+
+export const reportsApi = {
+  generate: (datasetId: string, body: DossierRequest) =>
+    request<DossierReport>(dossierPath(datasetId, 'json'), postInit(body)),
+  exportPath: dossierPath,
+}

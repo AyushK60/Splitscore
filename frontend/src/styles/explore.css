@@ -1096,3 +1096,68 @@
     grid-column: 1 / -1;
   }
 }
+
+/* ---- S7 scatter legibility ------------------------------------------------ */
+
+/* Panels are real grid cells now: the matrix no longer collapses into one
+   narrow strip, and hover/focus makes the panel's affordance explicit. */
+.xmatrix {
+  display: grid;
+  /* Six pairwise panels read best as a 3 × 2 gallery. `auto-fill` produced a
+     five-across row plus an orphan at workstation widths, which shrank the
+     panels the matrix exists to make legible. */
+  grid-template-columns: repeat(3, 238px);
+  justify-content: center;
+  gap: 12px;
+  align-items: stretch;
+}
+.xmatrix__panel {
+  align-items: center;
+  padding: 6px 8px 8px;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  cursor: pointer;
+}
+.xmatrix__panel:hover {
+  border-color: color-mix(in srgb, var(--rs-teal) 55%, var(--rs-line));
+  background: color-mix(in srgb, var(--rs-teal-soft) 45%, var(--rs-surface));
+  box-shadow: 0 2px 10px -7px rgb(24 35 29 / 50%);
+}
+.xmatrix__panel:focus-visible {
+  outline: 2px solid var(--rs-teal);
+  outline-offset: 2px;
+}
+.xmatrix__panel svg {
+  max-width: 100%;
+  height: auto;
+}
+.xmatrix__pairs {
+  width: 100%;
+  display: block;
+  color: var(--rs-ink);
+  font-size: 9.75px;
+  line-height: 1.45;
+  text-align: left;
+}
+.xmatrix__pairs .mono {
+  color: var(--rs-teal);
+  font-weight: 600;
+}
+.xmatrix__color {
+  width: 100%;
+  text-align: left;
+  color: var(--rs-soft);
+}
+.xfig__sub {
+  line-height: 1.55;
+}
+
+@media (max-width: 760px) {
+  .xmatrix {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+  .xmatrix__panel {
+    width: 100%;
+    max-width: 280px;
+  }
+}

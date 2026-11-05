@@ -2,6 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { exploreApi } from '../../api/client'
 import type { BrushPredicate, ExploreSchema, SeriesResponse } from '../../api/types'
+import {
+  groupColors,
+  isDiscreteAxis,
+  jitterOffset,
+  markStrokeWidth,
+  pointOpacity,
+} from '../../explore/scatterMarks'
 import { FigureExport } from './FigureExport'
 
 /**
@@ -25,11 +32,6 @@ interface Props {
   selectedIds: Set<string>
   colorColumn: string | null
   colorLevels: string[]
-}
-
-function groupColors(levels: string[]): string[] {
-  const palette = ['var(--rs-teal)', '#5b6d9e', '#7d9b4e', '#9e5b8a', '#4e8a9e', '#9e7d4e', '#8a5a00', '#6e6e6e']
-  return levels.map((_, i) => palette[i % palette.length])
 }
 
 export function ScatterFocus({
@@ -133,6 +135,29 @@ export function ScatterFocus({
   const levelList = useMemo(() => (colorColumn ? colorLevels : ['all']), [colorColumn, colorLevels])
   const levelColors = useMemo(() => groupColors(levelList), [levelList])
 
+  const discreteX = useMemo(
+    () =>
+      isDiscreteAxis(
+        (series?.rows ?? [])
+          .map((row) => row.values[x])
+          .filter((value): value is number => typeof value === 'number'),
+      ),
+    [series, x],
+  )
+  const discreteY = useMemo(
+    () =>
+      isDiscreteAxis(
+        (series?.rows ?? [])
+          .map((row) => row.values[y])
+          .filter((value): value is number => typeof value === 'number'),
+      ),
+    [series, y],
+  )
+  const jitterLabel = [discreteX ? x : null, discreteY ? y : null].filter(Boolean).join(' and ')
+  const drawnRows = series?.drawn_rows ?? 0
+  const strokeWidth = markStrokeWidth(drawnRows)
+  const hasSelection = selectedIds.size > 0
+
   const buckets = useMemo(() => {
     const map = new Map<string, string[]>() // path "M x y h…" dots
     const selected: string[] = []
@@ -141,8 +166,10 @@ export function ScatterFocus({
       const xv = row.values[x]
       const yv = row.values[y]
       if (typeof xv !== 'number' || typeof yv !== 'number') continue
-      const dot = `M${px(xv).toFixed(1)} ${py(yv).toFixed(1)}h.01`
-      if (selectedIds.size > 0 && selectedIds.has(row.id)) selected.push(dot)
+      const xOffset = discreteX ? jitterOffset(row.id, 'x') : 0
+      const yOffset = discreteY ? jitterOffset(row.id, 'y') : 0
+      const dot = `M${(px(xv) + xOffset).toFixed(1)} ${(py(yv) + yOffset).toFixed(1)}h.01`
+      if (hasSelection && selectedIds.has(row.id)) selected.push(dot)
       else {
         const key = colorColumn ? String(row.values[colorColumn] ?? '(missing)') : 'all'
         const bucket = map.get(key) ?? []
@@ -151,7 +178,7 @@ export function ScatterFocus({
       }
     }
     return { map, selected }
-  }, [series, x, y, px, py, selectedIds, colorColumn])
+  }, [series, x, y, px, py, selectedIds, colorColumn, discreteX, discreteY, hasSelection])
 
   const commitBrush = () => {
     const finished = dragRef.current
@@ -188,6 +215,7 @@ export function ScatterFocus({
                 series.sampling.stride > 1 ? ` (every ${series.sampling.stride}th row)` : ''
               } · up to ${pairValid.toLocaleString('en-US')} valid pairs`
             : 'loading…'}
+          {jitterLabel ? ` · discrete ${jitterLabel}: marks offset ≤4px for visibility` : ''}
         </span>
         <FigureExport
           figureId="scatter"
@@ -203,7 +231,13 @@ export function ScatterFocus({
               : ''
           }
           sampling={series?.sampling.description}
-          notes={['Point positions are genuine values; missing or unparsable cells are not drawn.']}
+          notes={[
+            'Point positions are genuine values; missing or unparsable cells are not drawn.',
+            jitterLabel
+              ? `Discrete axis ${jitterLabel} uses a deterministic display offset of at most 4px. Underlying values, brush ranges and counts are unchanged.`
+              : 'No display jitter is applied to this pair.',
+            hasSelection ? 'Copper marks are selected rows; pale marks remain the active population.' : 'All drawn marks belong to the active population; nothing is selected yet.',
+          ]}
           getSvg={() => svgRef.current}
         />
       </figcaption>
@@ -280,21 +314,48 @@ export function ScatterFocus({
                 />
               </g>
             ))}
-            {/* unselected points: one path per colour group */}
+            {/* A paper-coloured halo separates each mark from grid lines and
+                overplotted neighbours without changing its value. */}
+            {[...buckets.map.entries()].map(([level, dots]) => (
+              <path
+                key={`halo-${level}`}
+                d={dots.join('')}
+                stroke="var(--rs-surface)"
+                strokeWidth={strokeWidth + 2.6}
+                strokeLinecap="round"
+                opacity={pointOpacity(drawnRows, hasSelection) * 0.62}
+                fill="none"
+              />
+            ))}
             {[...buckets.map.entries()].map(([level, dots], i) => (
               <path
                 key={level}
                 d={dots.join('')}
                 stroke={colorColumn ? levelColors[i % levelColors.length] : 'var(--rs-teal)'}
-                strokeWidth={selectedIds.size > 0 ? 1 : 2}
+                strokeWidth={hasSelection ? strokeWidth * 0.82 : strokeWidth}
                 strokeLinecap="round"
-                opacity={selectedIds.size > 0 ? 0.25 : 0.55}
+                opacity={pointOpacity(drawnRows, hasSelection)}
                 fill="none"
               />
             ))}
-            {/* selected points */}
-            {selectedIds.size > 0 && (
-              <path d={buckets.selected.join('')} stroke="var(--rs-copper)" strokeWidth={3} strokeLinecap="round" fill="none" />
+            {/* Selected observations keep copper as the single selection cue. */}
+            {hasSelection && (
+              <>
+                <path
+                  d={buckets.selected.join('')}
+                  stroke="var(--rs-surface)"
+                  strokeWidth={strokeWidth + 3.4}
+                  strokeLinecap="round"
+                  fill="none"
+                />
+                <path
+                  d={buckets.selected.join('')}
+                  stroke="var(--rs-copper)"
+                  strokeWidth={strokeWidth + 0.5}
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </>
             )}
             {/* live brush rect */}
             {drag && (
@@ -375,6 +436,9 @@ export function ScatterFocus({
       <p className="xfig__note">
         Drag a rectangle to select observations — the selection joins the same shared pool as the
         parallel-coordinates brushes and the row-evidence inspector.
+        {jitterLabel
+          ? ` The ${jitterLabel} marks carry a deterministic display offset of at most 4px because those axes have few distinct values; values, ranges and counts are not altered.`
+          : ''}
       </p>
     </figure>
   )

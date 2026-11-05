@@ -1482,3 +1482,273 @@ export interface PredictionResult {
   warnings: ModelWarning[]
   versions: Record<string, string>
 }
+
+// --------------------------------------------------------------------------
+// S7 evidence dossier
+// --------------------------------------------------------------------------
+
+export interface DossierRequest {
+  sections: string[] | null
+  audit_run_id: string | null
+  comparison_run_id: string | null
+  model_run_ids: string[]
+}
+
+export interface DossierSummary {
+  study_title: string
+  objective: string | null
+  design: string | null
+  dataset_name: string
+  synthetic: boolean
+  split: SplitSummary | null
+  audit_headline: string | null
+  findings_total: number
+  findings_by_severity: Record<string, number>
+  evaluated_rule_count: number
+  not_evaluated_count: number
+  key_findings: Array<{ rule_id: string; title: string; severity: Severity }>
+  analyses: Array<{ key: string; label: string; run_id: string | null; status: string }>
+  model_count: number
+  comparison_available: boolean
+  cautions: string[]
+  note: string
+}
+
+export interface DossierProvenance {
+  dataset: {
+    dataset_id: string
+    name: string
+    source: string
+    is_synthetic: boolean
+    demo_id: string | null
+    sha256: string
+    row_count: number
+    column_count: number
+    created_at_utc: string
+    warnings: string[]
+  }
+  profile: {
+    numeric_columns: number | null
+    datetime_columns: number | null
+    duplicate_rows: number | null
+    duplicate_row_groups: number | null
+    summary: Record<string, number>
+    warnings: string[]
+    conventions: string[]
+  }
+  columns: Array<{
+    column: string
+    detected_type: string
+    declared_type: string | null
+    roles: string[]
+    missing_count: number
+    missing_ratio: number
+    distinct_count: number
+    unit: string | null
+    description: string | null
+    flags: string[]
+  }>
+  role_assignments: Record<string, string[]>
+  role_note: string
+}
+
+export interface DossierStudy {
+  study_id: string | null
+  revision: number | null
+  updated_at_utc: string | null
+  completion: { declared: number; required: number; missing: string[] } | null
+  declared_fields: Array<{ name: string; label: string; section: string; value: string | string[] }>
+  roles: { assignments?: Record<string, string[]> }
+  column_declarations: Record<string, unknown>
+  issues: Array<{ code: string; severity: string; message: string }>
+  provenance: Record<string, unknown> | null
+  storage_note: string | null
+  note: string
+}
+
+export interface DossierAudit {
+  run_id: string | null
+  generated_at_utc: string
+  duration_ms: number
+  split: SplitSummary
+  roles: ColumnRoles
+  resolved_roles: ResolvedRoles
+  evaluation: EvaluationSummary
+  settings: { audit_config: AuditConfig; audit_limits: Record<string, unknown> }
+  rule_outcomes: Array<{
+    rule_id: string
+    title: string
+    status: RuleOutcome['status']
+    duration_ms: number
+    finding_count: number
+  }>
+  not_evaluated: NotEvaluatedCheck[]
+  limitations: string[]
+  assumptions: string[]
+  diagnostics_note: string | null
+}
+
+export interface DossierFindings {
+  items: Finding[]
+  total: number
+}
+
+export interface DossierComparison {
+  run_id: string | null
+  generated_at_utc: string
+  split: SplitSummary | null
+  strategies: unknown[]
+  rows: ComparisonRow[]
+  plans: unknown[]
+  selection_note: string
+  limitations: string[]
+}
+
+export interface DossierStatisticalModel {
+  run_id: string
+  label: string
+  kind: 'statistical_model'
+  created_at_utc: string
+  versions: Record<string, string>
+  warnings: ModelWarning[]
+  task: StatisticsTask
+  specification: StatisticalModelResult['specification']
+  dataset: StatisticalModelResult['dataset']
+  population: StatisticalModelResult['population']
+  coefficients: StatisticalCoefficient[]
+  fit: StatisticalModelResult['fit']
+  diagnostics: {
+    condition_number: number
+    vif: StatisticalModelResult['diagnostics']['vif']
+    residual_summary: Record<string, number | null> | undefined
+    sample: {
+      method: string
+      stride: number
+      drawn_rows: number
+      analyzed_rows: number
+      description: string
+    }
+  }
+  note: string
+}
+
+export interface DossierPredictiveModel {
+  run_id: string
+  label: string
+  kind: 'prediction_model'
+  created_at_utc: string
+  versions: Record<string, string>
+  warnings: ModelWarning[]
+  task: PredictionTask
+  outcome: PredictionResult['outcome']
+  specification: PredictionResult['specification']
+  design: PredictionResult['design']
+  split: {
+    source: PredictionResult['split']['source']
+    summary: Record<string, unknown>
+    partitions: { fit: number; validation: number; test: number }
+  }
+  selected: PredictionResult['selected']
+  evaluation: {
+    partition: 'test'
+    n: number
+    metrics: PredictionMetrics
+  }
+  diagnostics: {
+    calibration_summary: PredictionCalibrationSummary | null | undefined
+    qq: PredictionQq | null | undefined
+    influence: Partial<PredictionInfluence>
+    permutation_importance: Partial<PredictionImportance>
+  }
+  subgroups: PredictionSubgroup | null | undefined
+  note: string
+}
+
+export interface DossierModels {
+  runs: Array<DossierStatisticalModel | DossierPredictiveModel | { run_id: string; label: string; kind: string; note: string }>
+  total: number
+}
+
+export interface DossierLimitations {
+  audit_limitations: string[]
+  audit_assumptions: string[]
+  comparison_limitations: string[]
+  dataset_warnings: string[]
+  profile_warnings: string[]
+  model_warnings: Array<{ run_id: string; warnings: ModelWarning[] }>
+  not_evaluated: NotEvaluatedCheck[]
+  general: string[]
+}
+
+export interface DossierReproducibility {
+  report_schema_version: string
+  app: { name: string; version: string }
+  generated_at_utc: string
+  dataset_id: string
+  dataset_name: string
+  dataset_sha256: string
+  row_count: number
+  column_count: number
+  audit_run_id: string | null
+  comparison_run_id: string | null
+  model_run_ids: string[]
+  model_environments: Array<{ run_id: string; versions: Record<string, string> }>
+  deterministic_note: string
+  storage_note: string
+}
+
+export type DossierSectionData =
+  | DossierSummary
+  | DossierProvenance
+  | DossierStudy
+  | DossierAudit
+  | RiskScorecard
+  | DossierFindings
+  | DossierComparison
+  | DossierModels
+  | DossierLimitations
+  | DossierReproducibility
+
+export interface DossierSection {
+  id: string
+  title: string
+  description: string
+  included: boolean
+  available: boolean
+  reason: string | null
+  data: DossierSectionData | null
+}
+
+export interface DossierReport {
+  report_kind: 'dossier'
+  schema_version: string
+  generated_at_utc: string
+  app: { name: string; version: string }
+  title: string
+  dataset: {
+    dataset_id: string
+    name: string
+    is_synthetic: boolean
+    source: string
+    sha256: string
+    row_count: number
+    column_count: number
+  }
+  request: {
+    sections: string[]
+    audit_run_id: string | null
+    comparison_run_id: string | null
+    model_run_ids: string[]
+  }
+  summary: DossierSummary
+  sections: Record<string, DossierSection>
+  included_sections: string[]
+  integrity: {
+    raw_data_embedded: boolean
+    row_predictions_embedded: boolean
+    bounded_evidence_embedded: boolean
+    note: string
+  }
+  reproducibility: DossierReproducibility
+  section_catalogue: Array<{ id: string; title: string; description: string }>
+}

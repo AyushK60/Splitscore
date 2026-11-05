@@ -8,6 +8,7 @@ import './styles/s3.css'
 import './styles/research.css'
 import './styles/explore.css'
 import './styles/models.css'
+import './styles/s7.css'
 
 import { AppProvider, useApp } from './state/AppState'
 import { useHashRoute, type ViewId } from './lib/router'
@@ -51,8 +52,8 @@ const NEXT_GUIDANCE: Record<ViewId, string> = {
   study: 'Study metadata is optional context. Explore the dataset, or run the audit from Data.',
   explore: 'Selections are analysis context, not findings. Inspect them, run the audit, or compare.',
   models: 'Statistical fits describe analysed rows; predictive metrics describe a held-out split. Neither proves causation.',
-  comparison: 'A comparison shows consequences, not a winner. Inspect evidence or export the run.',
-  export: 'Exports contain the runs you actually executed; no dossier report exists in this stage.',
+  comparison: 'A comparison shows consequences, not a winner. Assemble the evidence you have actually produced in the Export studio.',
+  export: 'Compose a dossier from the runs in this session, then download JSON or a printable HTML artifact.',
 }
 
 const NEXT_ACTIONS: Partial<Record<ViewId, Array<{ label: string; view: ViewId }>>> = {
@@ -78,6 +79,10 @@ const NEXT_ACTIONS: Partial<Record<ViewId, Array<{ label: string; view: ViewId }
     { label: 'Audit results', view: 'audit' },
     { label: 'Export', view: 'export' },
   ],
+  export: [
+    { label: 'Audit results', view: 'audit' },
+    { label: 'Compare splits', view: 'comparison' },
+  ],
 }
 
 function Shell() {
@@ -93,7 +98,9 @@ function Shell() {
       firstRender.current = false
       return
     }
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    // `auto` would defer to the global `scroll-behavior: smooth` and animate
+    // through the previous view. A new stage should open at its top at once.
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
     // The landing page renders its own <main id="main">; the workbench main is
     // reached through the ref, so focus lands on the content of either route.
     const target = mainRef.current ?? document.getElementById('main')
@@ -140,7 +147,8 @@ function Shell() {
   return (
     <>
       <div className="app-topbar">
-        <header className="app-header">
+        <div className="app-topbar__primary">
+          <header className="app-header">
           <div className="app-header__inner">
             <button
               type="button"
@@ -167,25 +175,28 @@ function Shell() {
               <span className="app-header__meta" aria-hidden="true" />
             )}
           </div>
-        </header>
+          </header>
 
-        <nav className="app-nav" aria-label="Primary">
-          <div className="app-nav__inner">
-            {steps.map(({ id, label, step }) => (
-              <button
-                key={id}
-                type="button"
-                aria-current={view === id ? 'page' : undefined}
-                disabled={busyLabel !== null}
-                onClick={() => navigate(id)}
-              >
-                <span className="app-nav__step" aria-hidden="true">{step}</span>
-                {label}
-              </button>
-            ))}
-          </div>
-        </nav>
+          <nav className="app-nav" aria-label="Primary">
+            <div className="app-nav__inner">
+              {steps.map(({ id, label, step }) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-current={view === id ? 'page' : undefined}
+                  disabled={busyLabel !== null}
+                  onClick={() => navigate(id)}
+                >
+                  <span className="app-nav__step" aria-hidden="true">{step}</span>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </nav>
+        </div>
+      </div>
 
+      <div className="app-context">
         <div className="app-crumb">
           <nav aria-label="Breadcrumb">
             <ol>

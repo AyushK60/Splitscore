@@ -2327,3 +2327,163 @@ details.disclosure[open] > summary {
   color: var(--medium);
   margin: 0;
 }
+
+/* ========================================================================== */
+/* S7 compact workbench chrome                                                */
+/* -------------------------------------------------------------------------- */
+/* The masthead and primary stages share one sticky row. Breadcrumb and the    */
+/* next-action guidance live in a lighter paper band that scrolls away, so     */
+/* orientation is present at the top of a document but never permanently      */
+/* consumes vertical space while reading a chart or a report.                  */
+/* ========================================================================== */
+
+.app-topbar__primary {
+  max-width: var(--ws-max);
+  margin: 0 auto;
+  padding: 0 var(--ws-gutter);
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.8vw, 26px);
+}
+
+.app-topbar .app-header {
+  flex: 0 1 auto;
+  padding: 0;
+}
+.app-topbar .app-header__inner {
+  max-width: none;
+  margin: 0;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+.app-topbar .app-header__title {
+  font-size: 17px;
+}
+.app-topbar .app-header__tagline {
+  font-size: 10.5px;
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+}
+.app-topbar .app-header__meta {
+  margin-left: 0;
+  max-width: 210px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.app-topbar .app-nav {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  margin-left: auto;
+}
+.app-topbar .app-nav__inner {
+  max-width: none;
+  margin: 0;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.app-topbar .app-nav__inner::-webkit-scrollbar {
+  display: none;
+}
+.app-topbar .app-nav button {
+  white-space: nowrap;
+  font-size: 12.75px;
+  padding: 9px 9px 9px;
+}
+.app-topbar .app-nav__step {
+  font-size: 9.5px;
+  padding: 0 4px;
+}
+
+.app-context {
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgb(24 35 29 / 3%);
+}
+.app-context .app-crumb {
+  max-width: var(--ws-max);
+  margin: 0 auto;
+  padding: 6px var(--ws-gutter) 7px;
+  border-top: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.app-context .app-crumb__link {
+  color: var(--muted);
+}
+.app-context .app-crumb__link:hover:not(:disabled) {
+  color: var(--ink);
+}
+.app-context .app-crumb [aria-current='page'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+.app-context .app-crumb li + li::before {
+  color: var(--line-strong);
+}
+.app-context .app-crumb__next {
+  flex: 0 1 860px;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+.app-context .app-crumb__label {
+  color: var(--muted);
+}
+.app-context .app-crumb__next .app-crumb__action {
+  color: var(--accent);
+}
+.app-context .app-crumb__next .app-crumb__action:hover:not(:disabled) {
+  color: var(--ink);
+}
+.app-context button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1500px) {
+  .app-topbar .app-header__tagline {
+    display: none;
+  }
+}
+@media (max-width: 1040px) {
+  .app-topbar__primary {
+    gap: 12px;
+  }
+  .app-topbar .app-nav__inner {
+    justify-content: flex-start;
+  }
+  .app-topbar .app-nav button {
+    font-size: 12px;
+    padding-inline: 7px;
+  }
+}
+@media (max-width: 760px) {
+  .app-topbar__primary {
+    min-height: 52px;
+    padding-inline: var(--space-3);
+  }
+  .app-topbar .app-header__meta {
+    display: none;
+  }
+  .app-topbar .app-header__mark {
+    width: 24px;
+    height: 24px;
+  }
+  .app-topbar .app-nav button {
+    padding-block: 8px;
+  }
+  .app-context .app-crumb {
+    padding-inline: var(--space-3);
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .app-context .app-crumb__next {
+    justify-content: flex-start;
+  }
+}

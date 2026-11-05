@@ -9,11 +9,16 @@ from fastapi import APIRouter
 from fastapi.responses import Response
 
 from app.api.deps import get_context
-from app.api.schemas import ReportRequest, RunListResponse
-from app.core.errors import ValidationFailure
+from app.api.schemas import DossierRequest, ReportRequest, RunListResponse
+from app.core.errors import NotFoundError, ValidationFailure
 from app.reports.csv_export import EXPORT_SANITIZATION_NOTE, build_assignment_csv
+from app.reports.dossier import build_dossier
+from app.reports.dossier_html import render_dossier_html
 from app.reports.html_report import render_audit_html, render_comparison_html
 from app.reports.json_report import build_audit_report, build_comparison_report, report_filename
+from app.research.profiling import build_profile
+from app.research.studies import roles_from_column_roles, study_payload
+from app.synthetic.manifest import recommended_roles as demo_recommended_roles
 
 router = APIRouter(prefix="/api", tags=["reports"])
 
@@ -33,6 +38,112 @@ def _run_payload(run_id: str):
     stored = context.store.get_run(run_id)
     dataset = context.store.get_dataset(stored.dataset_id)
     return context, stored, dataset
+
+
+@router.post("/datasets/{dataset_id}/reports/dossier")
+def export_dossier(
+    dataset_id: str,
+    request: DossierRequest,
+    format: str = "json",
+) -> Response:
+    """Compose (and optionally download) the S7 dossier from named stored runs.
+
+    The body is identical for both formats; ``format=json`` returns the API
+    object, while ``format=html`` wraps that same object in a self-contained
+    printable document. Supplying an ID of the wrong kind is a validation
+    failure, not a silently skipped section.
+    """
+    if format not in {"json", "html"}:
+        raise ValidationFailure(
+            "Dossier format must be 'json' or 'html'.",
+            details={"format": format},
+        )
+    context = get_context()
+    dataset = context.store.get_dataset(dataset_id)
+    record = context.studies.get(dataset_id)
+    if record is None and dataset.demo is not None:
+        demo_roles = demo_recommended_roles(dataset.demo.demo_id)
+        record = context.studies.get_or_create(
+            dataset_id,
+            seed_roles=roles_from_column_roles(demo_roles),
+            seed_split_labels=(demo_roles.split_train_value, demo_roles.split_test_value),
+        )
+    elif record is None:
+        record = context.studies.get_or_create(dataset_id)
+    study = study_payload(record, dataset)
+    profile = build_profile(
+        dataset,
+        assignments=record.role_assignments,
+        declarations=record.column_declarations,
+    )
+
+    def stored_run(run_id: str | None, kind: str, *, label: str) -> dict | None:
+        if not run_id:
+            return None
+        stored = context.store.get_run(run_id)
+        if stored.dataset_id != dataset_id:
+            raise NotFoundError(
+                f"That {label} belongs to a different dataset.",
+                details={"run_id": run_id, "dataset_id": stored.dataset_id},
+            )
+        if stored.kind != kind:
+            raise ValidationFailure(
+                f"That run is not a {label} run.",
+                details={"run_id": run_id, "kind": stored.kind},
+            )
+        return stored
+
+    audit_run = stored_run(request.audit_run_id, "audit", label="leakage audit")
+    comparison_run = stored_run(
+        request.comparison_run_id, "comparison", label="split comparison"
+    )
+    model_runs = []
+    seen_models: set[str] = set()
+    for run_id in request.model_run_ids:
+        if run_id in seen_models:
+            continue
+        seen_models.add(run_id)
+        stored = stored_run(run_id, "model", label="model")
+        if stored is not None:
+            model_runs.append(
+                {"run_id": stored.run_id, "label": stored.label, "payload": stored.payload}
+            )
+
+    try:
+        report = build_dossier(
+            dataset=dataset,
+            study=study,
+            profile=profile,
+            audit=(
+                {**audit_run.payload, "run_id": audit_run.run_id} if audit_run else None
+            ),
+            comparison=(
+                {**comparison_run.payload, "run_id": comparison_run.run_id}
+                if comparison_run
+                else None
+            ),
+            models=model_runs,
+            requested_sections=request.sections,
+        )
+    except ValueError as exc:
+        raise ValidationFailure(str(exc)) from exc
+
+    if format == "html":
+        body = render_dossier_html(report)
+        name = report_filename("dossier", dataset.name)
+        return Response(
+            content=body,
+            media_type="text/html; charset=utf-8",
+            headers=_download_headers(f"{name}.html"),
+        )
+
+    payload = json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False)
+    name = report_filename("dossier", dataset.name)
+    return Response(
+        content=payload,
+        media_type="application/json; charset=utf-8",
+        headers=_download_headers(f"{name}.json"),
+    )
 
 
 @router.post("/reports/json")
