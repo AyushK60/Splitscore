@@ -678,6 +678,19 @@ export function CausalLabView({ onNavigate }: Props) {
           <button
             type="button"
             className="btn btn--small"
+            onClick={() => {
+              if (datasetId && state.graphId) {
+                void downloadExport(causalApi.figurePath(datasetId, state.graphId))
+              }
+            }}
+            disabled={!state.graphId}
+            title="Download the publication figure (SVG) of the saved graph — deterministic, drawn from the spec, not a canvas screenshot"
+          >
+            Export figure
+          </button>
+          <button
+            type="button"
+            className="btn btn--small"
             onClick={() => importInputRef.current?.click()}
             disabled={Boolean(busy)}
             title="Import an export file as a new graph for this dataset"

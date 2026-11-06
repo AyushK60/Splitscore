@@ -394,6 +394,10 @@ export const causalApi = {
   exportPath: (datasetId: string, graphId: string) =>
     `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}/export`,
 
+  /** S10-C: the deterministic publication figure of the stored graph. */
+  figurePath: (datasetId: string, graphId: string) =>
+    `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}/figure.svg`,
+
   /** Fetches an export envelope as a JSON object (for import into any dataset). */
   fetchExport: (datasetId: string, graphId: string) =>
     request<CausalExportEnvelope>(

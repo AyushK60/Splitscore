@@ -126,7 +126,7 @@ def test_complete_dossier_ties_every_section_to_stored_runs(client, loaded_demo)
     body = response.json()
 
     assert body["report_kind"] == "dossier"
-    assert body["schema_version"] == "1.0.0"
+    assert body["schema_version"] == "1.1.0"  # S10-B: additive sections
     assert body["request"]["audit_run_id"] == audit["run_id"]
     assert body["request"]["comparison_run_id"] == comparison["run_id"]
     assert body["request"]["model_run_ids"] == [model["run_id"]]

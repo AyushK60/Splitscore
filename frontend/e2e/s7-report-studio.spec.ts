@@ -146,7 +146,7 @@ test('S7: audit, compare, fit, inspect marks and export one evidence dossier', a
   await expect(page.locator('#report-models')).toContainText(modelRunId)
   await expect(page.locator('#report-comparison')).toContainText('Group holdout')
   await expect(page.locator('#report-audit')).toContainText('SS-ENT-001')
-  await expect(page.locator('.report-toc a')).toHaveCount(10)
+  await expect(page.locator('.report-toc a')).toHaveCount(17) // S10-B: the default dossier now requests all 17 sections
   await expect(page.locator('.report-studio__identity')).toContainText(DATASET_NAME)
   await expect(page.locator('.report-config__actions')).toBeVisible()
   await scrollTo(page, 0)
@@ -179,7 +179,7 @@ test('S7: audit, compare, fit, inspect marks and export one evidence dossier', a
   await comparisonToggle.uncheck()
   await page.getByRole('button', { name: 'Update preview' }).click()
   await expect(page.locator('#report-comparison')).toHaveCount(0)
-  await expect(page.locator('.report-toc a')).toHaveCount(9)
+  await expect(page.locator('.report-toc a')).toHaveCount(16)
   await comparisonToggle.check()
   await page.getByRole('button', { name: 'Update preview' }).click()
   await expect(page.locator('#report-comparison')).toHaveCount(1)
@@ -202,10 +202,10 @@ test('S7: audit, compare, fit, inspect marks and export one evidence dossier', a
     integrity: { raw_data_embedded: boolean; row_predictions_embedded: boolean }
   }
   expect(dossier.report_kind).toBe('dossier')
-  expect(dossier.schema_version).toBe('1.0.0')
+  expect(dossier.schema_version).toBe('1.1.0') // S10-B: additive section schema
   expect(dossier.dataset.name).toBe(DATASET_NAME)
   expect(dossier.dataset.sha256).toHaveLength(64)
-  expect(dossier.included_sections).toHaveLength(10)
+  expect(dossier.included_sections).toHaveLength(17) // S10-B: default requests all sections
   expect(dossier.summary.findings_total).toBeGreaterThan(0)
   expect(dossier.summary.evaluated_rule_count).toBeGreaterThan(0)
   expect(dossier.summary.not_evaluated_count).toBeGreaterThan(0)

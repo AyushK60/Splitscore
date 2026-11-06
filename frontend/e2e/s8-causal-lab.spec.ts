@@ -170,7 +170,7 @@ test('S8B: create, validate, save, reload and export a causal graph', async ({ p
 
   // --- export the versioned JSON -------------------------------------------- //
   const downloadPromise = page.waitForEvent('download')
-  await page.getByRole('button', { name: 'Export' }).click()
+  await page.getByRole('button', { name: 'Export', exact: true }).click() // S10-C added 'Export figure'
   const download = await downloadPromise
   expect(download.suggestedFilename()).toMatch(/^splitscope-causal-graph-cgraph-/)
 })

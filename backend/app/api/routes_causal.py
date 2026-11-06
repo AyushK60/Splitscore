@@ -14,11 +14,12 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict
 
 from app.api.deps import get_context
 from app.audit.dataset import Dataset
+from app.causal.figure import build_graph_figure_svg
 from app.causal.registry import (
     STORAGE_NOTE,
     CausalGraphRecord,
@@ -152,6 +153,40 @@ def export_causal_graph(dataset_id: str, graph_id: str) -> JSONResponse:
             ),
             "X-SplitScope-Export-Note": (
                 "Graph structure, assumptions and layout only; no dataset rows are included."
+            ),
+        },
+    )
+
+
+@router.get("/datasets/{dataset_id}/causal-graphs/{graph_id}/figure.svg")
+def causal_graph_figure(dataset_id: str, graph_id: str) -> Response:
+    """Publication-grade SVG of the stored graph (S10-C).
+
+    Rendered deterministically from the stored spec — never a screenshot of
+    the interactive canvas. Display-only layout coordinates position the
+    nodes; they are excluded from the scientific fingerprint and carry no
+    analytical meaning.
+    """
+    context = get_context()
+    dataset = _dataset(dataset_id)
+    record = context.causal_graphs.get(dataset.dataset_id, graph_id)
+    spec = record.spec.model_dump(mode="json") if hasattr(record.spec, "model_dump") else record.spec
+    svg = build_graph_figure_svg(
+        spec,
+        {
+            "graph_id": record.graph_id,
+            "revision": record.revision,
+            "spec_fingerprint_sha256": record.fingerprint,
+        },
+    )
+    return Response(
+        content=svg,
+        media_type="image/svg+xml; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="splitscope-causal-graph-{record.graph_id}.svg"',
+            "X-SplitScope-Export-Note": (
+                "Deterministic figure of the assumed structure; layout is display-only and "
+                "excluded from the scientific fingerprint."
             ),
         },
     )

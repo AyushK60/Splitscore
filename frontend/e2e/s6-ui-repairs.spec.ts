@@ -227,6 +227,8 @@ test('workflow: the audit is the third stage and Data runs it directly', async (
     // S9C added the Causal research stage between estimation and comparison.
     { step: '9', label: 'Causal research' },
     { step: '10', label: 'Compare' },
+    // S10 added the research-history stage after Compare.
+    { step: '11', label: 'History' },
   ])
 
   // The breadcrumb names the current stage and offers real next steps.
