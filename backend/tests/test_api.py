@@ -104,6 +104,7 @@ def test_demos_endpoint_lists_every_demo_with_a_manifest_entry(client):
         "target_copy",
         "near_duplicates",
         "clean_control",
+        "causal_effect",
     ]
     for demo in body["demos"]:
         assert demo["synthetic"] is True

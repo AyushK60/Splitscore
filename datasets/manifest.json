@@ -725,6 +725,76 @@
       "notes": [
         "Entity identifiers are unique, so a group holdout on this file is equivalent to a random holdout. That is a property of the control, not of group splitting in general."
       ]
+    },
+    {
+      "demo_id": "causal_effect",
+      "title": "Confounded treatment-effect study",
+      "subtitle": "A known average effect of 1.5 units behind measured confounding",
+      "filename": "causal_effect.csv",
+      "synthetic": true,
+      "is_control": false,
+      "seed": 20240901,
+      "row_count": 1200,
+      "column_count": 7,
+      "columns": [
+        "unit_id",
+        "age",
+        "baseline_score",
+        "region",
+        "treatment",
+        "outcome",
+        "split"
+      ],
+      "sha256": "4bc249c10b741b555293a4e6f2df462f1a8b207c600677f2c2c33c6692141d90",
+      "teaching_point": "The treated and control groups differ in age, baseline score and region, and all three also shift the outcome, so the raw difference in means is not the causal effect. Adjusting for the measured confounders recovers an estimate close to the true 1.5-unit effect, while the demonstration's honest caveat remains: recovery here is a property of a known simulation with no unmeasured confounding.",
+      "generation_method": "1200 seeded rows. age ~ N(42, 11) clipped to [18, 80]; baseline_score ~ N(50, 12); region drawn from north/south/east with probabilities (0.40, 0.35, 0.25). Treatment is Bernoulli with logit = -0.9 + 0.035(age - 42) + 0.02(baseline_score - 50) + region shift (+0.5 south, -0.35 east). Outcome = 10 + 1.5*treatment + 0.25(age - 42) + 0.12(baseline_score - 50) + region shift (+0.8 south, -0.6 east) + N(0, 2). A random 75/25 train/test column is included for the audit stages; the causal cohort is every row unless a partition is named. No true propensity or potential-outcome column is shipped.",
+      "expected_findings": [
+        {
+          "rule_id": "SS-DUP-001",
+          "severity": "none",
+          "why": "Every row has a distinct measured signature, so no cross-split duplicate rows exist."
+        },
+        {
+          "rule_id": "SS-ENT-001",
+          "severity": "none",
+          "why": "unit_id is unique per row, so no entity straddles the split boundary."
+        }
+      ],
+      "recommended_audit": {
+        "features": [
+          "age",
+          "baseline_score",
+          "region"
+        ],
+        "target": "outcome",
+        "entity": "unit_id",
+        "timestamp": null,
+        "split": "split",
+        "split_train_value": "train",
+        "split_test_value": "test",
+        "metadata_excluded": [],
+        "near_duplicates": false
+      },
+      "recommended_split": null,
+      "planted_cases": [],
+      "summary_metrics": {
+        "true_ate": 1.5,
+        "rows": 1200,
+        "treated_rows": 349,
+        "control_rows": 851,
+        "naive_difference_in_units": 3.1724
+      },
+      "control_baseline": null,
+      "intended_pair_counts": {
+        "cross_split_duplicate_pairs": null,
+        "within_train_duplicate_pairs": null,
+        "within_test_duplicate_pairs": null,
+        "near_duplicate_pairs": null
+      },
+      "notes": [
+        "This dataset exists for the Effect Estimation Studio: it is the only bundled demo with a binary treatment and a continuous outcome.",
+        "The true effect is a property of the simulation that generated the file. It is not available to SplitScope at estimation time and is never used to compute a result."
+      ]
     }
   ]
 }

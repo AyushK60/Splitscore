@@ -216,8 +216,9 @@ export function OverviewView({ onNavigate }: { onNavigate: (view: ViewId) => voi
             2 — Open a synthetic demonstration
           </h2>
           <p className="we__paneltext">
-            Six bundled datasets, each generated with a specific leakage problem built in. They are
-            teaching data — not real people or events — and each states what it demonstrates.
+            Seven bundled datasets, each generated with a specific problem built in. They are
+            teaching data — not real people or events — and each states what it demonstrates. The
+            causal demonstration is the one to open for effect estimation.
           </p>
           {!demos ? (
             <p className="we__paneltext">

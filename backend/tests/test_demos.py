@@ -280,3 +280,19 @@ def test_audit_config_for_demos_only_enables_near_duplicates_where_documented():
         expected = bool(DEMOS[demo_id].recommended_audit.get("near_duplicates", False))
         assert config.near_duplicates.enabled is expected, demo_id
         assert isinstance(config, AuditConfig)
+
+
+def test_causal_effect_demo_has_a_binary_treatment_and_documented_true_effect():
+    """The S9B demonstration must be estimable and must document its own DGP."""
+    loaded = get_demo("causal_effect")
+    dataset = loaded.load(settings=DEMO_SETTINGS)
+    frame = dataset.frame
+
+    assert sorted(frame["treatment"].unique().tolist()) == ["0", "1"]
+    assert (frame["outcome"].astype(float).notna()).all()
+    assert loaded.manifest_entry["summary_metrics"]["true_ate"] == 1.5
+    # The point of the demo: measured confounding moves the raw contrast away
+    # from the true effect, so the studio has something real to correct.
+    naive = loaded.manifest_entry["summary_metrics"]["naive_difference_in_units"]
+    assert naive > 2.0
+    assert "No true propensity" in DEMOS["causal_effect"].generation_method

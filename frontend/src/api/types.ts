@@ -2047,3 +2047,263 @@ export interface CausalIdentificationResponse {
   search?: CausalAdjustmentSearchResponse
   interpretation_note: string
 }
+
+// ----------------------------------------------------------------------------
+// S9A causal effect estimation — consumed by the S9B studio
+// ----------------------------------------------------------------------------
+
+export type EstimatorName = 'regression_adjustment' | 'ipw' | 'aipw'
+
+export interface EstimationRequestPayload {
+  estimand: 'ate'
+  treatment_node: string
+  outcome_node: string
+  adjustment_nodes: string[]
+  treatment_mapping: { treated: string; control: string }
+  cohort: { split_assignment_id: string | null; partition: 'train' | 'test' | null }
+  missing_data_policy: 'complete_case' | 'median_mode'
+  cross_fit: { splits: number; group_column: string | null }
+  uncertainty: {
+    method: 'influence_function' | 'bootstrap'
+    level: number
+    reps: number
+    seed: number | null
+  }
+  propensity_truncation: { lower: number; upper: number } | null
+  expected_spec_fingerprint_sha256?: string | null
+}
+
+export interface EstimationCovariatePreview {
+  column: string
+  kind: 'numeric' | 'categorical'
+  levels: string[] | null
+  missing_in_cohort: number
+}
+
+export interface EstimationCohortPreview {
+  rows_in_dataset: number
+  rows_in_analysis_cohort_frame: number
+  rows_final: number
+  treated_rows: number
+  control_rows: number
+  exclusions: Array<{
+    reason: string
+    detail: string
+    count: number
+    sample_row_ids: string[]
+  }>
+  covariates: EstimationCovariatePreview[]
+  outcome_task: 'linear' | 'logistic'
+  outcome_coding: Record<string, unknown>
+  missing_data_policy: 'complete_case' | 'median_mode'
+}
+
+export interface EstimationGate {
+  gate: 'passed'
+  adjustment_set_verification: {
+    treatment: string
+    outcome: string
+    adjustment_set: string[]
+    valid: boolean
+    violations: Array<{ code: string; node_id: string | null; message: string }>
+    open_backdoor_paths: string[][]
+    path_listing_bounded: boolean
+    interpretation: string
+    interpretation_note: string
+  }
+  treatment_node: string
+  outcome_node: string
+  adjustment_nodes: string[]
+  caveat: string
+}
+
+export interface EstimationLimits {
+  max_rows: number
+  min_rows_total: number
+  min_rows_per_arm: number
+  max_covariates: number
+  max_categorical_levels: number
+  max_encoded_features: number
+  max_bootstrap_reps: number
+  min_bootstrap_reps: number
+  min_crossfit_splits: number
+  max_crossfit_splits: number
+}
+
+export interface EstimationValidateResponse {
+  graph_id: string
+  dataset_id: string
+  revision: number
+  spec_fingerprint_sha256: string
+  schema_version: string
+  estimation_version: string
+  estimation_schema_version: string
+  readiness: 'ready'
+  gate: EstimationGate
+  cohort_preview: EstimationCohortPreview
+  limits: EstimationLimits
+  note: string
+}
+
+export interface EstimationBalanceCovariate {
+  column: string
+  kind: 'numeric' | 'categorical'
+  level: string | null
+  smd_unweighted: number | null
+  smd_weighted: number | null
+}
+
+export interface EstimationBalance {
+  covariates: EstimationBalanceCovariate[]
+  weighted: boolean
+  interpretation_note: string
+  diagnostic_imputation?: string
+}
+
+export interface EstimationPropensityHistogram {
+  bin_edges: number[]
+  bin_count: number
+  treated_counts: number[]
+  control_counts: number[]
+  treated_share: number[]
+  control_share: number[]
+  definition: string
+}
+
+export interface EstimationOverlap {
+  propensity_summary: {
+    min: number
+    max: number
+    quantiles_overall: Record<string, number>
+    quantiles_treated: Record<string, number>
+    quantiles_control: Record<string, number>
+  }
+  propensity_histogram: EstimationPropensityHistogram
+  extremes: { 'below_0.01': number; 'above_0.99': number; count_definition: string }
+  effective_sample_sizes: {
+    treated_rows_unweighted: number
+    control_rows_unweighted: number
+    treated_ess_weighted: number
+    control_ess_weighted: number
+  }
+  weight_summary: {
+    max_individual_weight: number
+    quantiles_total_weight: Record<string, number>
+  }
+  warnings: string[]
+  scope_note: string
+  truncation: { lower: number; upper: number } | null
+}
+
+export interface EstimationUncertainty {
+  status: 'available' | 'unavailable'
+  method: string
+  level: number
+  standard_error: number | null
+  ci_lower: number | null
+  ci_upper: number | null
+  unavailable_reason?: string | null
+  bootstrap?: {
+    reps_requested: number
+    reps_succeeded: number
+    reps_failed?: number
+    seed: number
+    interval_type: string
+    refit_nuisance_models: boolean
+    sample_failure_messages?: string[]
+  } | null
+  assumptions?: string[]
+}
+
+export interface EstimationResult {
+  estimator: EstimatorName
+  status: 'estimated' | 'failed'
+  estimate?: number
+  mu1?: number
+  mu0?: number
+  treated_mean?: number
+  control_mean?: number
+  units?: string
+  sample_size?: number
+  model_specification?: Record<string, unknown>
+  fold_row_counts?: number[] | null
+  truncation?: { lower: number; upper: number } | null
+  uncertainty?: EstimationUncertainty
+  diagnostics?: { balance: EstimationBalance; overlap: EstimationOverlap | null }
+  warnings?: string[]
+  failure?: { reason: string; details: Record<string, unknown> }
+}
+
+export interface EstimationComparison {
+  shared_analysis: string
+  estimates: Partial<Record<EstimatorName, number>>
+  max_pairwise_difference?: number
+  interpretation: string
+}
+
+export interface EstimationReproducibility {
+  dataset_id: string
+  dataset_fingerprint_sha256: string
+  graph_id: string
+  graph_revision: number
+  graph_spec_fingerprint_sha256: string
+  estimation_version: string
+  estimation_schema_version: string
+  estimators: EstimatorName[]
+  treatment_node: string
+  outcome_node: string
+  adjustment_nodes: string[]
+  treatment_mapping: { treated: string; control: string }
+  cohort: { split_assignment_id: string | null; partition: 'train' | 'test' | null }
+  missing_data_policy: 'complete_case' | 'median_mode'
+  cross_fitting: { splits: number; group_column: string | null }
+  uncertainty: {
+    method: 'influence_function' | 'bootstrap'
+    level: number
+    reps: number
+    seed: number | null
+    resolved_seed: number
+  }
+  propensity_truncation: { lower: number; upper: number } | null
+  software_versions: Record<string, string>
+  limits: EstimationLimits
+}
+
+export interface EstimationRunPayload {
+  graph_id?: string
+  dataset_id?: string
+  revision?: number
+  spec_fingerprint_sha256?: string
+  estimation_version: string
+  estimation_schema_version: string
+  estimand: 'ate'
+  gate: EstimationGate
+  analysis: EstimationCohortPreview & {
+    treatment_column: string
+    outcome_column: string
+    adjustment_columns: string[]
+    outcome_units_note: string
+  }
+  results: EstimationResult[]
+  comparison?: EstimationComparison
+  defaults_applied: Array<{ field: string; value: unknown; meaning: string }>
+  reproducibility: EstimationReproducibility
+  scope_note: string
+  run_id: string
+  created_at_utc: string
+  stale?: boolean
+  staleness_reason?: string
+}
+
+export interface EstimationRunSummary {
+  run_id: string
+  kind: string
+  dataset_id: string
+  label: string
+  created_seconds_ago: number
+}
+
+export interface EstimationRunListResponse {
+  dataset_id: string
+  runs: EstimationRunSummary[]
+}

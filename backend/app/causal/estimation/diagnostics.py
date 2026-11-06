@@ -32,6 +32,12 @@ from app.causal.estimation.preparation import (
 EXTREME_LOW = 0.01
 EXTREME_HIGH = 0.99
 
+#: Fixed histogram geometry for the propensity-overlap figure. Twenty bins of
+#: width 0.05 is the smallest resolution that shows the shape of both arms
+#: without turning the payload into a row dump: 42 integers, no raw scores.
+#: The bins are held constant so two runs are always directly comparable.
+HISTOGRAM_BINS = 20
+
 BALANCE_NOTE = (
     "Standardized mean differences are descriptive summaries of covariate balance in this "
     "sample. Denominator convention: the pooled term uses the population-form (non-debiased) "
@@ -163,6 +169,40 @@ def _quantiles(values: np.ndarray, quantiles: list[float]) -> dict[str, float]:
     return {str(q): float(np.quantile(values, q)) for q in quantiles}
 
 
+def _arm_shares(counts: np.ndarray) -> list[float]:
+    total = float(np.sum(counts))
+    if total <= 0:
+        return [0.0 for _ in counts]
+    return [float(value) / total for value in counts]
+
+
+def propensity_histogram(propensity: np.ndarray, treatment: np.ndarray) -> dict[str, Any]:
+    """Bounded, aggregated propensity distribution for the overlap figure.
+
+    Fixed bins over the closed unit interval, counted separately per arm, plus
+    each arm's within-arm relative frequency. This is the smallest payload that
+    supports an honest overlaid histogram: counts and shares only, never scores
+    or row identifiers, so no uploaded row can be reconstructed from it.
+    """
+    edges = np.linspace(0.0, 1.0, HISTOGRAM_BINS + 1)
+    treated_counts, _ = np.histogram(propensity[treatment == 1], bins=edges)
+    control_counts, _ = np.histogram(propensity[treatment == 0], bins=edges)
+    return {
+        "bin_edges": [round(float(edge), 6) for edge in edges],
+        "bin_count": HISTOGRAM_BINS,
+        "treated_counts": [int(value) for value in treated_counts],
+        "control_counts": [int(value) for value in control_counts],
+        "treated_share": [round(value, 8) for value in _arm_shares(treated_counts)],
+        "control_share": [round(value, 8) for value in _arm_shares(control_counts)],
+        "definition": (
+            "Counts of fitted propensity scores in 20 fixed bins of width 0.05 over [0, 1]; "
+            "shares are relative frequencies within each arm, so the two arms are comparable "
+            "despite unequal group sizes. The scores are fitted estimates, not true treatment "
+            "probabilities."
+        ),
+    }
+
+
 def overlap_payload(
     propensity: np.ndarray,
     treatment: np.ndarray,
@@ -233,6 +273,7 @@ def overlap_payload(
 
     return {
         "propensity_summary": summary,
+        "propensity_histogram": propensity_histogram(propensity, treatment),
         "extremes": extremes,
         "effective_sample_sizes": ess,
         "weight_summary": weight_summary,
@@ -248,6 +289,7 @@ __all__ = [
     "EXTREME_LOW",
     "POSITIVITY_NOTE",
     "balance_payload",
+    "propensity_histogram",
     "kish_ess",
     "overlap_payload",
 ]

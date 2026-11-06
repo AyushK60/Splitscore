@@ -548,6 +548,85 @@ def build_near_duplicates() -> tuple[pd.DataFrame, dict[str, Any]]:
 
 
 # --------------------------------------------------------------------------- #
+# 7. Confounded treatment-effect study (S9B demonstration)
+# --------------------------------------------------------------------------- #
+
+
+def build_causal_effect() -> tuple[pd.DataFrame, dict[str, Any]]:
+    """A binary treatment with a known, constant average effect of 1.5 units.
+
+    Two measured confounders (``age``, ``baseline_score``) and a categorical one
+    (``region``) drive both the treatment assignment and the outcome, so the
+    naive treated-minus-control difference is biased away from the true effect
+    while an adjusted estimator recovers it in expectation. The data-generating
+    process is fully documented in the demo spec, and the true effect is stored
+    in the planted metadata so the studio can display it *next to* (never
+    instead of) the finite-sample estimate the backend computes.
+
+    No true propensity or potential-outcome column is shipped: those are not
+    observable quantities in real data, and exposing them would let an
+    estimator read the answer instead of estimating it.
+    """
+    seed = 20240901
+    rng = np.random.default_rng(seed)
+    n_rows = 1200
+
+    age = np.clip(np.round(rng.normal(42.0, 11.0, size=n_rows), 0), 18, 80)
+    baseline = np.round(rng.normal(50.0, 12.0, size=n_rows), 2)
+    region = rng.choice(["north", "south", "east"], size=n_rows, p=[0.40, 0.35, 0.25])
+    region_treatment = np.where(region == "south", 0.5, np.where(region == "east", -0.35, 0.0))
+    region_outcome = np.where(region == "south", 0.8, np.where(region == "east", -0.6, 0.0))
+
+    logit = -0.9 + 0.035 * (age - 42.0) + 0.02 * (baseline - 50.0) + region_treatment
+    propensity = 1.0 / (1.0 + np.exp(-logit))
+    treatment = (rng.random(n_rows) < propensity).astype(int)
+
+    true_effect = 1.5
+    outcome = np.round(
+        10.0
+        + true_effect * treatment
+        + 0.25 * (age - 42.0)
+        + 0.12 * (baseline - 50.0)
+        + region_outcome
+        + rng.normal(0.0, 2.0, size=n_rows),
+        3,
+    )
+
+    # A random split exists only so the file is a normal audit input; the causal
+    # analysis cohort is every row unless a researcher names a partition.
+    split_rng = np.random.default_rng(seed + 1)
+    split = np.where(split_rng.random(n_rows) < 0.25, SPLIT_TEST, SPLIT_TRAIN)
+
+    frame = pd.DataFrame(
+        {
+            "unit_id": [f"U-{5000 + index}" for index in range(n_rows)],
+            "age": age.astype(int),
+            "baseline_score": baseline,
+            "region": region,
+            "treatment": treatment,
+            "outcome": outcome,
+            "split": split,
+        }
+    )
+
+    treated = frame["treatment"] == 1
+    naive_difference = float(
+        frame.loc[treated, "outcome"].mean() - frame.loc[~treated, "outcome"].mean()
+    )
+    plant = {
+        "true_ate": true_effect,
+        "rows": int(len(frame)),
+        "treated_rows": int(treated.sum()),
+        "control_rows": int((~treated).sum()),
+        "naive_difference_in_units": round(naive_difference, 4),
+        "fitted_propensity_range": [round(float(propensity.min()), 4), round(float(propensity.max()), 4)],
+        "split": {"train_rows": int((frame["split"] == SPLIT_TRAIN).sum()), "test_rows": int((frame["split"] == SPLIT_TEST).sum())},
+        "planted_cases": [],
+    }
+    return frame, plant
+
+
+# --------------------------------------------------------------------------- #
 # Registry
 # --------------------------------------------------------------------------- #
 
@@ -558,6 +637,7 @@ DEMO_ORDER = (
     "target_copy",
     "near_duplicates",
     "clean_control",
+    "causal_effect",
 )
 
 DEMOS: dict[str, DemoSpec] = {
@@ -864,6 +944,63 @@ DEMOS: dict[str, DemoSpec] = {
         ],
         build=build_clean_control,
     ),
+    "causal_effect": DemoSpec(
+        demo_id="causal_effect",
+        title="Confounded treatment-effect study",
+        subtitle="A known average effect of 1.5 units behind measured confounding",
+        filename="causal_effect.csv",
+        seed=20240901,
+        teaching_point=(
+            "The treated and control groups differ in age, baseline score and region, and all "
+            "three also shift the outcome, so the raw difference in means is not the causal "
+            "effect. Adjusting for the measured confounders recovers an estimate close to the "
+            "true 1.5-unit effect, while the demonstration's honest caveat remains: recovery "
+            "here is a property of a known simulation with no unmeasured confounding."
+        ),
+        generation_method=(
+            "1200 seeded rows. age ~ N(42, 11) clipped to [18, 80]; baseline_score ~ N(50, 12); "
+            "region drawn from north/south/east with probabilities (0.40, 0.35, 0.25). Treatment "
+            "is Bernoulli with logit = -0.9 + 0.035(age - 42) + 0.02(baseline_score - 50) + "
+            "region shift (+0.5 south, -0.35 east). Outcome = 10 + 1.5*treatment + "
+            "0.25(age - 42) + 0.12(baseline_score - 50) + region shift (+0.8 south, -0.6 east) + "
+            "N(0, 2). A random 75/25 train/test column is included for the audit stages; the "
+            "causal cohort is every row unless a partition is named. No true propensity or "
+            "potential-outcome column is shipped."
+        ),
+        expected_findings=[
+            {
+                "rule_id": "SS-DUP-001",
+                "severity": "none",
+                "why": "Every row has a distinct measured signature, so no cross-split duplicate "
+                "rows exist.",
+            },
+            {
+                "rule_id": "SS-ENT-001",
+                "severity": "none",
+                "why": "unit_id is unique per row, so no entity straddles the split boundary.",
+            },
+        ],
+        recommended_audit={
+            "features": ["age", "baseline_score", "region"],
+            "target": "outcome",
+            "entity": "unit_id",
+            "timestamp": None,
+            "split": "split",
+            "split_train_value": SPLIT_TRAIN,
+            "split_test_value": SPLIT_TEST,
+            "metadata_excluded": [],
+            "near_duplicates": False,
+        },
+        recommended_split=None,
+        is_control=False,
+        notes=[
+            "This dataset exists for the Effect Estimation Studio: it is the only bundled demo "
+            "with a binary treatment and a continuous outcome.",
+            "The true effect is a property of the simulation that generated the file. It is not "
+            "available to SplitScope at estimation time and is never used to compute a result.",
+        ],
+        build=build_causal_effect,
+    ),
 }
 
 
@@ -879,6 +1016,7 @@ __all__ = [
     "DemoSpec",
     "build_chronology_violation",
     "build_clean_control",
+    "build_causal_effect",
     "build_demo",
     "build_exact_duplicates",
     "build_near_duplicates",

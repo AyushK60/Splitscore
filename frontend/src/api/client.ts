@@ -469,3 +469,63 @@ export const causalApi = {
       },
     ),
 }
+
+// --------------------------------------------------------------------------
+// S9A causal effect estimation — the S9B studio's only numerical source
+// --------------------------------------------------------------------------
+
+import type {
+  EstimationRequestPayload,
+  EstimationRunListResponse,
+  EstimationRunPayload,
+  EstimationValidateResponse,
+  EstimatorName,
+} from './types'
+
+export const estimationApi = {
+  /** Readiness probe: the full gate plus a cohort preview; stores nothing. */
+  validate: (datasetId: string, graphId: string, estimationRequest: EstimationRequestPayload) =>
+    request<EstimationValidateResponse>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(
+        graphId,
+      )}/estimation/validate`,
+      postInit({ request: estimationRequest }),
+    ),
+
+  run: (
+    datasetId: string,
+    graphId: string,
+    estimationRequest: EstimationRequestPayload,
+    estimator: EstimatorName,
+    label = '',
+  ) =>
+    request<EstimationRunPayload>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(
+        graphId,
+      )}/estimation/run`,
+      postInit({ request: estimationRequest, estimator, label }),
+    ),
+
+  compare: (
+    datasetId: string,
+    graphId: string,
+    estimationRequest: EstimationRequestPayload,
+    label = '',
+  ) =>
+    request<EstimationRunPayload>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(
+        graphId,
+      )}/estimation/compare`,
+      postInit({ request: estimationRequest, label }),
+    ),
+
+  runs: (datasetId: string) =>
+    request<EstimationRunListResponse>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/estimation-runs`,
+    ),
+
+  runDetail: (datasetId: string, runId: string) =>
+    request<EstimationRunPayload>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/estimation-runs/${encodeURIComponent(runId)}`,
+    ),
+}

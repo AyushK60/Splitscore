@@ -10,6 +10,7 @@ import './styles/explore.css'
 import './styles/models.css'
 import './styles/s7.css'
 import './styles/s8.css'
+import './styles/s9.css'
 
 import { AppProvider, useApp } from './state/AppState'
 import { useHashRoute, type ViewId } from './lib/router'
@@ -35,6 +36,14 @@ const CausalLabView = lazy(() =>
   import('./causal/CausalLabView').then((module) => ({ default: module.CausalLabView })),
 )
 
+/**
+ * The S9B Effect Estimation Studio is code-split for the same reason: its five
+ * analytical figures and export machinery are only needed on this route.
+ */
+const EstimationView = lazy(() =>
+  import('./estimation/EstimationView').then((module) => ({ default: module.EstimationView })),
+)
+
 /** Stage names used by the breadcrumb. "Audit results" is the third stage. */
 const STAGE_LABEL: Record<ViewId, string> = {
   home: 'Home',
@@ -45,6 +54,7 @@ const STAGE_LABEL: Record<ViewId, string> = {
   explore: 'Explore',
   models: 'Model Lab',
   causal: 'Causal Lab',
+  estimation: 'Effect estimation',
   evidence: 'Evidence',
   comparison: 'Compare',
   export: 'Export',
@@ -65,6 +75,7 @@ const NEXT_GUIDANCE: Record<ViewId, string> = {
   explore: 'Selections are analysis context, not findings. Inspect them, run the audit, or compare.',
   models: 'Statistical fits describe analysed rows; predictive metrics describe a held-out split. Neither proves causation.',
   causal: 'Draw assumed relationships, document assumptions and validate the structure. A valid DAG is not evidence the assumptions are true.',
+  estimation: 'Estimates are conditional on the DAG and the verified adjustment set. Inspect balance, overlap and effective sample size before reading an interval, and export the figure with its provenance.',
   comparison: 'A comparison shows consequences, not a winner. Assemble the evidence you have actually produced in the Export studio.',
   export: 'Compose a dossier from the runs in this session, then download JSON or a printable HTML artifact.',
 }
@@ -96,6 +107,10 @@ const NEXT_ACTIONS: Partial<Record<ViewId, Array<{ label: string; view: ViewId }
     { label: 'Explore data', view: 'explore' },
     { label: 'Audit results', view: 'audit' },
   ],
+  estimation: [
+    { label: 'Causal Lab', view: 'causal' },
+    { label: 'Export', view: 'export' },
+  ],
   export: [
     { label: 'Audit results', view: 'audit' },
     { label: 'Compare splits', view: 'comparison' },
@@ -106,6 +121,7 @@ function Shell() {
   const [view, navigate] = useHashRoute()
   const { status, busyLabel, dismissStatus, dataset, audit, comparison } = useApp()
   const mainRef = useRef<HTMLElement>(null)
+  const navRef = useRef<HTMLDivElement>(null)
   const firstRender = useRef(true)
 
   // A new step starts at its own top: without this the next view opens at the
@@ -122,6 +138,22 @@ function Shell() {
     // reached through the ref, so focus lands on the content of either route.
     const target = mainRef.current ?? document.getElementById('main')
     target?.focus({ preventScroll: true })
+  }, [view])
+
+  // The primary nav scrolls horizontally at narrow widths. Keep the active step
+  // in view, otherwise entering a late stage hides its own nav item off-screen.
+  useEffect(() => {
+    const nav = navRef.current
+    if (!nav) return
+    const centreActive = () => {
+      const active = nav.querySelector<HTMLElement>('[aria-current="page"]')
+      if (!active) return
+      const centred = active.offsetLeft + active.offsetWidth / 2 - nav.clientWidth / 2
+      nav.scrollLeft = Math.max(0, centred)
+    }
+    centreActive()
+    window.addEventListener('resize', centreActive)
+    return () => window.removeEventListener('resize', centreActive)
   }, [view])
 
   // The landing page carries its own navigation and footer: the workbench
@@ -151,6 +183,17 @@ function Shell() {
         <CausalLabView onNavigate={navigate} />
       </Suspense>
     ) :
+    view === 'estimation' ? (
+      <Suspense
+        fallback={
+          <div className="card" style={{ padding: 'var(--space-6)' }}>
+            <p className="muted" style={{ margin: 0 }} role="status">Loading the Effect Estimation Studio…</p>
+          </div>
+        }
+      >
+        <EstimationView onNavigate={navigate} />
+      </Suspense>
+    ) :
     view === 'audit' ? <AuditView onNavigate={navigate} /> :
     view === 'evidence' ? <EvidenceView onNavigate={navigate} /> :
     view === 'comparison' ? <ComparisonView onNavigate={navigate} /> :
@@ -169,8 +212,9 @@ function Shell() {
     ...(dataset ? [{ id: 'explore' as ViewId, label: 'Explore', step: 5 }] : []),
     ...(dataset ? [{ id: 'models' as ViewId, label: 'Model Lab', step: 6 }] : []),
     ...(dataset ? [{ id: 'causal' as ViewId, label: 'Causal Lab', step: 7 }] : []),
-    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 8 }] : []),
-    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 9 }] : []),
+    ...(dataset ? [{ id: 'estimation' as ViewId, label: 'Effect estimation', step: 8 }] : []),
+    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 9 }] : []),
+    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 10 }] : []),
   ]
 
   return (
@@ -207,7 +251,7 @@ function Shell() {
           </header>
 
           <nav className="app-nav" aria-label="Primary">
-            <div className="app-nav__inner">
+            <div className="app-nav__inner" ref={navRef}>
               {steps.map(({ id, label, step }) => (
                 <button
                   key={id}

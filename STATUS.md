@@ -1,6 +1,24 @@
 # SplitScope — Status Report
 
 **Date:** 2026-10-18 (finalization added; Stages 4a–4d recorded below)
+**S9B (2026-11-06):** COMPLETE — the Causal Effect Estimation Studio shipped on
+branch `v2-premium-visual-foundation`: a dedicated `#/estimation` stage (step 8)
+that gates every run behind the S9A readiness check, requires a saved S8C graph
+and an explicit run, and presents five analytical views — Effect summary
+(dot-and-interval), Covariate balance (Love plot), Overlap (per-arm propensity
+histograms plus a 20-bin count/share table), Weights (raw vs Kish effective
+sample size) and Methodology (cohort accounting, identification verdict,
+uncertainty, provenance, limitations). Results carry deterministic named
+staleness reasons, partial failures are shown as failures rather than zeros,
+unavailable intervals are never fabricated, and SVG/PNG/CSV/JSON figure exports
+and verbatim run JSON are produced from the plotted values. One bounded backend
+diagnostic was added (fixed 20-bin per-arm propensity histogram) plus a
+deterministic `causal_effect` demo with a documented true ATE of 1.5 and a
+confounded naive difference of 3.1724. 6 new backend tests (**536 total**), 60
+new frontend tests (**205 total**), 4 new real-backend Playwright journeys (**33
+total**), synthetic oracle still 41/41 (61 checks); responsive QA at 1440, 1024,
+768 and 390 with inspected screenshots. No ATT/CATE, sensitivity or subgroup
+analysis yet (S9C, not started). See `docs/S9B_HANDOFF.md`.
 **S9A (2026-11-06):** COMPLETE — scientific causal effect estimation shipped on
 branch `v2-premium-visual-foundation`: a mandatory S8C identification gate
 (fingerprint match, structural re-validation, exact backdoor verdict on the

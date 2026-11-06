@@ -2457,9 +2457,14 @@ details.disclosure[open] > summary {
   .app-topbar .app-nav__inner {
     justify-content: flex-start;
   }
+  /* Nine stages with step badges no longer fit beside the wordmark; the badge
+     is decorative (aria-hidden), so drop it rather than clip the last stages. */
+  .app-topbar .app-nav__step {
+    display: none;
+  }
   .app-topbar .app-nav button {
     font-size: 12px;
-    padding-inline: 7px;
+    padding-inline: 6px;
   }
 }
 @media (max-width: 760px) {

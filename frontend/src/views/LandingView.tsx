@@ -111,11 +111,11 @@ const STEPS = [
 ]
 
 const PROOF = [
-  { value: '373', label: 'backend tests', command: 'python -m pytest -q', span: 'span-5' },
-  { value: '104', label: 'frontend tests', command: 'npm run test', span: 'span-3' },
+  { value: '536', label: 'backend tests', command: 'python -m pytest -q', span: 'span-5' },
+  { value: '205', label: 'frontend tests', command: 'npm run test', span: 'span-3' },
   { value: '41 / 61', label: 'synthetic cases / checks', command: 'evaluate_synthetic.py', span: 'span-4' },
-  { value: '22', label: 'browser tests', command: 'npm run test:e2e', span: 'span-4' },
-  { value: '6', label: 'bundled synthetic demos', command: 'labelled synthetic throughout', span: 'span-4' },
+  { value: '33', label: 'browser tests', command: 'npm run test:e2e', span: 'span-4' },
+  { value: '7', label: 'bundled synthetic demos', command: 'labelled synthetic throughout', span: 'span-4' },
   { value: '3', label: 'export formats', command: 'JSON · HTML · CSV', span: 'span-4' },
 ]
 
@@ -417,8 +417,10 @@ export function LandingView({ onNavigate }: LandingProps) {
 
               <p className="lp-footnote" data-reveal="">
                 <span className="lp-footnote__label">In this build</span>
-                Visual Explorer · Model Lab · and the Report / Export Studio are available from the
-                workbench. Causal Lab remains future work; nothing here claims a causal result.
+                Visual Explorer · Model Lab · Causal Lab with graphical identification · Effect
+                estimation · and the Report / Export Studio are available from the workbench.
+                Identification and estimation are conditional on the assumed graph; nothing here
+                proves a causal effect.
               </p>
             </div>
           </div>
