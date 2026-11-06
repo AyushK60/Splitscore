@@ -35,6 +35,14 @@ from app.causal.estimation.service import (
     mark_staleness,
     run_estimation,
 )
+from app.causal.estimation.subgroups import SubgroupSpec, run_subgroup_estimation
+from app.causal.estimation.robustness import (
+    ConfounderSpec,
+    PlaceboSpec,
+    SubsamplingSpec,
+    run_robustness_experiment,
+)
+from app.causal.estimation.whatif import run_what_if
 from app.core.errors import NotFoundError
 from app.core.logging_config import get_logger
 
@@ -226,6 +234,120 @@ def get_estimation_run(dataset_id: str, run_id: str) -> dict[str, Any]:
         )
         return annotated
     return mark_staleness(run.payload, dataset, record)
+
+
+# --------------------------------------------------------------------------- #
+# S9C — subgroup effects, robustness experiments, what-if scenarios
+# --------------------------------------------------------------------------- #
+
+
+class SubgroupBody(_Model):
+    node_id: str = Field(min_length=1, max_length=80)
+    numeric_binning: Literal["median", "tercile", "quartile"] = "quartile"
+    levels: list[str] | None = Field(default=None, max_length=8)
+    intent: Literal["exploratory", "prespecified"] = "exploratory"
+
+
+class SubgroupRunRequest(_Model):
+    """Subgroup ATEs on the gated cohort from the cross-fitted AIPW equation."""
+
+    request: EstimationRequest
+    subgroup: SubgroupBody
+    label: str = Field(default="", max_length=120)
+
+
+class RobustnessRunRequest(_Model):
+    """One reproducible robustness experiment on the gated cohort."""
+
+    request: EstimationRequest
+    experiment: Literal["subsampling", "placebo", "unmeasured_confounder"]
+    parameters: RobustnessParams
+    label: str = Field(default="", max_length=120)
+
+
+class RobustnessParams(_Model):
+    estimator: Literal["regression_adjustment", "ipw", "aipw"] = "regression_adjustment"
+    reps: int = Field(default=200, ge=100, le=1000)
+    fraction: float = Field(default=0.5, ge=0.10, le=0.90)
+    prevalence: float = Field(default=0.3, ge=0.05, le=0.95)
+
+
+class WhatIfRunRequest(_Model):
+    """Model-based scenario predictions from the g-computation outcome model."""
+
+    request: EstimationRequest
+    profile: dict[str, float | str | None] = Field(default_factory=dict, max_length=30)
+    label: str = Field(default="", max_length=120)
+
+
+def _stored(kind_label: str, payload: dict[str, Any], label: str) -> dict[str, Any]:
+    """Timestamp and store an advanced-analysis run, then return it."""
+    context = get_context()
+    payload["created_at_utc"] = datetime.now(UTC).isoformat(timespec="seconds")
+    run_id = context.store.put_run(
+        kind="estimation",
+        dataset_id=payload["reproducibility"]["dataset_id"],
+        payload=payload,
+        label=label,
+    )
+    payload["run_id"] = run_id
+    logger.info("%s run %s stored", kind_label, run_id)
+    return payload
+
+
+@router.post("/datasets/{dataset_id}/causal-graphs/{graph_id}/estimation/subgroups")
+def estimation_subgroups(dataset_id: str, graph_id: str, body: SubgroupRunRequest) -> dict[str, Any]:
+    """Subgroup average treatment effects from the cross-fitted AIPW equation."""
+    dataset, record = _record(dataset_id, graph_id)
+    _require_validated_spec(record.spec, dataset)
+    spec = SubgroupSpec(
+        node_id=body.subgroup.node_id,
+        numeric_binning=body.subgroup.numeric_binning,
+        levels=body.subgroup.levels,
+        intent=body.subgroup.intent,
+    )
+    payload = run_subgroup_estimation(dataset, record, body.request, spec)
+    return _stored(
+        "subgroup estimation",
+        payload,
+        body.label
+        or f"subgroups: {body.subgroup.node_id} · {body.request.treatment_node} → {body.request.outcome_node}",
+    )
+
+
+@router.post("/datasets/{dataset_id}/causal-graphs/{graph_id}/estimation/robustness")
+def estimation_robustness(dataset_id: str, graph_id: str, body: RobustnessRunRequest) -> dict[str, Any]:
+    """Run one reproducible robustness experiment (subsampling/placebo/sensitivity)."""
+    dataset, record = _record(dataset_id, graph_id)
+    _require_validated_spec(record.spec, dataset)
+    params = body.parameters
+    if body.experiment == "subsampling":
+        spec: SubsamplingSpec | PlaceboSpec | ConfounderSpec = SubsamplingSpec(
+            estimator=params.estimator, reps=params.reps, fraction=params.fraction
+        )
+    elif body.experiment == "placebo":
+        spec = PlaceboSpec(estimator=params.estimator, reps=params.reps)
+    else:
+        spec = ConfounderSpec(estimator=params.estimator, prevalence=params.prevalence)
+    payload = run_robustness_experiment(dataset, record, body.request, body.experiment, spec)
+    return _stored(
+        f"robustness {body.experiment}",
+        payload,
+        body.label or f"robustness: {body.experiment} · {params.estimator}",
+    )
+
+
+@router.post("/datasets/{dataset_id}/causal-graphs/{graph_id}/estimation/whatif")
+def estimation_what_if(dataset_id: str, graph_id: str, body: WhatIfRunRequest) -> dict[str, Any]:
+    """Model-based scenario predictions under the g-computation outcome model."""
+    dataset, record = _record(dataset_id, graph_id)
+    _require_validated_spec(record.spec, dataset)
+    payload = run_what_if(dataset, record, body.request, body.profile)
+    return _stored(
+        "what-if scenario",
+        payload,
+        body.label or f"what-if: {body.request.treatment_node} → {body.request.outcome_node}",
+    )
 
 
 __all__ = ["router"]
