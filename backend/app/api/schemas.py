@@ -202,10 +202,12 @@ class DossierRequest(_Model):
     in scope. Sections are ordered server-side regardless of request order.
     """
 
-    sections: list[str] | None = Field(default=None, max_length=10)
+    sections: list[str] | None = Field(default=None, max_length=17)
     audit_run_id: str | None = Field(default=None, min_length=1, max_length=160)
     comparison_run_id: str | None = Field(default=None, min_length=1, max_length=160)
     model_run_ids: list[str] = Field(default_factory=list, max_length=8)
+    estimation_run_ids: list[str] = Field(default_factory=list, max_length=8)
+    presentation: Literal["concise", "technical"] = "concise"
 
 
 class RunListResponse(_Model):

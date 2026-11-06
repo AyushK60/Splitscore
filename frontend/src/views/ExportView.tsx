@@ -10,8 +10,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { dossierPath, modelsApi, reportsApi } from '../api/client'
-import type { DossierReport, DossierRequest } from '../api/types'
+import { dossierPath, estimationApi, modelsApi, reportsApi } from '../api/client'
+import type { DossierReport, DossierRequest, EstimationRunSummary } from '../api/types'
 import { ReportPreview } from '../components/report/ReportPreview'
 import { Callout } from '../components/ui'
 import { bytes, integer, pluralise } from '../lib/format'
@@ -27,6 +27,13 @@ const SECTION_ORDER = [
   'findings',
   'comparison',
   'models',
+  'causal_graph',
+  'identification',
+  'causal_estimation',
+  'subgroups',
+  'robustness',
+  'what_if',
+  'methodology',
   'limitations',
   'reproducibility',
 ] as const
@@ -42,6 +49,21 @@ const SECTION_COPY: Record<string, { title: string; note: string }> = {
   models: { title: 'Model Lab', note: 'Metrics and diagnostics for selected runs.' },
   limitations: { title: 'Limitations', note: 'Scope, assumptions and missing evaluations.' },
   reproducibility: { title: 'Reproducibility', note: 'Run IDs, fingerprint, versions and integrity.' },
+  causal_graph: { title: 'Causal graph', note: 'The assumed DAG: nodes, edges, assumptions.' },
+  identification: { title: 'Identification', note: 'Backdoor verdicts recorded by the estimation gate.' },
+  causal_estimation: { title: 'Effect estimation', note: 'Stored estimation runs: cohort, estimators, intervals.' },
+  subgroups: { title: 'Subgroup effects', note: 'Heterogeneity with multiple-comparisons caveats.' },
+  robustness: { title: 'Robustness', note: 'One experiment with its parameters and honest scope.' },
+  what_if: { title: 'What-if scenario', note: 'Conditional model expectations; never counterfactuals.' },
+  methodology: { title: 'Methodology', note: 'Generated methods section; gaps are explicit.' },
+}
+
+const ANALYSIS_KIND_LABEL: Record<string, string> = {
+  estimation: 'Estimation',
+  estimation_comparison: 'Comparison',
+  subgroups: 'Subgroups',
+  robustness: 'Robustness',
+  what_if: 'What-if',
 }
 
 interface ModelRun {
@@ -57,6 +79,10 @@ export function ExportView({ onNavigate }: { onNavigate: (view: ViewId) => void 
   const [modelRuns, setModelRuns] = useState<ModelRun[] | null>(null)
   const [modelsError, setModelsError] = useState<string | null>(null)
   const [selectedModels, setSelectedModels] = useState<string[]>([])
+  const [estimationRuns, setEstimationRuns] = useState<EstimationRunSummary[] | null>(null)
+  const [estimationError, setEstimationError] = useState<string | null>(null)
+  const [selectedEstimation, setSelectedEstimation] = useState<string[]>([])
+  const [presentation, setPresentation] = useState<'concise' | 'technical'>('concise')
   const [sections, setSections] = useState<string[]>([...SECTION_ORDER])
   const [report, setReport] = useState<DossierReport | null>(null)
   const [generating, setGenerating] = useState(false)
@@ -65,6 +91,7 @@ export function ExportView({ onNavigate }: { onNavigate: (view: ViewId) => void 
   const lastAutoSignature = useRef<string | null>(null)
   const sectionsTouched = useRef(false)
   const modelsTouched = useRef(false)
+  const estimationTouched = useRef(false)
   const generateRef = useRef<() => Promise<void>>(async () => {})
 
   useEffect(() => {
@@ -77,6 +104,10 @@ export function ExportView({ onNavigate }: { onNavigate: (view: ViewId) => void 
     setModelRuns(null)
     setModelsError(null)
     setSelectedModels([])
+    setEstimationRuns(null)
+    setEstimationError(null)
+    setSelectedEstimation([])
+    estimationTouched.current = false
     setReport(null)
     setError(null)
     setDirty(false)
@@ -104,6 +135,34 @@ export function ExportView({ onNavigate }: { onNavigate: (view: ViewId) => void 
         setModelRuns([])
         setModelsError(reason instanceof Error ? reason.message : 'Model runs could not be listed.')
       })
+    estimationApi
+      .runs(dataset.dataset.dataset_id)
+      .then((response) => {
+        if (cancelled) return
+        const runs = response.runs.map((run) => ({
+          run_id: run.run_id,
+          kind: run.kind,
+          dataset_id: run.dataset_id,
+          label: run.label,
+          created_seconds_ago: run.created_seconds_ago,
+          analysis_kind: run.analysis_kind,
+        }))
+        setEstimationRuns(runs)
+        if (!estimationTouched.current) {
+          // Pre-select causal estimation runs only: subgroup/robustness/what-if
+          // runs are optional enrichments the user selects deliberately.
+          setSelectedEstimation(
+            runs
+              .filter((run) => run.analysis_kind === 'estimation' || run.analysis_kind === 'estimation_comparison')
+              .map((run) => run.run_id),
+          )
+        }
+      })
+      .catch((reason) => {
+        if (cancelled) return
+        setEstimationRuns([])
+        setEstimationError(reason instanceof Error ? reason.message : 'Estimation runs could not be listed.')
+      })
     return () => {
       cancelled = true
     }
@@ -115,8 +174,10 @@ export function ExportView({ onNavigate }: { onNavigate: (view: ViewId) => void 
       audit_run_id: audit?.run_id ?? null,
       comparison_run_id: comparison?.run_id ?? null,
       model_run_ids: selectedModels,
+      estimation_run_ids: selectedEstimation,
+      presentation,
     }),
-    [sections, audit?.run_id, comparison?.run_id, selectedModels],
+    [sections, audit?.run_id, comparison?.run_id, selectedModels, selectedEstimation, presentation],
   )
 
   const generate = useCallback(async () => {
@@ -160,6 +221,31 @@ export function ExportView({ onNavigate }: { onNavigate: (view: ViewId) => void 
     findings: Boolean(audit),
     comparison: Boolean(comparison),
     models: Boolean(modelRuns?.length),
+    causal_graph: Boolean(selectedEstimation.length),
+    identification: Boolean(selectedEstimation.length),
+    causal_estimation: Boolean(
+      (estimationRuns ?? []).some(
+        (run) =>
+          selectedEstimation.includes(run.run_id) &&
+          (run.analysis_kind === 'estimation' || run.analysis_kind === 'estimation_comparison'),
+      ),
+    ),
+    subgroups: Boolean(
+      (estimationRuns ?? []).some(
+        (run) => selectedEstimation.includes(run.run_id) && run.analysis_kind === 'subgroups',
+      ),
+    ),
+    robustness: Boolean(
+      (estimationRuns ?? []).some(
+        (run) => selectedEstimation.includes(run.run_id) && run.analysis_kind === 'robustness',
+      ),
+    ),
+    what_if: Boolean(
+      (estimationRuns ?? []).some(
+        (run) => selectedEstimation.includes(run.run_id) && run.analysis_kind === 'what_if',
+      ),
+    ),
+    methodology: true,
     limitations: true,
     reproducibility: true,
   }
@@ -170,6 +256,12 @@ export function ExportView({ onNavigate }: { onNavigate: (view: ViewId) => void 
     findings: 'Run the leakage audit to add this section.',
     comparison: 'Run a split comparison to add this section.',
     models: 'Fit a model in Model Lab to add this section.',
+    causal_graph: 'Select a stored estimation run to add its causal graph.',
+    identification: 'Select a stored estimation run to add its identification verdicts.',
+    causal_estimation: 'Select a stored estimation comparison to add this section.',
+    subgroups: 'Run subgroup effects in Causal research, then select the run here.',
+    robustness: 'Run a robustness experiment in Causal research, then select the run here.',
+    what_if: 'Run a what-if scenario in Causal research, then select the run here.',
   }
 
   const toggleSection = (section: string) => {
@@ -279,6 +371,62 @@ export function ExportView({ onNavigate }: { onNavigate: (view: ViewId) => void 
                     </span>
                   </div>
                 </div>
+                <div className="report-source report-source--stacked">
+                  <span
+                    className={`report-source__mark${estimationRuns?.length ? ' report-source__mark--ok' : ''}`}
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <strong>Causal estimation runs</strong>
+                    <span>
+                      {estimationError
+                        ? estimationError
+                        : estimationRuns === null
+                          ? 'listing stored runs…'
+                          : `${integer(estimationRuns.length)} available · ${integer(selectedEstimation.length)} selected`}
+                    </span>
+                  </div>
+                </div>
+                {estimationRuns && estimationRuns.length > 0 ? (
+                  <div className="report-models">
+                    <div className="report-models__actions">
+                      <button
+                        type="button"
+                        className="report-link"
+                        onClick={() => {
+                          estimationTouched.current = true
+                          setSelectedEstimation(estimationRuns.map((run) => run.run_id))
+                          setDirty(true)
+                        }}
+                        disabled={selectedEstimation.length === estimationRuns.length}
+                      >
+                        Include all
+                      </button>
+                      <span>{selectedEstimation.length} of {estimationRuns.length}</span>
+                    </div>
+                    {estimationRuns.map((run) => (
+                      <label key={run.run_id} className="report-model-toggle">
+                        <input
+                          type="checkbox"
+                          checked={selectedEstimation.includes(run.run_id)}
+                          onChange={() => {
+                            estimationTouched.current = true
+                            setSelectedEstimation((previous) =>
+                              previous.includes(run.run_id)
+                                ? previous.filter((id) => id !== run.run_id)
+                                : [...previous, run.run_id],
+                            )
+                            setDirty(true)
+                          }}
+                        />
+                        <span>
+                          <strong>{ANALYSIS_KIND_LABEL[run.analysis_kind ?? 'estimation'] ?? 'Estimation'} · {run.label || run.run_id}</strong>
+                          <span className="mono">{run.run_id}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                ) : null}
                 {modelRuns && modelRuns.length > 0 ? (
                   <div className="report-models">
                     <div className="report-models__actions">
@@ -351,6 +499,19 @@ export function ExportView({ onNavigate }: { onNavigate: (view: ViewId) => void 
               <h2>Preview &amp; export</h2>
               <span className="report-config__status">{report ? 'ready' : 'not composed'}</span>
             </div>
+            <label className="report-config__presentation">
+              <span>Methodology presentation</span>
+              <select
+                value={presentation}
+                onChange={(event) => {
+                  setPresentation(event.target.value === 'technical' ? 'technical' : 'concise')
+                  setDirty(true)
+                }}
+              >
+                <option value="concise">Concise</option>
+                <option value="technical">Technical</option>
+              </select>
+            </label>
             <button
               type="button"
               className="btn btn--primary report-config__generate"

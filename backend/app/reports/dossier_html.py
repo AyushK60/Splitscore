@@ -718,6 +718,276 @@ def _reproducibility(section: dict[str, Any]) -> str:
     )
 
 
+# --------------------------------------------------------------------------- #
+# S10-B — causal sections
+# --------------------------------------------------------------------------- #
+
+
+def _causal_graph(section: dict[str, Any]) -> str:
+    data = section["data"]
+    return (
+        _section_heading(section)
+        + f'<p class="small muted">{_esc(data.get("caveat"))}</p>'
+        + _kv(
+            [
+                ("Graph", data.get("name")),
+                ("Graph id", data.get("graph_id")),
+                ("Revision", data.get("graph_revision")),
+                ("Spec fingerprint", data.get("graph_spec_fingerprint_sha256")),
+                ("Treatment", (data.get("analysis") or {}).get("treatment")),
+                ("Outcome", (data.get("analysis") or {}).get("outcome")),
+                ("Description", data.get("description")),
+            ]
+        )
+        + "<h3>Nodes</h3>"
+        + _table(
+            ["Node", "Column", "Kind", "Observed", "Description"],
+            [
+                [
+                    node.get("label"),
+                    node.get("column"),
+                    node.get("kind"),
+                    node.get("observed"),
+                    node.get("description"),
+                ]
+                for node in data.get("nodes", [])
+            ],
+        )
+        + "<h3>Edges (assumed relationships)</h3>"
+        + _table(
+            ["Source", "Target", "Rationale"],
+            [
+                [edge.get("source"), edge.get("target"), edge.get("rationale")]
+                for edge in data.get("edges", [])
+            ],
+        )
+        + "<h3>Recorded assumptions</h3>"
+        + _list(data.get("assumptions", []))
+        + "</section>"
+    )
+
+
+def _identification(section: dict[str, Any]) -> str:
+    data = section["data"]
+    blocks = [
+        _section_heading(section),
+        f'<p class="small muted">{_esc(data.get("interpretation_note"))}</p>',
+    ]
+    for verdict in data.get("verdicts", []):
+        verification = verdict.get("adjustment_set_verification") or {}
+        blocks.append(
+            "<article>"
+            + _kv(
+                [
+                    ("Run", verdict.get("run_id")),
+                    ("Analysis", verdict.get("analysis_kind")),
+                    ("Treatment", verdict.get("treatment_node")),
+                    ("Outcome", verdict.get("outcome_node")),
+                    ("Adjustment nodes", verdict.get("adjustment_nodes")),
+                    ("Backdoor verdict", verification.get("valid")),
+                    ("Verification detail", verification.get("detail") or verification.get("note")),
+                    ("Gate caveat", verdict.get("caveat")),
+                ]
+            )
+            + "</article>"
+        )
+    return "".join(blocks) + "</section>"
+
+
+def _causal_estimation(section: dict[str, Any]) -> str:
+    data = section["data"]
+    blocks = [
+        _section_heading(section),
+        f'<p class="small muted">{_esc(data.get("interpretation_note"))}</p>',
+    ]
+    for run in data.get("runs", []):
+        cohort = run.get("cohort") or {}
+        estimator_blocks = []
+        for estimator in run.get("estimators", []):
+            interval = estimator.get("interval") or {}
+            estimator_blocks.append(
+                "<article>"
+                + _kv(
+                    [
+                        ("Estimator", estimator.get("estimator")),
+                        ("Status", estimator.get("status")),
+                        ("Estimate", estimator.get("estimate")),
+                        ("Units", estimator.get("units")),
+                        (
+                            "Interval",
+                            f"{interval.get('ci_lower')} to {interval.get('ci_upper')} "
+                            f"(level {interval.get('interval_level')})"
+                            if estimator.get("interval")
+                            else None,
+                        ),
+                        ("Failure", (estimator.get("failure") or {}).get("reason")),
+                        ("Worst unweighted SMD", (estimator.get("balance") or {}).get("worst_unweighted")),
+                        ("Worst weighted SMD", (estimator.get("balance") or {}).get("worst_weighted")),
+                        ("Overlap summary", (estimator.get("overlap") or {}).get("propensity_summary")),
+                    ]
+                )
+                + "<h4>Warnings</h4>"
+                + _list(estimator.get("warnings", []))
+                + "</article>"
+            )
+        blocks.append(
+            "<article class='model'>"
+            + _kv(
+                [
+                    ("Run", run.get("run_id")),
+                    ("Created", run.get("created_at_utc")),
+                    ("Estimand", run.get("estimand")),
+                    ("Cohort rows", cohort.get("rows_final")),
+                    ("Treated / control", f"{cohort.get('treated_rows')} / {cohort.get('control_rows')}"),
+                    ("Missing-data policy", cohort.get("missing_data_policy")),
+                    ("Graph fingerprint", run.get("graph_spec_fingerprint_sha256")),
+                ]
+            )
+            + "<h3>Estimators</h3>"
+            + "".join(estimator_blocks)
+            + f'<p class="small muted">{_esc(run.get("scope_note"))}</p>'
+            + "</article>"
+        )
+    return "".join(blocks) + "</section>"
+
+
+def _subgroups(section: dict[str, Any]) -> str:
+    data = section["data"]
+    subgroup = data.get("subgroup") or {}
+    overall = data.get("overall") or {}
+    return (
+        _section_heading(section)
+        + _kv(
+            [
+                ("Run", data.get("run_id")),
+                ("Subgroup variable", subgroup.get("column")),
+                ("Definition", subgroup.get("definition")),
+                ("Intent", subgroup.get("intent")),
+                ("Rows excluded (missing)", subgroup.get("rows_excluded_missing")),
+                (
+                    "Overall ATE",
+                    f"{overall.get('estimate')} ({overall.get('ci_lower')} to {overall.get('ci_upper')})",
+                ),
+            ]
+        )
+        + "<h3>Subgroup estimates</h3>"
+        + _table(
+            ["Group", "Rows", "Treated/Control", "Estimate", "Interval", "Status", "Warnings"],
+            [
+                [
+                    group.get("label"),
+                    group.get("rows"),
+                    f"{group.get('treated_rows')}/{group.get('control_rows')}",
+                    group.get("estimate"),
+                    (
+                        f"{group.get('ci_lower')} to {group.get('ci_upper')}"
+                        if group.get("ci_lower") is not None
+                        else None
+                    ),
+                    group.get("status"),
+                    "; ".join(group.get("warnings", [])) or None,
+                ]
+                for group in data.get("groups", [])
+            ],
+        )
+        + "<h3>Between-group contrasts</h3>"
+        + _table(
+            ["A", "B", "Difference", "Interval"],
+            [
+                [
+                    contrast.get("a"),
+                    contrast.get("b"),
+                    contrast.get("difference"),
+                    f"{contrast.get('ci_lower')} to {contrast.get('ci_upper')}",
+                ]
+                for contrast in (data.get("contrasts") or [])
+            ],
+        )
+        + "<h3>Disclosed notes</h3>"
+        + _list([note.get("text") for note in data.get("notes", []) if isinstance(note, dict)])
+        + f'<p class="small muted">{_esc(data.get("scope_note"))}</p>'
+        + "</section>"
+    )
+
+
+def _robustness(section: dict[str, Any]) -> str:
+    data = section["data"]
+    parameters = data.get("parameters") or {}
+    distribution = data.get("distribution") or {}
+    return (
+        _section_heading(section)
+        + _kv(
+            [
+                ("Run", data.get("run_id")),
+                ("Experiment", data.get("experiment")),
+                ("Original estimate", (data.get("original") or {}).get("estimate")),
+                ("Experiment parameters", parameters),
+                (
+                    "Distribution mean / sd",
+                    f"{distribution.get('mean')} / {distribution.get('standard_deviation')}",
+                ),
+                ("Repetitions summarised", data.get("repetition_count")),
+                ("Full repetition series included", data.get("full_series_included")),
+            ]
+        )
+        + "<h3>Recorded failures</h3>"
+        + _list(
+            [
+                f"rep {failure.get('rep')}: {failure.get('reason')}"
+                for failure in (data.get("failures") or [])
+            ]
+        )
+        + "<h3>Caveats</h3>"
+        + _list(data.get("warnings", []))
+        + f'<p class="small muted">{_esc(data.get("method_note"))}</p>'
+        + f'<p class="small muted">{_esc(data.get("scope_note"))}</p>'
+        + "</section>"
+    )
+
+
+def _what_if(section: dict[str, Any]) -> str:
+    data = section["data"]
+    profile = data.get("profile_scenario") or {}
+    cohort_scenario = data.get("cohort_scenario") or {}
+    disclosures = profile.get("disclosures") or []
+    return (
+        _section_heading(section)
+        + _kv(
+            [
+                ("Run", data.get("run_id")),
+                ("Model", (data.get("model_specification") or {}).get("kind")),
+                ("Units", (data.get("model_specification") or {}).get("units")),
+                ("Treated prediction", profile.get("treated_prediction")),
+                ("Control prediction", profile.get("control_prediction")),
+                ("Scenario contrast", profile.get("contrast")),
+                ("Cohort-standardised contrast", cohort_scenario.get("contrast")),
+            ]
+        )
+        + "<h3>Profile disclosures</h3>"
+        + _table(
+            ["Field", "Source", "Value"],
+            [[item.get("field"), item.get("source"), item.get("value")] for item in disclosures],
+        )
+        + "<h3>Caveats</h3>"
+        + _list(data.get("warnings", []))
+        + f'<p class="small muted">{_esc(data.get("scope_note"))}</p>'
+        + "</section>"
+    )
+
+
+def _methodology(section: dict[str, Any]) -> str:
+    data = section["data"]
+    return (
+        _section_heading(section)
+        + f'<p class="small muted">{_esc(data.get("scope_note"))}</p>'
+        + "".join(
+            f"<h3>{_esc(paragraph.get('title'))}</h3><p>{_esc(paragraph.get('text'))}</p>"
+            for paragraph in data.get("paragraphs", [])
+        )
+        + "</section>"
+    )
+
+
 _RENDERERS = {
     "summary": _summary,
     "provenance": _provenance,
@@ -729,6 +999,13 @@ _RENDERERS = {
     "models": _models,
     "limitations": _limitations,
     "reproducibility": _reproducibility,
+    "causal_graph": _causal_graph,
+    "identification": _identification,
+    "causal_estimation": _causal_estimation,
+    "subgroups": _subgroups,
+    "robustness": _robustness,
+    "what_if": _what_if,
+    "methodology": _methodology,
 }
 
 

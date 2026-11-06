@@ -16,6 +16,13 @@ import type {
   DossierSummary,
   Finding,
   RiskScorecard,
+  DossierCausalGraph,
+  DossierIdentification,
+  DossierCausalEstimation,
+  DossierSubgroups,
+  DossierRobustness,
+  DossierWhatIf,
+  DossierMethodology,
 } from '../../api/types'
 import { integer } from '../../lib/format'
 
@@ -979,6 +986,337 @@ function ReproducibilitySection({ data }: { data: DossierReproducibility }) {
   )
 }
 
+// S10-B renderers for the seven new dossier sections.
+// Written with the same primitives the v1 renderers use (SectionShell,
+// report-kv, report-table) and the same honesty rules: unavailable data is
+// shown as '—', caveats are carried verbatim, nothing is invented.
+
+function str(value: unknown): string {
+  if (value === null || value === undefined || value === '') return '—'
+  if (typeof value === 'object') return JSON.stringify(value)
+  return String(value)
+}
+
+function listStr(value: unknown): string {
+  if (Array.isArray(value) && value.length > 0) return value.map((item) => str(item)).join(', ')
+  return '—'
+}
+
+function CausalGraphSection({ data }: { data: DossierCausalGraph }) {
+  return (
+    <>
+      <dl className="report-kv">
+        <dt>Graph</dt>
+        <dd>{data.name ?? '—'}</dd>
+        <dt>Graph run</dt>
+        <dd className="mono">{data.graph_id ?? '—'}</dd>
+        <dt>Spec fingerprint</dt>
+        <dd className="mono">{data.graph_spec_fingerprint_sha256 ?? '—'}</dd>
+        <dt>Treatment → outcome</dt>
+        <dd>{data.analysis ? `${data.analysis.treatment} → ${data.analysis.outcome}` : '—'}</dd>
+        <dt>Description</dt>
+        <dd>{data.description ?? '—'}</dd>
+      </dl>
+      <p className="report-note">{data.caveat}</p>
+      <div className="report-table-wrap">
+        <table className="report-table">
+          <thead>
+            <tr><th>Edge (assumed)</th><th>Rationale</th></tr>
+          </thead>
+          <tbody>
+            {data.edges.map((edge, index) => (
+              <tr key={`edge-${index}`}>
+                <td className="mono">{`${edge.source} → ${edge.target}`}</td>
+                <td>{edge.rationale ?? '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <h3>Recorded assumptions</h3>
+      {data.assumptions.length === 0 ? (
+        <p>No assumption was recorded on the graph.</p>
+      ) : (
+        <ul>
+          {data.assumptions.map((assumption, index) => (
+            <li key={`assumption-${index}`}>{str(assumption)}</li>
+          ))}
+        </ul>
+      )}
+    </>
+  )
+}
+
+function IdentificationSection({ data }: { data: DossierIdentification }) {
+  return (
+    <>
+      <p className="report-note">{data.interpretation_note}</p>
+      <div className="report-table-wrap">
+        <table className="report-table">
+          <thead>
+            <tr><th>Run</th><th>Analysis</th><th>Treatment</th><th>Outcome</th><th>Adjustment nodes</th><th>Backdoor verdict</th></tr>
+          </thead>
+          <tbody>
+            {data.verdicts.map((verdict, index) => (
+              <tr key={`verdict-${index}`}>
+                <td className="mono">{str(verdict.run_id)}</td>
+                <td>{statusLabel(str(verdict.analysis_kind))}</td>
+                <td>{str(verdict.treatment_node)}</td>
+                <td>{str(verdict.outcome_node)}</td>
+                <td>{listStr(verdict.adjustment_nodes)}</td>
+                <td>{(verdict as { adjustment_set_verification?: { valid?: boolean } }).adjustment_set_verification?.valid === true ? 'verified' : 'not verified'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )
+}
+
+function CausalEstimationSection({ data }: { data: DossierCausalEstimation }) {
+  return (
+    <>
+      <p className="report-note">{data.interpretation_note}</p>
+      {data.runs.map((run, runIndex) => {
+        const cohort = (run.cohort ?? {}) as Record<string, unknown>
+        const estimators = (run.estimators ?? []) as Array<Record<string, unknown>>
+        return (
+          <div key={`est-run-${runIndex}`} className="report-subblock">
+            <h3>{str(run.run_id)}</h3>
+            <dl className="report-kv">
+              <dt>Cohort rows</dt>
+              <dd>{str(cohort.rows_final)}</dd>
+              <dt>Treated / control</dt>
+              <dd>{`${str(cohort.treated_rows)} / ${str(cohort.control_rows)}`}</dd>
+              <dt>Missing-data policy</dt>
+              <dd>{str(cohort.missing_data_policy)}</dd>
+              <dt>Estimand</dt>
+              <dd>{str(run.estimand)}</dd>
+            </dl>
+            <div className="report-table-wrap">
+              <table className="report-table">
+                <thead>
+                  <tr><th>Estimator</th><th>Status</th><th>Estimate</th><th>Interval</th><th>Failure</th><th>Warnings</th></tr>
+                </thead>
+                <tbody>
+                  {estimators.map((estimator, index) => {
+                    const interval = (estimator.interval ?? null) as { ci_lower?: number; ci_upper?: number; interval_level?: number } | null
+                    return (
+                      <tr key={`estimator-${index}`}>
+                        <td>{str(estimator.estimator)}</td>
+                        <td>{str(estimator.status)}</td>
+                        <td className="mono">{str(estimator.estimate)}</td>
+                        <td className="mono">
+                          {interval && interval.ci_lower !== undefined
+                            ? `${number(interval.ci_lower)} to ${number(interval.ci_upper)} (level ${str(interval.interval_level)})`
+                            : '—'}
+                        </td>
+                        <td>{str((estimator.failure as { reason?: string } | undefined)?.reason)}</td>
+                        <td>{listStr(estimator.warnings)}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {typeof run.scope_note === 'string' ? <p className="report-note">{run.scope_note}</p> : null}
+          </div>
+        )
+      })}
+    </>
+  )
+}
+
+function SubgroupsSection({ data }: { data: DossierSubgroups }) {
+  const overall = data.overall
+  return (
+    <>
+      <dl className="report-kv">
+        <dt>Subgroup variable</dt>
+        <dd>{str(data.subgroup.column)}</dd>
+        <dt>Definition</dt>
+        <dd>{str(data.subgroup.definition)}</dd>
+        <dt>Intent</dt>
+        <dd>{str(data.subgroup.intent)}</dd>
+        <dt>Overall ATE</dt>
+        <dd className="mono">
+          {`${str(overall.estimate)} (${str(overall.ci_lower)} to ${str(overall.ci_upper)})`}
+        </dd>
+      </dl>
+      <div className="report-table-wrap">
+        <table className="report-table">
+          <thead>
+            <tr><th>Group</th><th>Rows</th><th>Treated/Control</th><th>Estimate</th><th>Interval</th><th>Status</th><th>Warnings</th></tr>
+          </thead>
+          <tbody>
+            {data.groups.map((group, index) => {
+              const row = group as {
+                label: string; rows: number; treated_rows: number; control_rows: number
+                estimate: number | null; ci_lower: number | null; ci_upper: number | null
+                status: string; warnings: string[]
+              }
+              return (
+                <tr key={`group-${index}`}>
+                  <td>{row.label}</td>
+                  <td>{integer(row.rows)}</td>
+                  <td>{`${integer(row.treated_rows)} / ${integer(row.control_rows)}`}</td>
+                  <td className="mono">{row.estimate === null ? '—' : number(row.estimate)}</td>
+                  <td className="mono">
+                    {row.ci_lower === null || row.ci_upper === null
+                      ? '—'
+                      : `${number(row.ci_lower)} to ${number(row.ci_upper)}`}
+                  </td>
+                  <td>{statusLabel(row.status)}</td>
+                  <td>{row.warnings.length > 0 ? row.warnings.join('; ') : '—'}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+      {data.contrasts && data.contrasts.length > 0 ? (
+        <>
+          <h3>Between-group contrasts</h3>
+          <div className="report-table-wrap">
+            <table className="report-table">
+              <thead>
+                <tr><th>A</th><th>B</th><th>Difference</th><th>Interval</th></tr>
+              </thead>
+              <tbody>
+                {data.contrasts.map((contrast, index) => {
+                  const row = contrast as { a: string; b: string; difference: number; ci_lower: number; ci_upper: number }
+                  return (
+                    <tr key={`contrast-${index}`}>
+                      <td>{row.a}</td>
+                      <td>{row.b}</td>
+                      <td className="mono">{number(row.difference)}</td>
+                      <td className="mono">{`${number(row.ci_lower)} to ${number(row.ci_upper)}`}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : null}
+      <h3>Disclosed notes</h3>
+      <ul>
+        {data.notes.map((note, index) => (
+          <li key={`note-${index}`}>{str((note as { text?: string }).text)}</li>
+        ))}
+      </ul>
+      <p className="report-note">{data.scope_note}</p>
+    </>
+  )
+}
+
+function RobustnessSection({ data }: { data: DossierRobustness }) {
+  const distribution = data.distribution
+  return (
+    <>
+      <dl className="report-kv">
+        <dt>Experiment</dt>
+        <dd>{statusLabel(data.experiment ?? '')}</dd>
+        <dt>Original estimate</dt>
+        <dd className="mono">{str((data.original ?? {}).estimate)}</dd>
+        <dt>Parameters</dt>
+        <dd className="mono">{JSON.stringify(data.parameters)}</dd>
+        {distribution ? (
+          <>
+            <dt>Distribution mean / sd</dt>
+            <dd className="mono">{`${str(distribution.mean)} / ${str(distribution.standard_deviation)}`}</dd>
+            <dt>Repetitions summarised</dt>
+            <dd>{data.repetition_count === null ? '—' : integer(data.repetition_count)}</dd>
+          </>
+        ) : null}
+        <dt>Full repetition series included</dt>
+        <dd>{data.full_series_included ? 'yes' : 'no (stays in the stored run)'}</dd>
+      </dl>
+      {data.failures.length > 0 ? (
+        <>
+          <h3>Recorded failures</h3>
+          <ul>
+            {data.failures.map((failure, index) => (
+              <li key={`failure-${index}`}>{str(failure)}</li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+      <h3>Caveats</h3>
+      <ul>
+        {data.warnings.map((warning, index) => (
+          <li key={`warning-${index}`}>{warning}</li>
+        ))}
+      </ul>
+      {data.method_note ? <p className="report-note">{data.method_note}</p> : null}
+      <p className="report-note">{data.scope_note}</p>
+    </>
+  )
+}
+
+function WhatIfSection({ data }: { data: DossierWhatIf }) {
+  const profile = data.profile_scenario
+  const cohortScenario = data.cohort_scenario
+  const disclosures = (profile?.disclosures ?? []) as Array<{ field: string; source: string; value: unknown }>
+  return (
+    <>
+      <dl className="report-kv">
+        <dt>Model</dt>
+        <dd>{statusLabel(str((data.model_specification ?? {}).kind))}</dd>
+        <dt>Units</dt>
+        <dd>{statusLabel(str((data.model_specification ?? {}).units))}</dd>
+        <dt>Treated prediction</dt>
+        <dd className="mono">{str(profile?.treated_prediction)}</dd>
+        <dt>Control prediction</dt>
+        <dd className="mono">{str(profile?.control_prediction)}</dd>
+        <dt>Scenario contrast</dt>
+        <dd className="mono">{str(profile?.contrast)}</dd>
+        <dt>Cohort-standardised contrast</dt>
+        <dd className="mono">{str(cohortScenario?.contrast)}</dd>
+      </dl>
+      <h3>Profile disclosures</h3>
+      <div className="report-table-wrap">
+        <table className="report-table">
+          <thead>
+            <tr><th>Field</th><th>Source</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            {disclosures.map((item, index) => (
+              <tr key={`disclosure-${index}`}>
+                <td>{item.field}</td>
+                <td>{statusLabel(item.source)}</td>
+                <td className="mono">{str(item.value)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <h3>Caveats</h3>
+      <ul>
+        {data.warnings.map((warning, index) => (
+          <li key={`caveat-${index}`}>{warning}</li>
+        ))}
+      </ul>
+      <p className="report-note">{data.scope_note}</p>
+    </>
+  )
+}
+
+function MethodologySection({ data }: { data: DossierMethodology }) {
+  return (
+    <>
+      <p className="report-note">{data.scope_note}</p>
+      {data.paragraphs.map((paragraph) => (
+        <div key={paragraph.title} className="report-subblock">
+          <h3>{paragraph.title}</h3>
+          <p>{paragraph.text}</p>
+        </div>
+      ))}
+    </>
+  )
+}
+
 const RENDERERS: Record<string, (section: DossierSection) => ReactNode> = {
   summary: (section) => <SummarySection summary={section.data as DossierSummary} />,
   provenance: (section) => <ProvenanceSection data={section.data as DossierProvenance} />,
@@ -992,6 +1330,15 @@ const RENDERERS: Record<string, (section: DossierSection) => ReactNode> = {
   reproducibility: (section) => (
     <ReproducibilitySection data={section.data as DossierReproducibility} />
   ),
+  causal_graph: (section) => <CausalGraphSection data={section.data as DossierCausalGraph} />,
+  identification: (section) => <IdentificationSection data={section.data as DossierIdentification} />,
+  causal_estimation: (section) => (
+    <CausalEstimationSection data={section.data as DossierCausalEstimation} />
+  ),
+  subgroups: (section) => <SubgroupsSection data={section.data as DossierSubgroups} />,
+  robustness: (section) => <RobustnessSection data={section.data as DossierRobustness} />,
+  what_if: (section) => <WhatIfSection data={section.data as DossierWhatIf} />,
+  methodology: (section) => <MethodologySection data={section.data as DossierMethodology} />,
 }
 
 export function ReportPreview({ report }: { report: DossierReport }) {

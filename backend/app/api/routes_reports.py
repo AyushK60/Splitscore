@@ -109,6 +109,45 @@ def export_dossier(
                 {"run_id": stored.run_id, "label": stored.label, "payload": stored.payload}
             )
 
+    # S10-B: stored estimation runs (S9A/S9C) with cross-dataset and staleness
+    # refusal. A run computed against different dataset bytes is refused
+    # outright — the dossier never silently substitutes numbers from another
+    # cohort, and never presents a stale result as current.
+    estimation_runs: list[dict[str, Any]] = []
+    seen_estimation: set[str] = set()
+    graph_record: dict[str, Any] | None = None
+    for run_id in request.estimation_run_ids:
+        if run_id in seen_estimation:
+            continue
+        seen_estimation.add(run_id)
+        stored = stored_run(run_id, "estimation", label="estimation")
+        if stored is None:
+            continue
+        repro = stored.payload.get("reproducibility") or {}
+        recorded = repro.get("dataset_fingerprint_sha256")
+        if recorded and recorded != dataset.fingerprint_sha256:
+            raise ValidationFailure(
+                "The estimation run named for this dossier was computed against a dataset whose "
+                "content has since changed. It cannot be included as current; re-run the analysis "
+                "and select the new run.",
+                details={"run_id": run_id, "recorded_fingerprint": recorded,
+                         "current_fingerprint": dataset.fingerprint_sha256},
+            )
+        graph_id = repro.get("graph_id")
+        if graph_id:
+            try:
+                record = context.causal_graphs.get(dataset_id, graph_id)
+            except NotFoundError:
+                record = None
+            if record is not None and graph_record is None:
+                graph_record = {
+                    "graph_id": record.graph_id,
+                    "revision": record.revision,
+                    "spec_fingerprint_sha256": record.fingerprint,
+                    "spec": record.spec.model_dump(mode="json") if hasattr(record.spec, "model_dump") else record.spec,
+                }
+        estimation_runs.append({**stored.payload, "run_id": stored.run_id})
+
     try:
         report = build_dossier(
             dataset=dataset,
@@ -124,6 +163,9 @@ def export_dossier(
             ),
             models=model_runs,
             requested_sections=request.sections,
+            estimation_runs=estimation_runs,
+            graph_record=graph_record,
+            presentation=request.presentation,
         )
     except ValueError as exc:
         raise ValidationFailure(str(exc)) from exc

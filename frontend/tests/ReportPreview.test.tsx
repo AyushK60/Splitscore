@@ -185,3 +185,138 @@ describe('dossier preview', () => {
     expect(screen.queryByText(/causal effect/i)).not.toBeInTheDocument()
   })
 })
+
+describe('dossier preview — S10-B causal sections', () => {
+  const causalSections: Record<string, DossierSection> = {
+    causal_graph: section('causal_graph', 'Causal graph specification', {
+      graph_id: 'cgraph-1',
+      graph_revision: 3,
+      graph_spec_fingerprint_sha256: 'b'.repeat(64),
+      name: 'Retention DAG',
+      description: null,
+      analysis: { treatment: 'tenure', outcome: 'churn' },
+      nodes: [{ node_id: 'age', label: 'Age', column: 'age', observed: true, kind: 'covariate', description: null }],
+      edges: [{ source: 'age', target: 'churn', rationale: '<confounder &x>', reference: null }],
+      assumptions: [{ rationale: 'No unmeasured confounding assumed.' }],
+      caveat: 'An edge is an assumption, not empirical proof.',
+    }),
+    causal_estimation: section('causal_estimation', 'Causal effect estimation', {
+      runs: [
+        {
+          run_id: 'run-est-1',
+          created_at_utc: '2026-11-07T00:00:00+00:00',
+          estimand: 'ate',
+          cohort: { rows_final: 1200, treated_rows: 600, control_rows: 600, missing_data_policy: 'complete_case' },
+          estimators: [
+            {
+              estimator: 'aipw',
+              status: 'estimated',
+              estimate: 1.234,
+              units: 'outcome_units',
+              interval: { ci_lower: 0.9, ci_upper: 1.6, interval_level: 0.95 },
+              warnings: ['A warning from the estimator.'],
+            },
+            { estimator: 'ipw', status: 'failed', failure: { reason: 'degenerate arm' } },
+          ],
+          scope_note: 'Estimates are conditional on assumptions.',
+        },
+      ],
+      total: 1,
+      interpretation_note: 'Estimates are ATEs on one cohort.',
+    }),
+    subgroups: section('subgroups', 'Subgroup and heterogeneity', {
+      run_id: 'run-sub-1',
+      subgroup: { column: 'region', definition: 'Observed levels', intent: 'exploratory' },
+      overall: { estimate: 1.5, ci_lower: 1.1, ci_upper: 1.9 },
+      groups: [
+        { label: 'east', rows: 300, treated_rows: 60, control_rows: 240, estimate: 1.4, ci_lower: 0.8, ci_upper: 2.0, status: 'estimated', warnings: [] },
+        { label: 'tiny', rows: 12, treated_rows: 2, control_rows: 10, estimate: null, ci_lower: null, ci_upper: null, status: 'unavailable', warnings: [] },
+      ],
+      contrasts: [{ a: 'east', b: 'tiny', difference: 1.4, ci_lower: -0.5, ci_upper: 3.3 }],
+      notes: [{ code: 'multiple_comparisons', text: 'Several subgroup estimates are inspected at once.' }],
+      scope_note: 'Exploratory evidence about this sample.',
+    }),
+    robustness: section('robustness', 'Robustness and sensitivity', {
+      run_id: 'run-rob-1',
+      original: { estimate: 1.5 },
+      experiment: 'unmeasured_confounder_simulation',
+      parameters: { estimator: 'regression_adjustment', prevalence: 0.3 },
+      distribution: null,
+      repetition_count: null,
+      full_series_included: false,
+      failures: [],
+      warnings: ['This is a hypothetical scenario analysis, not a bound.'],
+      method_note: 'The grid shows the scenario.',
+      scope_note: 'None of them proves the causal assumptions.',
+    }),
+    what_if: section('what_if', 'Model-based what-if scenarios', {
+      run_id: 'run-wif-1',
+      model_specification: { kind: 'regression_adjustment_outcome_model', units: 'outcome_units' },
+      profile_scenario: {
+        treated_prediction: 14.9,
+        control_prediction: 13.2,
+        contrast: 1.7,
+        disclosures: [{ field: 'age', source: 'explicit', value: 55 }],
+      },
+      cohort_scenario: { contrast: 1.7 },
+      warnings: ['It is not an observed outcome, not an individual counterfactual, and not an interval-bearing estimate.'],
+      scope_note: 'Conditional model expectation.',
+    }),
+    methodology: section('methodology', 'Methodology', {
+      methodology_version: '1.0.0',
+      presentation: 'concise',
+      paragraphs: [
+        { title: 'Data source and sample', text: "The analysis used 'panel.csv'." },
+        { title: 'Causal identification and estimation', text: 'Not evaluated — no qualifying analysis run was included in this dossier.' },
+      ],
+      sources: {},
+      scope_note: 'Missing inputs are marked explicitly.',
+    }),
+  }
+
+  function causalDossier(): DossierReport {
+    const base = dossier()
+    return {
+      ...base,
+      schema_version: '1.1.0',
+      sections: causalSections,
+      included_sections: Object.keys(causalSections),
+    }
+  }
+
+  it('renders the causal graph section with its assumption caveat', () => {
+    render(<ReportPreview report={causalDossier()} />)
+    expect(screen.getByRole('heading', { name: 'Causal graph specification' })).toBeInTheDocument()
+    expect(screen.getByText('An edge is an assumption, not empirical proof.')).toBeInTheDocument()
+    expect(screen.getByText('<confounder &x>')).toBeInTheDocument()
+  })
+
+  it('renders estimation rows exactly as stored, including the failed estimator', () => {
+    render(<ReportPreview report={causalDossier()} />)
+    expect(screen.getByText('1.234')).toBeInTheDocument()
+    expect(screen.getByText('0.900 to 1.600 (level 0.95)')).toBeInTheDocument()
+    expect(screen.getByText('failed')).toBeInTheDocument()
+    expect(screen.getByText('degenerate arm')).toBeInTheDocument()
+  })
+
+  it('renders subgroup unavailable rows as unavailable, never zero', () => {
+    render(<ReportPreview report={causalDossier()} />)
+    expect(screen.getByText('unavailable')).toBeInTheDocument()
+    expect(screen.getByText('Several subgroup estimates are inspected at once.')).toBeInTheDocument()
+  })
+
+  it('keeps the sensitivity caveat and the what-if counterfactual boundary', () => {
+    render(<ReportPreview report={causalDossier()} />)
+    expect(screen.getByText('This is a hypothetical scenario analysis, not a bound.')).toBeInTheDocument()
+    expect(
+      screen.getByText('It is not an observed outcome, not an individual counterfactual, and not an interval-bearing estimate.'),
+    ).toBeInTheDocument()
+  })
+
+  it('renders methodology paragraphs including the not-evaluated state', () => {
+    render(<ReportPreview report={causalDossier()} />)
+    expect(screen.getByRole('heading', { name: 'Methodology' })).toBeInTheDocument()
+    expect(screen.getByText("The analysis used 'panel.csv'.")).toBeInTheDocument()
+    expect(screen.getByText('Not evaluated — no qualifying analysis run was included in this dossier.')).toBeInTheDocument()
+  })
+})

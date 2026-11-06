@@ -2374,6 +2374,8 @@ export interface EstimationRunPayload {
 }
 
 export interface EstimationRunSummary {
+  analysis_kind?: string
+  graph_id?: string
   run_id: string
   kind: string
   dataset_id: string

@@ -199,11 +199,22 @@ def list_estimation_runs(dataset_id: str) -> dict[str, Any]:
     """Estimation runs for one live dataset, newest first."""
     context = get_context()
     dataset = _dataset(dataset_id)
-    runs = [
-        entry
-        for entry in context.store.list_runs()
-        if entry["kind"] == "estimation" and entry["dataset_id"] == dataset.dataset_id
-    ]
+    runs = []
+    for entry in context.store.list_runs():
+        if entry["kind"] != "estimation" or entry["dataset_id"] != dataset.dataset_id:
+            continue
+        run = context.store.get_run(entry["run_id"])
+        payload = run.payload
+        analysis_kind = payload.get("analysis_kind") or (
+            "estimation_comparison" if "comparison" in payload else "estimation"
+        )
+        runs.append(
+            {
+                **entry,
+                "analysis_kind": analysis_kind,
+                "graph_id": (payload.get("reproducibility") or {}).get("graph_id"),
+            }
+        )
     return {"dataset_id": dataset.dataset_id, "runs": runs}
 
 

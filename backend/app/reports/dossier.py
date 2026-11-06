@@ -17,8 +17,20 @@ from datetime import UTC, datetime
 from typing import Any
 
 from app.core.version import APP_NAME, APP_VERSION
+from app.reports.dossier_estimation import (
+    causal_estimation_section,
+    causal_graph_section,
+    identification_section,
+    robustness_section,
+    subgroups_section,
+    what_if_section,
+)
+from app.reports.methodology import build_methodology
 
-DOSSIER_SCHEMA_VERSION = "1.0.0"
+# v1.1.0 (S10-B): adds the causal_graph, identification, causal_estimation,
+# subgroups, robustness, what_if and methodology sections. Additive only —
+# every v1.0.0 section keeps its id, shape and semantics.
+DOSSIER_SCHEMA_VERSION = "1.1.0"
 
 SECTION_SPECS: tuple[dict[str, str], ...] = (
     {
@@ -70,6 +82,41 @@ SECTION_SPECS: tuple[dict[str, str], ...] = (
         "id": "reproducibility",
         "title": "Reproducibility and export metadata",
         "description": "Run identifiers, dataset fingerprint, versions and embedding policy.",
+    },
+    {
+        "id": "causal_graph",
+        "title": "Causal graph specification",
+        "description": "The assumed DAG behind the causal analyses: nodes, edges and assumptions.",
+    },
+    {
+        "id": "identification",
+        "title": "Graphical identification",
+        "description": "The backdoor-criterion verdicts the estimation gate recorded at run time.",
+    },
+    {
+        "id": "causal_estimation",
+        "title": "Causal effect estimation",
+        "description": "Stored effect-estimation runs: cohort, estimators, intervals and diagnostics.",
+    },
+    {
+        "id": "subgroups",
+        "title": "Subgroup and heterogeneity",
+        "description": "Stored subgroup effects, contrasts and their multiple-comparisons caveats.",
+    },
+    {
+        "id": "robustness",
+        "title": "Robustness and sensitivity",
+        "description": "One stored robustness experiment with its parameters and honest scope.",
+    },
+    {
+        "id": "what_if",
+        "title": "Model-based what-if scenarios",
+        "description": "Stored conditional outcome-model scenarios; never individual counterfactuals.",
+    },
+    {
+        "id": "methodology",
+        "title": "Methodology",
+        "description": "Generated academic methodology from the included runs; gaps are explicit.",
     },
 )
 
@@ -525,9 +572,29 @@ def build_dossier(
     models: list[dict[str, Any]],
     requested_sections: Iterable[str] | None = None,
     generated_at_utc: str | None = None,
+    estimation_runs: list[dict[str, Any]] | None = None,
+    graph_record: dict[str, Any] | None = None,
+    presentation: str = "concise",
 ) -> dict[str, Any]:
     sections_requested = normalise_sections(requested_sections)
     specs = {spec["id"]: spec for spec in SECTION_SPECS}
+    estimation_runs = estimation_runs or []
+    causal_runs: list[dict[str, Any]] = []
+    subgroup_runs: list[dict[str, Any]] = []
+    robustness_runs: list[dict[str, Any]] = []
+    whatif_runs: list[dict[str, Any]] = []
+    for payload in estimation_runs:
+        kind = payload.get("analysis_kind") or (
+            "estimation_comparison" if "comparison" in payload else "estimation"
+        )
+        if kind in ("estimation", "estimation_comparison"):
+            causal_runs.append(payload)
+        elif kind == "subgroups":
+            subgroup_runs.append(payload)
+        elif kind == "robustness":
+            robustness_runs.append(payload)
+        elif kind == "what_if":
+            whatif_runs.append(payload)
     audit_data = _audit_data(audit)
     findings = _findings_data(audit)
     comparison_data = _comparison_data(comparison)
@@ -591,6 +658,74 @@ def build_dossier(
         reason="No model run was named. Fit and select a model in Model Lab to include it.",
     )
 
+    # -- S10-B: causal sections from stored estimation runs ------------------- #
+    estimation_reason = (
+        "No estimation run was named for this dossier. Run the Effect Estimation Studio, "
+        "then select the stored run in the Report Studio."
+    )
+    add(
+        "causal_graph",
+        available=graph_record is not None,
+        data=(
+            causal_graph_section(graph_record.get("spec", {}), graph_record)
+            if graph_record is not None
+            else None
+        ),
+        reason=(
+            "No causal graph was named. The graph arrives with a stored estimation run; select "
+            "one in the Report Studio."
+        ),
+    )
+    add(
+        "identification",
+        available=bool(causal_runs or subgroup_runs or robustness_runs or whatif_runs),
+        data=identification_section(estimation_runs) if estimation_runs else None,
+        reason=estimation_reason,
+    )
+    add(
+        "causal_estimation",
+        available=bool(causal_runs),
+        data=causal_estimation_section(causal_runs) if causal_runs else None,
+        reason=estimation_reason,
+    )
+    add(
+        "subgroups",
+        available=bool(subgroup_runs),
+        data=subgroups_section(subgroup_runs[0]) if subgroup_runs else None,
+        reason=(
+            "No subgroup run was named. Run subgroup effects in the Causal Research stage and "
+            "select it in the Report Studio."
+        ),
+    )
+    add(
+        "robustness",
+        available=bool(robustness_runs),
+        data=robustness_section(robustness_runs[0]) if robustness_runs else None,
+        reason=(
+            "No robustness experiment was named. Run one in the Causal Research stage and "
+            "select it in the Report Studio."
+        ),
+    )
+    add(
+        "what_if",
+        available=bool(whatif_runs),
+        data=what_if_section(whatif_runs[0]) if whatif_runs else None,
+        reason=(
+            "No what-if scenario was named. Run one in the Causal Research stage and select it "
+            "in the Report Studio."
+        ),
+    )
+    methodology_data = build_methodology(
+        dataset=dataset,
+        study=study,
+        audit=audit,
+        comparison=comparison,
+        models=models,
+        estimation_runs=estimation_runs,
+        presentation=presentation,
+    )
+    add("methodology", available=True, data=methodology_data)
+
     not_evaluated = ((audit or {}).get("evaluation") or {}).get("not_evaluated", [])
     limitations = {
         "audit_limitations": (audit or {}).get("limitations", []),
@@ -602,6 +737,15 @@ def build_dossier(
             {"run_id": model["run_id"], "warnings": model.get("warnings", [])}
             for model in model_data
             if model.get("warnings")
+        ],
+        "estimation_warnings": [
+            {
+                "run_id": payload.get("run_id"),
+                "analysis_kind": payload.get("analysis_kind"),
+                "warnings": (payload.get("result") or {}).get("warnings") or payload.get("warnings"),
+            }
+            for payload in estimation_runs
+            if ((payload.get("result") or {}).get("warnings") or payload.get("warnings"))
         ],
         "not_evaluated": not_evaluated,
         "general": [
@@ -629,6 +773,8 @@ def build_dossier(
         "audit_run_id": (audit or {}).get("run_id"),
         "comparison_run_id": (comparison or {}).get("run_id"),
         "model_run_ids": [model["run_id"] for model in model_data],
+        "estimation_run_ids": [payload.get("run_id") for payload in estimation_runs],
+        "methodology_presentation": presentation,
         "model_environments": environment,
         "deterministic_note": (
             "Audit and comparison algorithms are deterministic for identical input bytes, roles and "
@@ -672,6 +818,7 @@ def build_dossier(
             "audit_run_id": (audit or {}).get("run_id"),
             "comparison_run_id": (comparison or {}).get("run_id"),
             "model_run_ids": [model["run_id"] for model in model_data],
+            "estimation_run_ids": [payload.get("run_id") for payload in estimation_runs],
         },
         "summary": summary_data,
         "sections": sections,
