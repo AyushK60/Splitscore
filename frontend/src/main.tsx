@@ -44,6 +44,14 @@ const EstimationView = lazy(() =>
   import('./estimation/EstimationView').then((module) => ({ default: module.EstimationView })),
 )
 
+/**
+ * The S9C Causal Research stage is code-split like the other late stages: its
+ * forest plot, robustness figures and scenario explorer load only on route.
+ */
+const ResearchView = lazy(() =>
+  import('./research/ResearchView').then((module) => ({ default: module.ResearchView })),
+)
+
 /** Stage names used by the breadcrumb. "Audit results" is the third stage. */
 const STAGE_LABEL: Record<ViewId, string> = {
   home: 'Home',
@@ -55,6 +63,7 @@ const STAGE_LABEL: Record<ViewId, string> = {
   models: 'Model Lab',
   causal: 'Causal Lab',
   estimation: 'Effect estimation',
+  research: 'Causal research',
   evidence: 'Evidence',
   comparison: 'Compare',
   export: 'Export',
@@ -76,6 +85,7 @@ const NEXT_GUIDANCE: Record<ViewId, string> = {
   models: 'Statistical fits describe analysed rows; predictive metrics describe a held-out split. Neither proves causation.',
   causal: 'Draw assumed relationships, document assumptions and validate the structure. A valid DAG is not evidence the assumptions are true.',
   estimation: 'Estimates are conditional on the DAG and the verified adjustment set. Inspect balance, overlap and effective sample size before reading an interval, and export the figure with its provenance.',
+  research: 'Subgroup, robustness and what-if analyses reuse a stored estimation run’s study. They describe this sample under the same assumptions — they do not verify them.',
   comparison: 'A comparison shows consequences, not a winner. Assemble the evidence you have actually produced in the Export studio.',
   export: 'Compose a dossier from the runs in this session, then download JSON or a printable HTML artifact.',
 }
@@ -108,7 +118,11 @@ const NEXT_ACTIONS: Partial<Record<ViewId, Array<{ label: string; view: ViewId }
     { label: 'Audit results', view: 'audit' },
   ],
   estimation: [
-    { label: 'Causal Lab', view: 'causal' },
+    { label: 'Causal research', view: 'research' },
+    { label: 'Export', view: 'export' },
+  ],
+  research: [
+    { label: 'Effect estimation', view: 'estimation' },
     { label: 'Export', view: 'export' },
   ],
   export: [
@@ -194,6 +208,17 @@ function Shell() {
         <EstimationView onNavigate={navigate} />
       </Suspense>
     ) :
+    view === 'research' ? (
+      <Suspense
+        fallback={
+          <div className="card" style={{ padding: 'var(--space-6)' }}>
+            <p className="muted" style={{ margin: 0 }} role="status">Loading the Causal Research stage…</p>
+          </div>
+        }
+      >
+        <ResearchView onNavigate={navigate} />
+      </Suspense>
+    ) :
     view === 'audit' ? <AuditView onNavigate={navigate} /> :
     view === 'evidence' ? <EvidenceView onNavigate={navigate} /> :
     view === 'comparison' ? <ComparisonView onNavigate={navigate} /> :
@@ -213,8 +238,9 @@ function Shell() {
     ...(dataset ? [{ id: 'models' as ViewId, label: 'Model Lab', step: 6 }] : []),
     ...(dataset ? [{ id: 'causal' as ViewId, label: 'Causal Lab', step: 7 }] : []),
     ...(dataset ? [{ id: 'estimation' as ViewId, label: 'Effect estimation', step: 8 }] : []),
-    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 9 }] : []),
-    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 10 }] : []),
+    ...(dataset ? [{ id: 'research' as ViewId, label: 'Causal research', step: 9 }] : []),
+    ...(dataset ? [{ id: 'comparison' as ViewId, label: 'Compare', step: 10 }] : []),
+    ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 11 }] : []),
   ]
 
   return (

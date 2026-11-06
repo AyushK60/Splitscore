@@ -2307,3 +2307,173 @@ export interface EstimationRunListResponse {
   dataset_id: string
   runs: EstimationRunSummary[]
 }
+
+// --------------------------------------------------------------------------
+// S9C — subgroup effects, robustness experiments, what-if scenarios
+// --------------------------------------------------------------------------
+
+export interface SubgroupRunPayload {
+  graph_id?: string
+  dataset_id?: string
+  revision?: number
+  spec_fingerprint_sha256?: string
+  analysis_kind: 'subgroups'
+  estimation_version: string
+  subgroup_schema_version: string
+  estimand: 'ate'
+  gate: EstimationGate
+  analysis: EstimationCohortPreview & {
+    treatment_column: string
+    outcome_column: string
+    adjustment_columns: string[]
+  }
+  subgroup: {
+    node_id: string
+    column: string
+    kind: 'numeric' | 'categorical'
+    definition: string
+    numeric_binning: string | null
+    requested_levels: string[] | null
+    bin_edges: number[] | null
+    intent: 'exploratory' | 'prespecified'
+    rows_excluded_missing: number
+  }
+  overall: {
+    estimator: string
+    estimate: number
+    standard_error: number
+    ci_lower: number
+    ci_upper: number
+    interval_level: number
+    note: string
+  }
+  groups: SubgroupGroup[]
+  contrasts: Array<{
+    a: string
+    b: string
+    difference: number
+    standard_error: number
+    ci_lower: number
+    ci_upper: number
+  }> | null
+  notes: Array<{ code: string; text: string }>
+  reproducibility: EstimationReproducibility & { subgroup?: Record<string, unknown> }
+  scope_note: string
+  run_id: string
+  created_at_utc: string
+  stale?: boolean
+  staleness_reason?: string
+}
+
+export interface SubgroupGroup {
+  label: string
+  rows: number
+  treated_rows: number
+  control_rows: number
+  status: 'estimated' | 'unavailable'
+  estimate: number | null
+  standard_error: number | null
+  ci_lower: number | null
+  ci_upper: number | null
+  unavailable_reason?: string
+  propensity_summary?: {
+    treated_min: number
+    treated_max: number
+    control_min: number
+    control_max: number
+    extreme_rows: number
+  }
+  warnings: string[]
+}
+
+export interface RobustnessRunPayload {
+  graph_id?: string
+  dataset_id?: string
+  revision?: number
+  spec_fingerprint_sha256?: string
+  analysis_kind: 'robustness'
+  estimation_version: string
+  robustness_schema_version: string
+  estimand: 'ate'
+  gate: EstimationGate
+  analysis: EstimationCohortPreview & {
+    treatment_column: string
+    outcome_column: string
+    adjustment_columns: string[]
+  }
+  original: {
+    estimator: string
+    estimate: number | null
+    failure: string | null
+    note: string
+  }
+  result: {
+    experiment: 'subsampling' | 'placebo_treatment' | 'unmeasured_confounder_simulation'
+    parameters: Record<string, unknown>
+    distribution: {
+      mean: number
+      standard_deviation: number | null
+      min: number
+      max: number
+      q05: number
+      q50: number
+      q95: number
+    } | null
+    estimates: number[]
+    failures: Array<{ rep: number; reason: string }>
+    warnings: string[]
+    method_note: string
+    grid?: Array<Array<number | null>>
+    failures_grid?: Array<{ gamma: number; kappa: number; reason: string }>
+  }
+  reproducibility: EstimationReproducibility & { experiment?: Record<string, unknown> }
+  scope_note: string
+  run_id: string
+  created_at_utc: string
+  stale?: boolean
+  staleness_reason?: string
+}
+
+export interface WhatIfRunPayload {
+  graph_id?: string
+  dataset_id?: string
+  revision?: number
+  spec_fingerprint_sha256?: string
+  analysis_kind: 'what_if'
+  estimation_version: string
+  what_if_schema_version: string
+  estimand: 'ate'
+  gate: EstimationGate
+  analysis: EstimationCohortPreview & {
+    treatment_column: string
+    outcome_column: string
+    adjustment_columns: string[]
+  }
+  model_specification: {
+    kind: string
+    outcome_task: 'linear' | 'logistic'
+    units: string
+    uncertainty: string
+    covariates: string[]
+  }
+  profile_scenario: {
+    profile: Record<string, number | string>
+    disclosures: Array<{ field: string; source: string; value: number | string }>
+    treated_prediction: number
+    control_prediction: number
+    contrast: number
+  }
+  cohort_scenario: {
+    treated_mean: number
+    control_mean: number
+    contrast: number
+    note: string
+  }
+  warnings: string[]
+  reproducibility: EstimationReproducibility & { scenario?: Record<string, unknown> }
+  scope_note: string
+  run_id: string
+  created_at_utc: string
+  stale?: boolean
+  staleness_reason?: string
+}

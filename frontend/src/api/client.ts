@@ -480,6 +480,9 @@ import type {
   EstimationRunPayload,
   EstimationValidateResponse,
   EstimatorName,
+  RobustnessRunPayload,
+  SubgroupRunPayload,
+  WhatIfRunPayload,
 } from './types'
 
 export const estimationApi = {
@@ -527,5 +530,49 @@ export const estimationApi = {
   runDetail: (datasetId: string, runId: string) =>
     request<EstimationRunPayload>(
       `/api/datasets/${encodeURIComponent(datasetId)}/estimation-runs/${encodeURIComponent(runId)}`,
+    ),  // ---- S9C: subgroup effects, robustness experiments, what-if scenarios ----
+
+  subgroups: (
+    datasetId: string,
+    graphId: string,
+    estimationRequest: EstimationRequestPayload,
+    subgroup: { node_id: string; numeric_binning: string; levels: string[] | null; intent: string },
+    label = '',
+  ) =>
+    request<SubgroupRunPayload>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(
+        graphId,
+      )}/estimation/subgroups`,
+      postInit({ request: estimationRequest, subgroup, label }),
+    ),
+
+  robustness: (
+    datasetId: string,
+    graphId: string,
+    estimationRequest: EstimationRequestPayload,
+    experiment: 'subsampling' | 'placebo' | 'unmeasured_confounder',
+    parameters: Record<string, unknown>,
+    label = '',
+  ) =>
+    request<RobustnessRunPayload>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(
+        graphId,
+      )}/estimation/robustness`,
+      postInit({ request: estimationRequest, experiment, parameters, label }),
+    ),
+
+  whatIf: (
+    datasetId: string,
+    graphId: string,
+    estimationRequest: EstimationRequestPayload,
+    profile: Record<string, number | string | null>,
+    label = '',
+  ) =>
+    request<WhatIfRunPayload>(
+      `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(
+        graphId,
+      )}/estimation/whatif`,
+      postInit({ request: estimationRequest, profile, label }),
     ),
 }
+
