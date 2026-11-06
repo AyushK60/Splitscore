@@ -1,6 +1,23 @@
 # SplitScope — Status Report
 
 **Date:** 2026-10-18 (finalization added; Stages 4a–4d recorded below)
+**S9C (2026-11-07):** COMPLETE — advanced causal research shipped on branch
+`v2-premium-visual-foundation` as a new `#/research` stage (step 9, Causal
+research) with three focused views that build strictly on a stored estimation
+run: **Subgroup effects** (S9C-A: subgroup ATEs as cross-fitted AIPW
+pseudo-outcome averages with influence-function uncertainty and valid
+between-group contrasts; treatment descendants refused; small/missing/overlap-
+fragile subgroups reported honestly, never fabricated) in a forest plot with
+the overall reference; **Robustness** (S9C-B: reproducible seeded subsampling
+and placebo-treatment experiments with per-repetition failure recording, plus a
+5×5 hypothetical-unmeasured-confounder simulation grid explicitly labelled a
+scenario, not a bound); and **What-If** (S9C-C: model-based conditional outcome
+predictions from the verified g-computation model with disclosed cohort
+defaults, extrapolation warnings and no invented intervals). One behaviour-
+preserving extraction (`estimationErrors.ts`); no loosened assertions. 45 new
+backend tests (**581 total**), 31 new frontend tests (**236 total**), 4 new
+real-backend Playwright journeys (**37 total**), synthetic oracle still 41/41
+(61 checks). See `docs/S9C_HANDOFF.md`.
 **S9B (2026-11-06):** COMPLETE — the Causal Effect Estimation Studio shipped on
 branch `v2-premium-visual-foundation`: a dedicated `#/estimation` stage (step 8)
 that gates every run behind the S9A readiness check, requires a saved S8C graph
