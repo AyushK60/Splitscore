@@ -1492,6 +1492,9 @@ export interface DossierRequest {
   audit_run_id: string | null
   comparison_run_id: string | null
   model_run_ids: string[]
+  /** S10-B: stored estimation-run sources (S9A/S9C). */
+  estimation_run_ids?: string[]
+  presentation?: 'concise' | 'technical'
 }
 
 export interface DossierSummary {
@@ -1708,6 +1711,80 @@ export type DossierSectionData =
   | DossierModels
   | DossierLimitations
   | DossierReproducibility
+  | DossierCausalGraph
+  | DossierIdentification
+  | DossierCausalEstimation
+  | DossierSubgroups
+  | DossierRobustness
+  | DossierWhatIf
+  | DossierMethodology
+
+/** S10-B — causal sections, mirrored from the server contract (dossier.py v1.1.0). */
+export interface DossierCausalGraph {
+  graph_id: string | null
+  graph_revision: number | null
+  graph_spec_fingerprint_sha256: string | null
+  name: string | null
+  description: string | null
+  analysis: { treatment: string; outcome: string } | null
+  nodes: Array<Record<string, unknown>>
+  edges: Array<{ source: string; target: string; rationale: string | null; reference: string | null }>
+  assumptions: Array<Record<string, unknown>>
+  caveat: string
+}
+
+export interface DossierIdentification {
+  verdicts: Array<Record<string, unknown>>
+  total: number
+  interpretation_note: string
+}
+
+export interface DossierCausalEstimation {
+  runs: Array<Record<string, unknown>>
+  total: number
+  interpretation_note: string
+}
+
+export interface DossierSubgroups {
+  run_id: string | null
+  subgroup: Record<string, unknown>
+  overall: Record<string, unknown>
+  groups: Array<Record<string, unknown>>
+  contrasts: Array<Record<string, unknown>> | null
+  notes: Array<Record<string, unknown>>
+  scope_note: string
+}
+
+export interface DossierRobustness {
+  run_id: string | null
+  original: Record<string, unknown> | null
+  experiment: string | null
+  parameters: Record<string, unknown> | null
+  distribution: Record<string, unknown> | null
+  repetition_count: number | null
+  full_series_included: boolean
+  failures: Array<Record<string, unknown>>
+  warnings: string[]
+  method_note: string | null
+  scope_note: string
+}
+
+export interface DossierWhatIf {
+  run_id: string | null
+  model_specification: Record<string, unknown> | null
+  profile_scenario: Record<string, unknown> | null
+  cohort_scenario: Record<string, unknown> | null
+  warnings: string[]
+  scope_note: string
+}
+
+export interface DossierMethodology {
+  methodology_version: string
+  presentation: string
+  paragraphs: Array<{ title: string; text: string }>
+  sources: Record<string, unknown>
+  scope_note: string
+}
 
 export interface DossierSection {
   id: string
@@ -1739,6 +1816,7 @@ export interface DossierReport {
     audit_run_id: string | null
     comparison_run_id: string | null
     model_run_ids: string[]
+    estimation_run_ids?: string[]
   }
   summary: DossierSummary
   sections: Record<string, DossierSection>
@@ -2476,4 +2554,72 @@ export interface WhatIfRunPayload {
   created_at_utc: string
   stale?: boolean
   staleness_reason?: string
+}
+
+// --------------------------------------------------------------------------
+// S10 — research run history and reproducibility manifests
+// --------------------------------------------------------------------------
+
+export interface HistoryDataset {
+  dataset_id: string
+  name: string
+  fingerprint_sha256: string
+  row_count: number
+  column_count: number
+}
+
+export interface HistoryEntry {
+  run_id: string
+  kind: 'audit' | 'comparison' | 'model' | 'estimation'
+  analysis_kind: string
+  label: string
+  created_at_utc: string | null
+  age_seconds: number
+  dataset: {
+    dataset_id: string
+    dataset_name: string
+    dataset_fingerprint_sha256: string
+  }
+  study: { study_id: string | null; note: string }
+  parameters: Record<string, unknown>
+  status: 'available'
+  stale: boolean
+  staleness_reasons: string[]
+  graph: { graph_id: string; graph_spec_fingerprint_sha256: string; graph_revision: number } | null
+  reproducibility: Record<string, unknown>
+}
+
+export interface HistoryResponse {
+  history_schema_version: string
+  generated_at_utc: string
+  dataset: HistoryDataset
+  runs: HistoryEntry[]
+  counts_by_analysis_kind: Record<string, number>
+  stale_count: number
+  storage_note: string
+  store: { runs_used: number; limits: Record<string, number> }
+}
+
+export interface RunReproducibilityManifest {
+  manifest_schema_version: string
+  manifest_kind: string
+  generated_at_utc: string
+  run: {
+    run_id: string
+    kind: string
+    analysis_kind: string
+    label: string
+    created_at_utc: string
+    stale: boolean
+    staleness_reasons: string[]
+  }
+  dataset: Record<string, unknown>
+  study: { study_id: string | null; note: string }
+  graph: Record<string, unknown> | null
+  analysis_definition: Record<string, unknown>
+  cohort: Record<string, unknown>
+  reproducibility: Record<string, unknown>
+  results_included: string
+  reproduction_requirements: string
+  integrity: { canonical_json_sha256: string; canonicalisation: string }
 }

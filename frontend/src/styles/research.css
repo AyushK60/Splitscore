@@ -1121,3 +1121,92 @@
     align-items: stretch;
   }
 }
+
+/* ==========================================================================
+   S10-A — research run history
+   One read-only projection of the bounded in-memory run store. Grouped by
+   analysis kind, staleness rendered loudly, nothing re-computed here.
+   ========================================================================== */
+
+.hist-note {
+  padding: 12px 16px;
+}
+
+.hist-note p {
+  margin: 0;
+  color: var(--ink-quiet, #57534e);
+  font-size: 13px;
+}
+
+.hist-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hist-run {
+  padding: 14px 18px;
+}
+
+.hist-run__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hist-run__title {
+  margin: 2px 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink, #1c1917);
+}
+
+.hist-run__meta {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--muted, #78716c);
+}
+
+.hist-run__actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hist-reasons {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.hist-params {
+  margin: 12px 0 0;
+  border-top: 1px solid var(--line, #e7e5e4);
+  padding-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 4px 24px;
+}
+
+.hist-params__row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.hist-params__row dt {
+  flex: 0 0 150px;
+  font-size: 12px;
+  color: var(--muted, #78716c);
+}
+
+.hist-params__row dd {
+  margin: 0;
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}

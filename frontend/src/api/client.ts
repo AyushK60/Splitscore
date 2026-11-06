@@ -26,6 +26,8 @@ import type {
   DictionaryResponse,
   ManifestResponse,
   ManifestValidation,
+  HistoryResponse,
+  RunReproducibilityManifest,
   ProfileResponse,
   RoleMapResponse,
   StudyResponse,
@@ -219,6 +221,12 @@ export const researchApi = {
     }),
   studyExportPath: (dataset_id: string) => `/api/datasets/${dataset_id}/study/export`,
   manifestExportPath: (dataset_id: string) => `/api/datasets/${dataset_id}/manifest/export`,
+  // S10-A research run history and reproducibility manifests.
+  runHistory: (dataset_id: string) => request<HistoryResponse>(`/api/datasets/${dataset_id}/history`),
+  runManifest: (dataset_id: string, run_id: string) =>
+    request<RunReproducibilityManifest>(
+      `/api/datasets/${dataset_id}/history/${run_id}/manifest`,
+    ),
 }
 
 // --------------------------------------------------------------------------

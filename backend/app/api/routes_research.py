@@ -14,7 +14,13 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.api.deps import get_context
 from app.audit.catalogue import catalogue_payload
+from app.core.errors import NotFoundError
 from app.core.logging_config import get_logger
+from app.core.store import StoredRun
+from app.research.history import (
+    build_manifest as build_reproducibility_manifest,
+)
+from app.research.history import build_run_history
 from app.research.profiling import build_profile
 from app.research.provenance import build_manifest, validate_manifest
 from app.research.schema import MANIFEST_SCHEMA_VERSION, StudyCardDraft
@@ -280,6 +286,57 @@ def post_manifest_validate(
 
     result["applied"] = applied
     return result
+
+
+# --------------------------------------------------------------------------- #
+# S10-A — research run history and reproducibility manifests
+# --------------------------------------------------------------------------- #
+
+
+def _graph_fingerprint_lookup(dataset_id: str, graph_id: str) -> tuple[str, str] | None:
+    """(graph_id, spec_fingerprint) for a live graph, or None when it is gone."""
+    context = get_context()
+    try:
+        record = context.causal_graphs.get(dataset_id, graph_id)
+    except NotFoundError:
+        return None
+    return record.graph_id, record.fingerprint
+
+
+@router.get("/datasets/{dataset_id}/history")
+def dataset_history(dataset_id: str) -> dict[str, Any]:
+    """The typed research run history for one live dataset, newest first."""
+    context = get_context()
+    dataset = context.store.get_dataset(dataset_id)
+    listed = [
+        entry
+        for entry in context.store.list_runs()
+        if entry["dataset_id"] == dataset.dataset_id
+    ]
+    stored: list[tuple[StoredRun, float]] = []
+    for entry in listed:
+        run = context.store.get_run(entry["run_id"])
+        stored.append((run, entry["created_seconds_ago"]))
+    payload = build_run_history(dataset, stored, _graph_fingerprint_lookup)
+    payload["store"] = {
+        "runs_used": len(stored),
+        "limits": context.store.stats().limits,
+    }
+    return payload
+
+
+@router.get("/datasets/{dataset_id}/history/{run_id}/manifest")
+def dataset_run_manifest(dataset_id: str, run_id: str) -> dict[str, Any]:
+    """A portable, metadata-only reproducibility manifest for one stored run."""
+    context = get_context()
+    dataset = context.store.get_dataset(dataset_id)
+    run = context.store.get_run(run_id)
+    if run.dataset_id != dataset.dataset_id:
+        raise NotFoundError(
+            "That run belongs to a different dataset.",
+            details={"run_id": run_id, "dataset_id": dataset_id},
+        )
+    return build_reproducibility_manifest(run, dataset, _graph_fingerprint_lookup)
 
 
 __all__ = ["router"]
