@@ -1,6 +1,26 @@
 # SplitScope — Status Report
 
 **Date:** 2026-10-18 (finalization added; Stages 4a–4d recorded below)
+**S10 (2026-11-07):** COMPLETE — the integrated Research Dossier, experiment
+history, reproducibility infrastructure, methodology generation and
+publication exports shipped on branch `v2-premium-visual-foundation`.
+S10-A added a typed, read-only Research History projection of the bounded
+in-memory run store (new `#/history` stage, step 11) with per-run identity,
+parameters, staleness re-checks and honest "not recorded" states, plus
+portable metadata-only reproducibility manifests with independently
+verifiable canonical-JSON sha256. S10-B extended the S7 dossier engine to
+schema **1.1.0 (additive)** with seven server-authored sections composed
+from stored estimation runs — causal graph, identification, causal
+estimation, subgroups, robustness, what-if and a methodology generator
+(concise/technical) that invents nothing — with refusal of cross-dataset,
+stale and mismatched sources, and verbatim carriage of every caveat into
+JSON, preview and printable HTML. S10-C added the deterministic
+publication SVG of the causal graph (rendered from the stored spec, never a
+canvas screenshot), and two real-backend Playwright journeys verifying the
+complete workflow (audit → gated estimation → three research experiments →
+integrated dossier → downloads). 20 new backend tests (**620 total**), 9 new
+frontend tests (**245 total**), 2 new Playwright journeys (**39 total**),
+synthetic oracle still 41/41 (61 checks). See `docs/S10_HANDOFF.md`.
 **S9C (2026-11-07):** COMPLETE — advanced causal research shipped on branch
 `v2-premium-visual-foundation` as a new `#/research` stage (step 9, Causal
 research) with three focused views that build strictly on a stored estimation

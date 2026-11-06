@@ -732,3 +732,14 @@ These are **implementation and reporting references**, not proof that SplitScope
 | Preserve existing SplitScope | §2, F03, S0 | Entire verified audit flow |
 
 **Scope status:** Accepted requirements documented. **No V2 feature has been represented here as shipped or independently verified.** The next decision is an implementation model/session strategy for S0 and S1, once the owner approves this blueprint.
+
+---
+
+## Implementation status (milestone tracker — appended, historical entries preserved)
+
+| Stage | Status | Evidence |
+| --- | --- | --- |
+| S0–S8C | COMPLETE | per-stage docs (`docs/S0_S2…S8C_*.md`), historical |
+| S9A–S9C | COMPLETE | S9A/S9B/S9C handoffs; S9C independent audit PASS (`S9C_INDEPENDENT_AUDIT.md`, `S9C_FINAL_VERIFICATION.md`) |
+| S10 (F19–F23 core) | COMPLETE (2026-11-07) | `S10_ARCHITECTURE.md`, `S10_HISTORY_AND_REPRODUCIBILITY.md`, `S10_RESEARCH_DOSSIER.md`, `S10_PUBLICATION_EXPORTS.md`, `S10_SCIENTIFIC_VALIDATION.md`, `S10_FINAL_VERIFICATION.md`, `S10_HANDOFF.md`; 620 backend / 245 frontend / 39 Playwright; oracle 41/41 |
+| S11 | NOT STARTED — next: independent release audit | — |
