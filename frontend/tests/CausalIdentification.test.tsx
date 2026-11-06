@@ -260,8 +260,15 @@ function dseparationFixture(
   }
 }
 
-function enterIdentificationMode() {
+async function enterIdentificationMode() {
   fireEvent.click(screen.getByTestId('mode-identification'))
+  // The saved-graph selection (list -> get -> dispatch load) settles
+  // asynchronously after the lab mounts, and identification always runs on the
+  // saved revision. Wait for that hydration to finish before interacting: the
+  // save gate must have cleared because the graph is saved and clean. A test
+  // that deliberately dirties the draft does so *after* this await, and its
+  // gate assertions are unaffected.
+  await waitFor(() => expect(screen.queryByTestId('identification-save-gate')).toBeNull())
 }
 
 function listFixture() {
@@ -325,7 +332,7 @@ describe('Causal Lab identification mode (S8C)', () => {
     renderLab()
     await waitFor(() => expect(screen.getByTestId('mode-identification')).toBeEnabled())
 
-    enterIdentificationMode()
+    await enterIdentificationMode()
     expect(screen.getByTestId('identification-panel')).toBeVisible()
     // Saved, clean graph: no save gate, run button enabled with a scope.
     expect(screen.queryByTestId('identification-save-gate')).toBeNull()
@@ -340,7 +347,7 @@ describe('Causal Lab identification mode (S8C)', () => {
     vi.mocked(causalApi.identify).mockResolvedValue(identificationFixture())
     renderLab()
     await waitFor(() => expect(screen.getByTestId('mode-identification')).toBeEnabled())
-    enterIdentificationMode()
+    await enterIdentificationMode()
     fireEvent.click(screen.getByTestId('run-identification'))
 
     await waitFor(() => expect(screen.getByTestId('identification-status')).toBeVisible())
@@ -362,7 +369,7 @@ describe('Causal Lab identification mode (S8C)', () => {
     vi.mocked(causalApi.evaluateAdjustment).mockResolvedValue(evaluationFixture())
     renderLab()
     await waitFor(() => expect(screen.getByTestId('mode-identification')).toBeEnabled())
-    enterIdentificationMode()
+    await enterIdentificationMode()
     fireEvent.click(screen.getByTestId('run-identification'))
     await waitFor(() => expect(screen.getByTestId('suggested-set')).toBeVisible())
 
@@ -397,7 +404,7 @@ describe('Causal Lab identification mode (S8C)', () => {
     )
     renderLab()
     await waitFor(() => expect(screen.getByTestId('mode-identification')).toBeEnabled())
-    enterIdentificationMode()
+    await enterIdentificationMode()
     // Evaluate without running identification first: candidates come from the
     // draft's observed nodes. The backend's structured verdict is rendered
     // verbatim whatever it reports.
@@ -418,7 +425,7 @@ describe('Causal Lab identification mode (S8C)', () => {
     )
     renderLab()
     await waitFor(() => expect(screen.getByTestId('mode-identification')).toBeEnabled())
-    enterIdentificationMode()
+    await enterIdentificationMode()
 
     fireEvent.change(screen.getByRole('combobox', { name: 'd-separation variable X' }), {
       target: { value: 'age' },
@@ -459,7 +466,7 @@ describe('Causal Lab identification mode (S8C)', () => {
     )
     renderLab()
     await waitFor(() => expect(screen.getByTestId('mode-identification')).toBeEnabled())
-    enterIdentificationMode()
+    await enterIdentificationMode()
     fireEvent.click(screen.getByTestId('run-identification'))
     await waitFor(() => expect(screen.getByTestId('identification-status')).toBeVisible())
     expect(screen.getByText(/No eligible observed backdoor set found/)).toBeVisible()
@@ -471,7 +478,7 @@ describe('Causal Lab identification mode (S8C)', () => {
     vi.mocked(causalApi.identify).mockResolvedValue(identificationFixture())
     renderLab()
     await waitFor(() => expect(screen.getByTestId('mode-identification')).toBeEnabled())
-    enterIdentificationMode()
+    await enterIdentificationMode()
     fireEvent.click(screen.getByTestId('run-identification'))
     await waitFor(() => expect(screen.getByTestId('identification-status')).toBeVisible())
     expect(screen.queryByTestId('identification-stale')).toBeNull()
@@ -495,7 +502,7 @@ describe('Causal Lab identification mode (S8C)', () => {
     vi.mocked(causalApi.update).mockResolvedValue(payloadFixture())
     renderLab()
     await waitFor(() => expect(screen.getByTestId('mode-identification')).toBeEnabled())
-    enterIdentificationMode()
+    await enterIdentificationMode()
     fireEvent.change(screen.getByRole('combobox', { name: 'Identification outcome selection' }), {
       target: { value: 'age' },
     })
@@ -513,7 +520,7 @@ describe('Causal Lab identification mode (S8C)', () => {
     vi.mocked(causalApi.identify).mockResolvedValue(identificationFixture())
     renderLab()
     await waitFor(() => expect(screen.getByTestId('mode-identification')).toBeEnabled())
-    enterIdentificationMode()
+    await enterIdentificationMode()
     fireEvent.click(screen.getByTestId('run-identification'))
     await waitFor(() => expect(screen.getAllByTestId('explanation').length).toBe(2))
     const explanations = screen.getAllByTestId('explanation')

@@ -258,3 +258,72 @@ def test_estimation_runs_belong_to_their_dataset():
     run_id = result["payload"]["run_id"]
     wrong_dataset = client.get(f"/api/datasets/{other}/estimation-runs/{run_id}")
     assert wrong_dataset.status_code == 404
+
+
+# --------------------------------------------------------------------------- #
+# S9C independent audit additions: fingerprint gating on every S9C route
+# --------------------------------------------------------------------------- #
+
+
+def _graph_fingerprint(dataset_id: str, graph_id: str) -> str:
+    fetched = client.get(f"/api/datasets/{dataset_id}/causal-graphs/{graph_id}")
+    assert fetched.status_code == 200
+    body = fetched.json()
+    graph = body.get("graph") or body
+    return graph["spec_fingerprint_sha256"]
+
+
+def _stale_request(dataset_id: str, graph_id: str) -> dict:
+    request = _request()
+    request["expected_spec_fingerprint_sha256"] = "0" * 64
+    assert request["expected_spec_fingerprint_sha256"] != _graph_fingerprint(dataset_id, graph_id)
+    return request
+
+
+def test_subgroups_refuse_a_stale_graph_fingerprint():
+    dataset_id, graph_id = _load_demo()
+    result = _run_subgroups(dataset_id, graph_id, request=_stale_request(dataset_id, graph_id))
+    assert result["status"] == 409
+    assert result["payload"]["error"]["code"] == "infeasible_operation"
+
+
+def test_robustness_refuses_a_stale_graph_fingerprint():
+    dataset_id, graph_id = _load_demo()
+    body = {
+        "request": _stale_request(dataset_id, graph_id),
+        "experiment": "subsampling",
+        "parameters": {"estimator": "aipw", "reps": 100, "fraction": 0.5},
+        "label": "api-test",
+    }
+    response = client.post(
+        f"/api/datasets/{dataset_id}/causal-graphs/{graph_id}/estimation/robustness", json=body
+    )
+    assert response.status_code == 409
+
+
+def test_what_if_refuses_a_stale_graph_fingerprint():
+    dataset_id, graph_id = _load_demo()
+    body = {
+        "request": _stale_request(dataset_id, graph_id),
+        "profile": {"age": 40},
+        "label": "api-test",
+    }
+    response = client.post(
+        f"/api/datasets/{dataset_id}/causal-graphs/{graph_id}/estimation/whatif", json=body
+    )
+    assert response.status_code == 409
+
+
+def test_robustness_refuses_unknown_experiment_kind_and_mismatched_spec():
+    dataset_id, graph_id = _load_demo()
+    wrong_kind = {
+        "request": _request(),
+        "experiment": "subsampling",
+        "parameters": {"estimator": "bogus_estimator"},  # rejected before the gate
+        "label": "api-test",
+    }
+    response = client.post(
+        f"/api/datasets/{dataset_id}/causal-graphs/{graph_id}/estimation/robustness",
+        json=wrong_kind,
+    )
+    assert response.status_code in (400, 422)

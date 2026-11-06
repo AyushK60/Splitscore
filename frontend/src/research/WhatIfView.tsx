@@ -87,7 +87,7 @@ export function WhatIfView({
                   type="number"
                   step="any"
                   value={values[covariate.column] ?? ''}
-                  placeholder="cohort median"
+                  placeholder="median"
                   onChange={(event) => setValue(covariate.column, event.target.value)}
                   data-testid={`whatif-field-${covariate.column}`}
                 />

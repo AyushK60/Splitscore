@@ -10,11 +10,20 @@
    dashboards, no equal-weight chart grid.
    ========================================================================== */
 
-.eststudio {
+/* The estimation palette is part of the shared instrument language: shared
+   chart rules (.estrow__interval, .estrow__cap, .estrow__dot) are also rendered
+   by the S9C research stage, which sits outside .eststudio. Defining the
+   variables only on .eststudio made those rules compute `stroke: none` there —
+   the forest plot's uncertainty whiskers silently vanished. They are defined
+   on :root so every consumer of the shared rules sees the same palette. */
+:root {
   --est-copper: #b4562a;
   --est-copper-soft: #f6ece3;
   --est-teal: #0a6d7d;
   --est-teal-soft: #e7f3f5;
+}
+
+.eststudio {
   display: flex;
   flex-direction: column;
   gap: 14px;

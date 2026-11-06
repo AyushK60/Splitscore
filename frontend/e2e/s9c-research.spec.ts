@@ -106,6 +106,18 @@ test('S9C journey A — subgroup effects on the confounded demonstration study',
   // The forest plot names the overall reference and the exploratory intent.
   await expect(page.getByTestId('subgroup-forest')).toContainText('overall')
   await expect(page.getByTestId('subgroup-forest')).toContainText('exploratory')
+  // Regression guard (S9C audit): the uncertainty whiskers must actually paint.
+  // A scoped-CSS regression once computed `stroke: none` on these lines and the
+  // intervals vanished while the dots stayed visible — the chart looked fine at
+  // a glance and lied about the uncertainty. Assert real painted geometry.
+  const whisker = page.locator('[data-testid="subgroup-forest-chart"] .estrow__interval').first()
+  await expect
+    .poll(async () => whisker.evaluate((el) => getComputedStyle(el).stroke), { timeout: 5_000 })
+    .not.toBe('none')
+  expect(await whisker.evaluate((el) => getComputedStyle(el).strokeWidth)).toBe('3.5px')
+  const whiskerBox = await whisker.boundingBox()
+  expect(whiskerBox).not.toBeNull()
+  expect(whiskerBox!.width).toBeGreaterThan(50)
   await screenshot(page, 'subgroup-forest-1440.png', true)
 })
 
