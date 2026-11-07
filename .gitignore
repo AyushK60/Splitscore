@@ -38,3 +38,6 @@ evaluation_output/
 tiny_test.csv
 up*.txt
 scripts/_scratch_*.py
+
+# Desktop-launcher runtime state and server logs (regenerated at runtime)
+.launcher/

@@ -47,7 +47,27 @@ npm ci
 cd ..
 ```
 
-## Build and start the application
+## Starting SplitScope V2 (one-click, recommended)
+
+On Windows you do not need the terminal at all:
+
+1. **First time only:** double-click `Setup-SplitScope.cmd` (checks Python
+   3.11 and Node.js ≥ 20.18, installs the pinned dependencies, builds the
+   frontend, creates the desktop shortcut — clear errors if a prerequisite
+   is missing).
+2. **Every day:** double-click the **SplitScope V2** desktop shortcut (or
+   `Start-SplitScope.cmd`). SplitScope opens in your browser at
+   http://127.0.0.1:8000.
+3. **To shut down:** run `Stop-SplitScope.cmd` — it stops only the server
+   the launcher started. `Status-SplitScope.cmd` shows a plain-language
+   status at any time.
+
+The launcher reuses a healthy running server, never rebuilds unnecessarily,
+never opens a duplicate browser tab, and never touches unrelated programs on
+port 8000. See `docs/POST_S11_LOCAL_LAUNCHER.md` for details and
+troubleshooting.
+
+## Build and start the application (manual)
 
 ```powershell
 # Build the frontend once (output: frontend/dist)
