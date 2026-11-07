@@ -1,6 +1,32 @@
 # SplitScope — Status Report
 
 **Date:** 2026-10-18 (finalization added; Stages 4a–4d recorded below)
+**S11 (2026-11-07):** COMPLETE — final release engineering shipped on branch
+`v2-premium-visual-foundation` as three verified checkpoints. S11-A
+independently re-executed the full S10 gate on `f7103ea` (backend 620 passed,
+synthetic oracle 41/41 with 61 checks, vitest/TS/ESLint/build clean, 39
+real-backend Playwright journeys) and walked the product in a real browser at
+1440 and 390; it repaired a ~1-in-N flaky identification unit test and a
+run-count format defect, and inventoried the motion, transition and bundle
+gaps. S11-B fixed the highest-value usability defect found: **unsaved causal
+graph drafts were silently destroyed by ordinary navigation** — the draft
+reducer now lives above the route switch (regression-tested; live-verified
+add node → leave → return). It also introduced the motion token system
+(`--motion-fast/base/slow`, `--ease-standard/emphasis`) with a quiet keyed
+stage transition that respects `prefers-reduced-motion`, normalized the
+shared interaction transitions, and cut the main bundle **589.16 kB →
+405.53 kB (−31 %)** by route-level code splitting Data/Model Lab/Compare/
+Report Studio behind labelled loading fallbacks. S11-D re-ran the full gate
+on the final tree: **620 backend, 246 frontend, oracle 41/41, TS/ESLint
+clean, build OK, Playwright 39/39 (8.8 min, retries 0)**; zero horizontal
+overflow at 390 px; inspected screenshots in `docs/screenshots/s11/`.
+Reviews and handoff: `docs/S11_INITIAL_AUDIT.md`,
+`docs/S11_HCI_USABILITY_REVIEW.md`, `docs/S11_INTERACTION_AND_MOTION_SYSTEM.md`,
+`docs/S11_VISUAL_REFINEMENTS.md`, `docs/S11_ACCESSIBILITY_REVIEW.md`,
+`docs/S11_PERFORMANCE_REVIEW.md`, `docs/S11_SECURITY_REVIEW.md`,
+`docs/S11_FINAL_VERIFICATION.md`, `docs/S11_RELEASE_HANDOFF.md` — verdict:
+**RELEASE READY** for the intended local/private research demo (not a claim
+of production security). See `docs/S11_RELEASE_HANDOFF.md`.
 **S10 (2026-11-07):** COMPLETE — the integrated Research Dossier, experiment
 history, reproducibility infrastructure, methodology generation and
 publication exports shipped on branch `v2-premium-visual-foundation`.
