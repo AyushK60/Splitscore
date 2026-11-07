@@ -1,4 +1,4 @@
-import { StrictMode, Suspense, lazy, useEffect, useRef } from 'react'
+import { StrictMode, Suspense, lazy, useEffect, useRef, type ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import './styles/app.css'
@@ -15,17 +15,34 @@ import './styles/s9.css'
 import { AppProvider, useApp } from './state/AppState'
 import { useHashRoute, type ViewId } from './lib/router'
 import { ExploreProvider } from './explore/ExploreState'
+import { CausalDraftProvider } from './causal/CausalDraftContext'
 import { LandingView } from './views/LandingView'
 import { OverviewView } from './views/OverviewView'
-import { DatasetView } from './views/DatasetView'
 import { StudyView } from './views/StudyView'
 import { ExploreView } from './views/ExploreView'
-import { ModelLabView } from './views/ModelLabView'
 import { AuditView } from './views/AuditView'
 import { EvidenceView } from './views/EvidenceView'
 import { HistoryView } from './views/HistoryView'
-import { ComparisonView } from './views/ComparisonView'
-import { ExportView } from './views/ExportView'
+
+/**
+ * Code splitting (S11). The main bundle previously carried every workspace and
+ * warned above the 500 kB budget. The heavy analytical views now load only when
+ * their route is opened: each is its own chunk, the fallback is an honest
+ * labelled card (see StageFallback below), and repeat visits are served from
+ * cache. Lightweight early stages stay eager so the first steps never flash.
+ */
+const DatasetView = lazy(() =>
+  import('./views/DatasetView').then((module) => ({ default: module.DatasetView })),
+)
+const ModelLabView = lazy(() =>
+  import('./views/ModelLabView').then((module) => ({ default: module.ModelLabView })),
+)
+const ComparisonView = lazy(() =>
+  import('./views/ComparisonView').then((module) => ({ default: module.ComparisonView })),
+)
+const ExportView = lazy(() =>
+  import('./views/ExportView').then((module) => ({ default: module.ExportView })),
+)
 
 /**
  * The Causal Lab (S8B) is code-split: the graph editor is the largest single
@@ -179,49 +196,32 @@ function Shell() {
     return <LandingView onNavigate={navigate} />
   }
 
+  /** Honest, labelled fallback for every code-split stage (no blank swap). */
+  const stage = (label: string, node: ReactNode) => (
+    <Suspense
+      fallback={
+        <div className="card" style={{ padding: 'var(--space-6)' }}>
+          <p className="muted" style={{ margin: 0 }} role="status">Loading {label}…</p>
+        </div>
+      }
+    >
+      {node}
+    </Suspense>
+  )
+
   const body =
     view === 'overview' ? <OverviewView onNavigate={navigate} /> :
-    view === 'dataset' ? <DatasetView onNavigate={navigate} /> :
+    view === 'dataset' ? stage('the Data workspace', <DatasetView onNavigate={navigate} />) :
     view === 'study' ? <StudyView onNavigate={navigate} /> :
     view === 'explore' ? (
       <ExploreProvider>
         <ExploreView onNavigate={navigate} />
       </ExploreProvider>
     ) :
-    view === 'models' ? <ModelLabView onNavigate={navigate} /> :
-    view === 'causal' ? (
-      <Suspense
-        fallback={
-          <div className="card" style={{ padding: 'var(--space-6)' }}>
-            <p className="muted" style={{ margin: 0 }} role="status">Loading the Causal Lab…</p>
-          </div>
-        }
-      >
-        <CausalLabView onNavigate={navigate} />
-      </Suspense>
-    ) :
-    view === 'estimation' ? (
-      <Suspense
-        fallback={
-          <div className="card" style={{ padding: 'var(--space-6)' }}>
-            <p className="muted" style={{ margin: 0 }} role="status">Loading the Effect Estimation Studio…</p>
-          </div>
-        }
-      >
-        <EstimationView onNavigate={navigate} />
-      </Suspense>
-    ) :
-    view === 'research' ? (
-      <Suspense
-        fallback={
-          <div className="card" style={{ padding: 'var(--space-6)' }}>
-            <p className="muted" style={{ margin: 0 }} role="status">Loading the Causal Research stage…</p>
-          </div>
-        }
-      >
-        <ResearchView onNavigate={navigate} />
-      </Suspense>
-    ) :
+    view === 'models' ? stage('the Model Lab', <ModelLabView onNavigate={navigate} />) :
+    view === 'causal' ? stage('the Causal Lab', <CausalLabView onNavigate={navigate} />) :
+    view === 'estimation' ? stage('the Effect Estimation Studio', <EstimationView onNavigate={navigate} />) :
+    view === 'research' ? stage('the Causal Research stage', <ResearchView onNavigate={navigate} />) :
     view === 'history' ? (
       dataset ? (
         <HistoryView dataset={dataset} onNavigate={navigate} />
@@ -231,8 +231,8 @@ function Shell() {
     ) :
     view === 'audit' ? <AuditView onNavigate={navigate} /> :
     view === 'evidence' ? <EvidenceView onNavigate={navigate} /> :
-    view === 'comparison' ? <ComparisonView onNavigate={navigate} /> :
-    view === 'export' ? <ExportView onNavigate={navigate} /> :
+    view === 'comparison' ? stage('the split comparison', <ComparisonView onNavigate={navigate} />) :
+    view === 'export' ? stage('the Report Studio', <ExportView onNavigate={navigate} />) :
     <OverviewView onNavigate={navigate} />
 
   // The navigation follows the order of the actual work: the audit is the third
@@ -375,7 +375,14 @@ function Shell() {
             </div>
           </section>
         ) : null}
-        {body}
+        {/* Keyed by stage: each workspace appears with the same quiet
+            fade-and-rise (see .app-stage). The views already remount on stage
+            change, so the key adds no state loss; the animation is opacity and
+            transform only, never blocks input, and collapses to an instant
+            swap under prefers-reduced-motion. */}
+        <div key={view} className="app-stage">
+          {body}
+        </div>
       </main>
 
       <footer className="app-main app-footer">
@@ -392,7 +399,11 @@ const root = createRoot(document.getElementById('root')!)
 root.render(
   <StrictMode>
     <AppProvider>
-      <Shell />
+      {/* The unsaved causal draft survives ordinary navigation (S11-B): the
+          provider lives above the route switch, the reducer is unchanged. */}
+      <CausalDraftProvider>
+        <Shell />
+      </CausalDraftProvider>
     </AppProvider>
   </StrictMode>,
 )

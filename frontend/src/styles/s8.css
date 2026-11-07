@@ -235,6 +235,10 @@
 .clab-column-list {
   max-height: 180px;
   overflow-y: auto;
+  /* Keep the vertical scrollbar off the ADD chips: without this the native
+     scrollbar overlays the trailing edge of the last row (S11 audit, LOW). */
+  scrollbar-gutter: stable;
+  padding-right: 2px;
 }
 
 .clab-graph-item {

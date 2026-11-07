@@ -12,10 +12,11 @@
  * expiry handling, and keyboard shortcuts.
  */
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AppProvider, useApp } from '../src/state/AppState'
+import { CausalDraftProvider } from '../src/causal/CausalDraftContext'
 import { CausalLabView } from '../src/causal/CausalLabView'
 import { ApiError } from '../src/api/client'
 import type * as ApiClient from '../src/api/client'
@@ -199,9 +200,11 @@ async function renderLab() {
   vi.mocked(api.demos).mockResolvedValue({} as Awaited<ReturnType<typeof api.demos>>)
   vi.mocked(api.loadDemo).mockResolvedValue(loadedFixture())
 
-  render(
+  const renderResult = render(
     <AppProvider>
-      <Harness />
+      <CausalDraftProvider>
+        <Harness />
+      </CausalDraftProvider>
     </AppProvider>,
   )
   await screen.findByText('loading…')
@@ -210,6 +213,7 @@ async function renderLab() {
   // state instead of racing it. ('unsaved draft' is the pre-load text and is
   // deliberately not matched.)
   await screen.findByText(/revision \d+|No saved graphs yet\./)
+  return renderResult
 }
 
 async function addColumn(column: string) {
@@ -499,5 +503,55 @@ describe('failure and lifecycle handling', () => {
     await waitFor(() =>
       expect(screen.getByText('0 of 60 variables · 0 of 240 edges')).toBeInTheDocument(),
     )
+  })
+
+  it('an uncommitted draft survives unmounting and remounting the lab (S11-B)', async () => {
+    // No saved graphs: the pre-S11 bug discarded a drawn node on every
+    // navigation because the draft lived inside the unmounted view. Here the
+    // provider sits above a simulated route switch, exactly as it does in the
+    // app shell, so leaving the lab and returning is what the test exercises.
+    vi.mocked(causalApi.list).mockResolvedValue(emptyList())
+    function RouteHarness() {
+      const ctx = useApp()
+      const [onLab, setOnLab] = useState(true)
+      useEffect(() => {
+        if (!ctx.dataset) void ctx.loadDemo('fixture_demo')
+      }, [])
+      return (
+        <CausalDraftProvider>
+          {ctx.dataset && onLab ? <CausalLabView onNavigate={() => {}} /> : ctx.dataset ? <p>elsewhere</p> : <p>loading…</p>}
+          <button type="button" onClick={() => setOnLab((value) => !value)}>
+            toggle stage
+          </button>
+        </CausalDraftProvider>
+      )
+    }
+    vi.mocked(api.health).mockResolvedValue({} as Awaited<ReturnType<typeof api.health>>)
+    vi.mocked(api.checks).mockResolvedValue({} as Awaited<ReturnType<typeof api.checks>>)
+    vi.mocked(api.demos).mockResolvedValue({} as Awaited<ReturnType<typeof api.demos>>)
+    vi.mocked(api.loadDemo).mockResolvedValue(loadedFixture())
+    render(
+      <AppProvider>
+        <RouteHarness />
+      </AppProvider>,
+    )
+    await screen.findByText('loading…')
+    await waitFor(() => expect(screen.getByRole('region', { name: 'Causal Lab' })).toBeInTheDocument())
+    await screen.findByText('No saved graphs yet.')
+    await addColumn(COLUMN_A)
+    await waitFor(() =>
+      expect(screen.getByText('1 of 60 variables · 0 of 240 edges')).toBeInTheDocument(),
+    )
+
+    // Leave the lab (the view unmounts) and return to it.
+    fireEvent.click(screen.getByRole('button', { name: 'toggle stage' }))
+    await screen.findByText('elsewhere')
+    fireEvent.click(screen.getByRole('button', { name: 'toggle stage' }))
+    await waitFor(() => expect(screen.getByRole('region', { name: 'Causal Lab' })).toBeInTheDocument())
+    // The drawn node is still there — and the auto-load did not clobber it.
+    await waitFor(() =>
+      expect(screen.getByText('1 of 60 variables · 0 of 240 edges')).toBeInTheDocument(),
+    )
+    await screen.findByTestId('node-inspector')
   })
 })

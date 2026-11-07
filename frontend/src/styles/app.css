@@ -66,6 +66,17 @@
   --ws-max: 1800px;
   --ws-gutter: clamp(18px, 2.6vw, 44px);
   --ws-reading: 76ch;
+
+  /* Motion (S11): one vocabulary instead of ad-hoc durations.
+     fast  — interaction feedback (hover, press, focus, colour/border changes)
+     base  — controls appearing in place (dropdowns, toasts, inline reveals)
+     slow  — workspace-level transitions (stage appearance), nothing larger
+     Easing: standard for state changes, emphasis for elements that enter. */
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 260ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasis: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 *,
@@ -259,7 +270,8 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  transition: color 120ms ease, border-color 120ms ease;
+  transition: color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
 }
 .app-nav button:hover:not(:disabled) {
   color: var(--bone);
@@ -406,6 +418,29 @@ a {
   max-width: var(--ws-max);
   margin: 0 auto;
   padding: var(--space-5) var(--ws-gutter) var(--space-7);
+}
+
+/* Workspace stage transition (S11): a quiet fade-and-rise anchors the eye as
+   the stage changes. Opacity/transform only — nothing reflows, input is never
+   blocked, and the global reduced-motion block collapses it to an instant
+   swap. The keyed wrapper in Shell re-triggers the animation per stage. */
+.app-stage {
+  animation: stage-in var(--motion-slow) var(--ease-emphasis) both;
+}
+@keyframes stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-stage {
+    animation: none;
+  }
 }
 
 .stack > * + * {
@@ -726,7 +761,9 @@ button,
   justify-content: center;
   gap: var(--space-2);
   font-weight: 550;
-  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease,
+  transition: background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
     box-shadow 120ms ease, transform 80ms ease;
 }
 button:hover:not(:disabled),
@@ -811,7 +848,8 @@ textarea {
   padding: 6px 9px;
   width: 100%;
   max-width: 340px;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
 }
 input[type='text']:hover,
 input[type='number']:hover,
@@ -1244,7 +1282,9 @@ table caption + thead th {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
 }
 
 .segmented__option:hover:not(:disabled) {
@@ -1296,7 +1336,7 @@ details.disclosure {
   background: var(--bg-raised);
   padding: var(--space-2) var(--space-4);
   margin: var(--space-3) 0;
-  transition: border-color 120ms ease;
+  transition: border-color var(--motion-fast) var(--ease-standard);
 }
 details.disclosure:hover {
   border-color: var(--line-strong);
@@ -1526,7 +1566,9 @@ details.disclosure[open] > summary {
   border-radius: var(--radius);
   padding: var(--space-4);
   box-shadow: var(--shadow);
-  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+  transition: border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
 }
 .scenario-card:hover {
   border-color: var(--accent-line);
@@ -1697,7 +1739,8 @@ details.disclosure[open] > summary {
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--bg-quiet);
-  transition: border-color 140ms ease, box-shadow 140ms ease;
+  transition: border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
 }
 .entry-option:hover {
   border-color: var(--accent-line);
@@ -1730,7 +1773,8 @@ details.disclosure[open] > summary {
   cursor: pointer;
   font-weight: 400;
   margin: 0;
-  transition: border-color 120ms ease, background-color 120ms ease;
+  transition: border-color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
 }
 .strategy-option:hover {
   border-color: var(--accent-line);

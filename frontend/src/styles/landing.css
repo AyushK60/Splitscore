@@ -699,6 +699,12 @@
   background: rgb(246 239 226 / 70%);
 }
 
+/* S11: the readout CTA can wrap at narrow hero widths; wrapped mono lines
+   must stay left-aligned instead of visually centring under the first line. */
+.lp-readout__cta {
+  text-align: left;
+}
+
 .lp-link {
   position: relative;
   display: inline-flex;

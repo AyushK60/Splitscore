@@ -14,7 +14,7 @@
  * - a 422 from the backend keeps the draft and shows its structured errors.
  */
 
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ApiError, causalApi, downloadExport } from '../api/client'
 import type {
@@ -27,13 +27,12 @@ import type {
 } from '../api/types'
 import type { ViewId } from '../lib/router'
 import { useApp } from '../state/AppState'
+import { useCausalDraft } from './CausalDraftContext'
 import {
-  initialLabState,
   isDirty,
   localEdgeProblems,
   scientificSignature,
   slugifyNodeId,
-  causalLabReducer,
   type CausalDraft,
   type Selection,
 } from './CausalLabState'
@@ -66,7 +65,9 @@ function validationFromDetails(details: Record<string, unknown>): CausalValidati
 export function CausalLabView({ onNavigate }: Props) {
   const { dataset } = useApp()
   const datasetId = dataset?.dataset.dataset_id ?? null
-  const [state, dispatch] = useReducer(causalLabReducer, undefined, initialLabState)
+  // The draft lives above the route switch (CausalDraftProvider) so ordinary
+  // navigation never discards an uncommitted graph. The reducer is unchanged.
+  const { state, dispatch, draftDatasetId, setDraftDatasetId } = useCausalDraft()
   // Latest-state mirror for the global keyboard handler, which must not be
   // re-registered on every keystroke.
   const stateRef = useRef(state)
@@ -103,6 +104,13 @@ export function CausalLabView({ onNavigate }: Props) {
   useEffect(() => {
     if (!datasetId || loadedForDataset.current === datasetId) return
     loadedForDataset.current = datasetId
+    // The draft outlives this view. If it already belongs to this dataset and
+    // carries unsaved content, returning here must NOT clobber it with the
+    // first saved graph; only a draft from another dataset (or a truly fresh
+    // one) is replaced by the auto-load.
+    const returningToOwnDraft =
+      draftDatasetId === datasetId && (state.draft.nodes.length > 0 || state.draft.edges.length > 0)
+    if (returningToOwnDraft) return
     let cancelled = false
     setBusy('Loading causal graphs')
     ;(async () => {
@@ -114,7 +122,12 @@ export function CausalLabView({ onNavigate }: Props) {
           const payload = await causalApi.get(datasetId, listing.graphs[0].graph_id)
           if (cancelled) return
           dispatch({ type: 'load', payload })
+        } else if (state.draft.nodes.length > 0 || state.draft.edges.length > 0) {
+          // Draft belongs to a previous dataset with no saved graphs to restore;
+          // the scientific context changed, so the stale draft is reset.
+          dispatch({ type: 'reset', datasetId })
         }
+        setDraftDatasetId(datasetId)
       } catch (caught) {
         if (!cancelled) {
           const message =
@@ -130,6 +143,10 @@ export function CausalLabView({ onNavigate }: Props) {
     return () => {
       cancelled = true
     }
+    // `state.draft`/`draftDatasetId` are read once per dataset transition; the
+    // guard above makes re-running this on every draft edit both unnecessary
+    // and harmful (it would re-fetch on each keystroke).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasetId])
 
   const save = useCallback(async (): Promise<boolean> => {
@@ -175,7 +192,7 @@ export function CausalLabView({ onNavigate }: Props) {
     } finally {
       setBusy(null)
     }
-  }, [datasetId, state.draft, state.graphId, refreshList])
+  }, [datasetId, state.draft, state.graphId, refreshList, dispatch])
 
   const validate = useCallback(async () => {
     if (!datasetId) return
@@ -202,7 +219,7 @@ export function CausalLabView({ onNavigate }: Props) {
     } finally {
       setBusy(null)
     }
-  }, [datasetId, dirty, save, state.graphId])
+  }, [datasetId, dirty, save, state.graphId, dispatch])
 
   const selectGraph = useCallback(
     async (graphId: string) => {
@@ -225,7 +242,7 @@ export function CausalLabView({ onNavigate }: Props) {
         setBusy(null)
       }
     },
-    [datasetId, dirty],
+    [datasetId, dirty, dispatch],
   )
 
   const newGraph = useCallback(() => {
@@ -234,7 +251,7 @@ export function CausalLabView({ onNavigate }: Props) {
     }
     dispatch({ type: 'reset', datasetId: datasetId ?? '' })
     setSavedNote(null)
-  }, [datasetId, dirty])
+  }, [datasetId, dirty, dispatch])
 
   const deleteGraph = useCallback(async () => {
     if (!datasetId || !state.graphId) return
@@ -254,7 +271,7 @@ export function CausalLabView({ onNavigate }: Props) {
       setBusy(null)
       setConfirmDeleteGraph(false)
     }
-  }, [datasetId, state.graphId, refreshList])
+  }, [datasetId, state.graphId, refreshList, dispatch])
 
   const exportGraph = useCallback(() => {
     if (!datasetId || !state.graphId) return
@@ -299,7 +316,7 @@ export function CausalLabView({ onNavigate }: Props) {
         setBusy(null)
       }
     },
-    [datasetId, refreshList],
+    [datasetId, refreshList, dispatch],
   )
 
   // -- draft edits ----------------------------------------------------------- //
@@ -322,7 +339,7 @@ export function CausalLabView({ onNavigate }: Props) {
       })
       dispatch({ type: 'select', selection: { kind: 'node', id: nodeId } })
     },
-    [state.draft.nodes],
+    [state.draft.nodes, dispatch],
   )
 
   const hypotheticalCount = useRef(0)
@@ -343,7 +360,7 @@ export function CausalLabView({ onNavigate }: Props) {
       },
     })
     dispatch({ type: 'select', selection: { kind: 'node', id: nodeId } })
-  }, [state.draft.nodes])
+  }, [state.draft.nodes, dispatch])
 
   const connectNodes = useCallback(
     (source: string, target: string) => {
@@ -355,7 +372,7 @@ export function CausalLabView({ onNavigate }: Props) {
       }
       dispatch({ type: 'addEdge', edge: { source, target, rationale: null, reference: null } })
     },
-    [state.draft],
+    [state.draft, dispatch],
   )
 
   const handleFlowConnect = useCallback(
@@ -371,7 +388,7 @@ export function CausalLabView({ onNavigate }: Props) {
       const [source, target] = edgeId.split('->')
       if (source && target) dispatch({ type: 'removeEdge', source, target })
     },
-    [],
+    [dispatch],
   )
 
   // -- S8C identification ------------------------------------------------------ //
@@ -399,7 +416,7 @@ export function CausalLabView({ onNavigate }: Props) {
     } finally {
       setBusy(null)
     }
-  }, [datasetId, state.graphId, dirty, state.draft])
+  }, [datasetId, state.graphId, dirty, state.draft, dispatch])
 
   const evaluateAdjustmentSet = useCallback(
     async (variables: string[]): Promise<CausalAdjustmentEvaluationResponse> => {
@@ -452,7 +469,7 @@ export function CausalLabView({ onNavigate }: Props) {
       type: 'setMeta',
       patch: { name: example.name, description: example.description ?? '' },
     })
-  }, [datasetId])
+  }, [datasetId, dispatch])
 
   // -- keyboard shortcuts ---------------------------------------------------- //
 
@@ -487,7 +504,7 @@ export function CausalLabView({ onNavigate }: Props) {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [removeEdgeById])
+  }, [removeEdgeById, dispatch])
 
   // -- derived render data ---------------------------------------------------- //
 
