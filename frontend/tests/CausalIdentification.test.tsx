@@ -18,6 +18,7 @@ import { useEffect } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AppProvider, useApp } from '../src/state/AppState'
+import { CausalDraftProvider } from '../src/causal/CausalDraftContext'
 import { CausalLabView } from '../src/causal/CausalLabView'
 import { api } from '../src/api/client'
 import type * as ApiClient from '../src/api/client'
@@ -319,7 +320,9 @@ describe('Causal Lab identification mode (S8C)', () => {
 
     render(
       <AppProvider>
+        <CausalDraftProvider>
         <Harness />
+      </CausalDraftProvider>
       </AppProvider>,
     )
     await screen.findByText('loading…')
@@ -356,9 +359,14 @@ describe('Causal Lab identification mode (S8C)', () => {
     expect(causalApi.identify).toHaveBeenCalledWith(DATASET_ID, 'cgraph-ident01')
 
     // Inspecting the set loads it into the custom tester and highlights Age.
+    // Under full-suite load the click can land while the identification result
+    // hydration is still settling, so the checked state is awaited rather than
+    // read synchronously (same failure class as the S9C AUDIT-2 soak fix).
     fireEvent.click(screen.getByRole('button', { name: 'Inspect this set' }))
-    const checkbox = within(screen.getByTestId('adjustment-candidates')).getByRole('checkbox', { name: 'Adjust for Age' }) as HTMLInputElement
-    expect(checkbox.checked).toBe(true)
+    await waitFor(() => {
+      const checkbox = within(screen.getByTestId('adjustment-candidates')).getByRole('checkbox', { name: 'Adjust for Age' }) as HTMLInputElement
+      expect(checkbox.checked).toBe(true)
+    })
     // The on-canvas highlight class (.cnode--adjustment) is rendered by the
     // real React Flow tree (stubbed here); the legend is real and visible.
     expect(screen.getByLabelText('Graph legend')).toBeVisible()

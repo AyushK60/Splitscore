@@ -22,7 +22,7 @@ import type {
   HistoryResponse,
   RunReproducibilityManifest,
 } from '../api/types'
-import { formatNumber } from '../estimation/format'
+import { formatCompact } from '../estimation/format'
 import type { ViewId } from '../lib/router'
 
 const ANALYSIS_LABELS: Record<string, string> = {
@@ -168,7 +168,7 @@ export function HistoryView({
           <p className="rs-eyebrow">Research history</p>
           <h1 className="rs-h1">Every analysis this session has stored</h1>
           <p className="rs-sub">
-            {formatNumber(history.runs.length)} run{history.runs.length === 1 ? '' : 's'} for{' '}
+            {formatCompact(history.runs.length)} run{history.runs.length === 1 ? '' : 's'} for{' '}
             {history.dataset.name} · {history.stale_count} stale · bounded in-memory store, TTL{' '}
             {Math.round((history.store.limits.ttl_seconds ?? 0) / 60)} min
           </p>
