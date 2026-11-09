@@ -283,7 +283,7 @@ function Shell() {
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
                   <rect x="1" y="1" width="6" height="14" rx="1.5" fill="currentColor" opacity="0.9" />
                   <rect x="9" y="1" width="6" height="14" rx="1.5" fill="currentColor" opacity="0.45" />
-                  <path d="M8 0.5v15" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M8 0.5v15" stroke="var(--accent)" strokeWidth="1.6" />
                 </svg>
               </span>
               <span className="app-header__title">SplitScope</span>

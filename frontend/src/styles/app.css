@@ -168,9 +168,11 @@ a {
 }
 .app-header__title {
   font-family: var(--font-display);
-  font-size: 21px;
-  font-weight: 700;
-  letter-spacing: var(--tracking-display);
+  font-size: 25px;
+  font-weight: 780;
+  font-variation-settings: 'opsz' 96;
+  letter-spacing: -0.045em;
+  line-height: 1;
   color: var(--band-ink);
 }
 .app-header__tagline {
@@ -212,7 +214,7 @@ a {
   font-weight: 500;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: rgb(236 238 234 / 52%);
+  color: rgb(243 235 223 / 56%);
 }
 .app-nav__group:first-child {
   margin-top: var(--space-1);
@@ -237,19 +239,19 @@ a {
 }
 .app-nav button:hover:not(:disabled) {
   color: var(--band-ink);
-  background: rgb(236 238 234 / 7%);
+  background: rgb(243 235 223 / 8%);
   border-color: transparent;
-  border-left-color: rgb(236 238 234 / 30%);
+  border-left-color: rgb(243 235 223 / 34%);
 }
 .app-nav button[aria-current='page'],
 .app-nav button[aria-current='page']:hover:not(:disabled) {
   color: var(--band-ink);
   font-weight: 650;
-  background: rgb(157 171 255 / 14%);
+  background: rgb(242 154 107 / 16%);
   border-left-color: var(--accent-on-dark);
 }
 .app-nav button:disabled {
-  color: rgb(236 238 234 / 36%);
+  color: rgb(243 235 223 / 38%);
   background: transparent;
   cursor: not-allowed;
 }
@@ -260,8 +262,8 @@ a {
   font-size: 10.5px;
   font-variant-numeric: tabular-nums;
   text-align: center;
-  color: rgb(236 238 234 / 60%);
-  border: 1px solid rgb(236 238 234 / 22%);
+  color: rgb(243 235 223 / 64%);
+  border: 1px solid rgb(243 235 223 / 26%);
   border-radius: var(--r-sm);
   padding: 0 4px;
   line-height: 1.55;
@@ -272,7 +274,7 @@ a {
   color: var(--band);
 }
 .app-nav button:disabled .app-nav__step {
-  border-color: rgb(236 238 234 / 12%);
+  border-color: rgb(243 235 223 / 14%);
 }
 
 /* On the graphite rail the blue focus ring is too close to the background:
@@ -442,7 +444,7 @@ a {
   }
   .app-nav button:hover:not(:disabled) {
     border-left-color: transparent;
-    border-bottom-color: rgb(236 238 234 / 30%);
+    border-bottom-color: rgb(243 235 223 / 34%);
   }
   .app-nav button[aria-current='page'],
   .app-nav button[aria-current='page']:hover:not(:disabled) {

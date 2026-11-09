@@ -19,48 +19,49 @@
   /* ---- 1. canonical tokens ---------------------------------------------- */
 
   /* Paper and ink */
-  --bg: #f1f2f0; /* page */
-  --surface: #fbfbf9; /* cards, inputs, tables */
-  --surface-2: #e8eae6; /* subtle fills, hover */
-  --surface-3: #f6f7f4; /* quietest fill between page and surface */
-  --line: #d6d9d3; /* hairline */
-  --line-strong: #bcc0b9; /* control borders, emphasised rules */
-  --ink: #14171a;
-  --ink-2: #454b52; /* secondary text */
-  --ink-3: #5c626a; /* tertiary / meta (AA on --bg and --surface-2) */
+  --bg: #f3eee7; /* page: warm stone */
+  --hero: #ebddca; /* landing hero sand */
+  --surface: #fbf9f5; /* cards, inputs, tables */
+  --surface-2: #e9e1d6; /* subtle fills, hover */
+  --surface-3: #f7f3ec; /* quietest fill between page and surface */
+  --line: #ddd3c5; /* hairline */
+  --line-strong: #c4b8a7; /* control borders, emphasised rules */
+  --ink: #1f1b18;
+  --ink-2: #4d443d; /* secondary text */
+  --ink-3: #655b52; /* tertiary / meta (AA on --bg and --surface-2) */
 
-  /* Accent: ultramarine. Actions, selection, focus. Never decoration. */
-  --accent: #2540d9;
-  --accent-deep: #1a2fa6;
+  /* Accent: ember. Actions, selection, focus. Never decoration. */
+  --accent: #be4a1a;
+  --accent-deep: #983711;
   --accent-ink: #ffffff;
-  --accent-soft: #e4e8fb;
-  --accent-line: #b7c1f2;
-  --accent-on-dark: #9dabff;
+  --accent-soft: #f6e2d6;
+  --accent-line: #e6bca3;
+  --accent-on-dark: #f29a6b;
 
-  /* Signal: vermilion. What the audit flags, never a button colour. */
-  --signal: #b9411a;
-  --signal-soft: #f8e6de;
-  --signal-on-dark: #ff8f66;
+  /* Signal: crimson. What the audit flags, never a button colour. */
+  --signal: #a3202b;
+  --signal-soft: #f7e1e1;
+  --signal-on-dark: #f29a6b;
 
-  /* Graphite band: the one dark surface per page */
-  --band: #101316;
-  --band-2: #171b1f;
-  --band-3: #1f2429;
-  --band-ink: #eceeea;
-  --band-ink-2: rgb(236 238 234 / 72%);
-  --band-line: rgb(236 238 234 / 14%);
+  /* Umber band: the one dark surface per page (rail, plate, method band) */
+  --band: #3a3028;
+  --band-2: #443a31;
+  --band-3: #50453b;
+  --band-ink: #f3ebdf;
+  --band-ink-2: rgb(243 235 223 / 76%);
+  --band-line: rgb(243 235 223 / 18%);
 
   /* Severity: muted, print-like. Colour never carries meaning alone. */
-  --high: #a4281f;
-  --high-soft: #fbe9e6;
+  --high: #a3202b;
+  --high-soft: #f7e1e1;
   --medium: #86570a;
   --medium-soft: #fbf1d9;
-  --low: #3a5f86;
-  --low-soft: #ecf1f7;
-  --info: #475260;
-  --info-soft: #eff1f4;
-  --ok: #2a6a4b;
-  --ok-soft: #e9f3ec;
+  --low: #6a5a48;
+  --low-soft: #f0eae0;
+  --info: #5a5148;
+  --info-soft: #efeae3;
+  --ok: #3f3a34;
+  --ok-soft: #ece8e1;
   --warn: var(--medium);
   --err: var(--high);
   --focus: var(--accent);
@@ -104,9 +105,9 @@
   --r-md: 4px;
   --r-lg: 6px;
   --r-pill: 999px;
-  --shadow-1: 0 1px 2px rgb(16 19 22 / 6%);
-  --shadow-2: 0 10px 28px -12px rgb(16 19 22 / 22%);
-  --shadow-3: 0 28px 64px -24px rgb(16 19 22 / 34%);
+  --shadow-1: 0 1px 2px rgb(31 27 24 / 6%);
+  --shadow-2: 0 10px 28px -12px rgb(31 27 24 / 24%);
+  --shadow-3: 0 28px 64px -24px rgb(31 27 24 / 36%);
 
   /* Motion: calm. One vocabulary, honoured by prefers-reduced-motion. */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -198,13 +199,13 @@
   --lp-paper: var(--bg);
   --lp-paper-hi: var(--surface);
   --lp-copper: var(--accent-on-dark);
-  --lp-copper-light: #c4ccff;
+  --lp-copper-light: #f7b48c;
   --lp-copper-deep: var(--accent);
-  --lp-celadon: #b9c0d2;
-  --lp-celadon-bright: #dfe3ee;
+  --lp-celadon: #d8cbb8;
+  --lp-celadon-bright: #efe6d8;
   --lp-ink-text: var(--ink);
   --lp-ink-soft: var(--ink-2);
-  --lp-rule: rgb(20 23 26 / 14%);
+  --lp-rule: rgb(31 27 24 / 14%);
   --lp-rule-ink: var(--band-line);
   --lp-display: var(--font-display);
   --lp-sans: var(--font-body);

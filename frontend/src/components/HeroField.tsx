@@ -106,7 +106,7 @@ export function HeroField({ phase, paused, cycle }: HeroFieldProps) {
     <svg
       key={cycle}
       className="hs-scene obs-scene"
-      viewBox={narrow ? '490 140 880 540' : '490 140 860 560'}
+      viewBox={narrow ? '480 140 900 560' : '480 140 900 560'}
       preserveAspectRatio="xMidYMid meet"
       data-phase={phase}
       data-paused={paused ? 'true' : 'false'}

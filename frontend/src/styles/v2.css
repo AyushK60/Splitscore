@@ -136,7 +136,7 @@ button.app-header__brand--home:hover:not(:disabled) {
 .banner--synthetic,
 .callout--synthetic {
   background: var(--medium-soft);
-  border-color: #e4d2a4;
+  border-color: #e6d3a6;
 }
 .callout--info {
   border-color: var(--accent-line);
@@ -153,7 +153,7 @@ button.app-header__brand--home:hover:not(:disabled) {
   border-color: #eac6c1;
 }
 .callout--ok {
-  border-color: #bfdccb;
+  border-color: var(--line-strong);
 }
 .callout__title {
   font-family: var(--font-body);
@@ -447,4 +447,11 @@ details.disclosure {
   #root:has(> .app-topbar) {
     display: block !important;
   }
+}
+
+/* The workspace main is focused programmatically on stage change; it is not a
+   control, so it carries no focus outline. */
+.app-main:focus,
+.app-main:focus-visible {
+  outline: none;
 }

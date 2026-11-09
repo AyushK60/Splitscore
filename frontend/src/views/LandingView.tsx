@@ -169,7 +169,7 @@ export function LandingView({ onNavigate }: LandingProps) {
                   fill="currentColor"
                   opacity="0.22"
                 />
-                <path d="M10 1v18" stroke="var(--signal)" strokeWidth="1.2" />
+                <path d="M10 1v18" stroke="var(--accent)" strokeWidth="1.2" />
               </svg>
             </span>
             <span className="lp-brand__name">SplitScope</span>
