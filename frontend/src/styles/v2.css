@@ -455,3 +455,155 @@ details.disclosure {
 .app-main:focus-visible {
   outline: none;
 }
+
+/* ---------- workflow position in the rail ---------- */
+
+.app-progress {
+  padding: var(--space-4) var(--space-4) var(--space-5);
+  border-top: 1px solid var(--band-line);
+}
+.app-progress__label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 var(--space-2);
+  font: 500 10px/1.4 var(--font-mono);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--band-ink-2);
+  max-width: none;
+}
+.app-progress__label span:last-child {
+  color: var(--band-ink);
+  font-variant-numeric: tabular-nums;
+}
+.app-progress__bar {
+  display: flex;
+  gap: 3px;
+}
+.app-progress__bar span {
+  flex: 1;
+  height: 4px;
+  border-radius: 1px;
+  background: rgb(31 27 24 / 14%);
+  transition: background-color var(--d-base) var(--ease-out);
+}
+.app-progress__bar span[data-active='true'] {
+  background: var(--accent);
+}
+.app-progress__note {
+  margin: var(--space-3) 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--band-ink-2);
+  max-width: none;
+}
+@media (max-width: 1023px) {
+  .app-progress {
+    display: none;
+  }
+}
+
+/* ---------- motion: entering the workbench and moving between stages ---------- */
+
+/* Entering the workbench from the landing page: the rail slides in, the page
+   header drops in, the first stage rises. The rail is not remounted between
+   stages, so this plays once per visit to the workbench. */
+@media (prefers-reduced-motion: no-preference) {
+  .app-topbar {
+    animation: rail-in 560ms var(--ease-out) backwards;
+  }
+  .app-nav__inner > * {
+    animation: rail-item-in 520ms var(--ease-out) backwards;
+  }
+  .app-nav__inner > *:nth-child(1) { animation-delay: 80ms; }
+  .app-nav__inner > *:nth-child(2) { animation-delay: 110ms; }
+  .app-nav__inner > *:nth-child(3) { animation-delay: 140ms; }
+  .app-nav__inner > *:nth-child(4) { animation-delay: 170ms; }
+  .app-nav__inner > *:nth-child(5) { animation-delay: 200ms; }
+  .app-nav__inner > *:nth-child(6) { animation-delay: 230ms; }
+  .app-nav__inner > *:nth-child(7) { animation-delay: 260ms; }
+  .app-nav__inner > *:nth-child(n + 8) { animation-delay: 290ms; }
+
+  .app-context {
+    animation: fade-down 460ms var(--ease-out) 120ms backwards;
+  }
+
+  /* Each stage fades and rises; its first sections follow in a short stagger.
+     fill-mode is "backwards" only, so nothing keeps a transform after the
+     animation ends (sticky and positioned descendants stay unaffected). */
+  .app-stage {
+    animation: stage-in 460ms var(--ease-out) backwards;
+  }
+  .app-stage > * > *:nth-child(-n + 8) {
+    animation: stage-child 560ms var(--ease-out) backwards;
+  }
+  .app-stage > * > *:nth-child(1) { animation-delay: 40ms; }
+  .app-stage > * > *:nth-child(2) { animation-delay: 100ms; }
+  .app-stage > * > *:nth-child(3) { animation-delay: 160ms; }
+  .app-stage > * > *:nth-child(4) { animation-delay: 220ms; }
+  .app-stage > * > *:nth-child(5) { animation-delay: 270ms; }
+  .app-stage > * > *:nth-child(6) { animation-delay: 320ms; }
+  .app-stage > * > *:nth-child(n + 7) { animation-delay: 360ms; }
+
+  /* A thin ember line sweeps across the top of the content on every stage
+     change. The stage wrapper is keyed per stage, so this replays each time. */
+  .app-stage {
+    position: relative;
+  }
+  .app-stage::before {
+    content: '';
+    position: absolute;
+    top: calc(-1 * var(--space-6));
+    left: calc(-1 * var(--ws-gutter));
+    right: calc(-1 * var(--ws-gutter));
+    height: 2px;
+    background: var(--accent);
+    transform-origin: left;
+    pointer-events: none;
+    animation: stage-sweep 720ms var(--ease-in-out) both;
+  }
+}
+@keyframes rail-in {
+  from { opacity: 0; transform: translateX(-18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes rail-item-in {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fade-down {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes stage-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes stage-child {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes stage-sweep {
+  0% { transform: scaleX(0); opacity: 1; }
+  70% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+/* ---------- landing: use the full width, fill the left edge ---------- */
+
+@media (min-width: 1200px) {
+  .lp-hero::after {
+    content: 'SplitScope · Research integrity studio · Local-first';
+    position: absolute;
+    left: clamp(12px, 1.4vw, 28px);
+    top: 56px;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font: 500 10.5px/1 var(--font-mono);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--ink-3);
+    pointer-events: none;
+  }
+}

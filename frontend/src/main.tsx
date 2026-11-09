@@ -319,6 +319,25 @@ function Shell() {
               ))}
             </div>
           </nav>
+
+          {/* Position within the workflow. Not a completion tracker: no stage
+              is marked done by visiting another. */}
+          <div className="app-progress" aria-hidden="true">
+            <p className="app-progress__label">
+              <span>Workflow</span>
+              <span>
+                {steps.find((item) => item.id === view)
+                  ? `${steps.find((item) => item.id === view)?.step} / ${steps.length}`
+                  : 'Evidence view'}
+              </span>
+            </p>
+            <div className="app-progress__bar">
+              {steps.map((item) => (
+                <span key={item.id} data-active={view === item.id ? 'true' : 'false'} />
+              ))}
+            </div>
+            <p className="app-progress__note">Local-first. Nothing leaves this machine.</p>
+          </div>
         </div>
       </div>
 

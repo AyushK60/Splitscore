@@ -10,14 +10,14 @@
  */
 
 export const SCATTER_PALETTE = [
-  'var(--rs-teal)',
-  '#5b6d9e',
-  '#6f8f45',
-  '#9e5b8a',
-  '#3f7d8c',
-  '#9e7d4e',
-  '#8a5a00',
-  '#6e6e6e',
+  '#7e1f2c',
+  '#e0a21b',
+  '#2f2b27',
+  '#c4577a',
+  '#a89a88',
+  '#8c5a3c',
+  '#e8c36a',
+  '#d98ca3',
 ] as const
 
 export function groupColors(levels: string[]): string[] {

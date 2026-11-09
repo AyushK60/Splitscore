@@ -240,7 +240,7 @@ function MatrixPanel({
   const palette = groupColors(colorLevels)
   const levelColor = (level: string) => {
     const index = colorLevels.indexOf(level)
-    return index >= 0 ? palette[index] : '#6e6e6e'
+    return index >= 0 ? palette[index] : '#a89a88'
   }
 
   const groups = new Map<string, string[]>()

@@ -168,8 +168,8 @@ export function buildStandaloneSvg(
 
   // Caption block under the chart.
   const lines = captionLines(meta, context)
-  const ink = sourceStyles.getPropertyValue('--rs-ink') || '#18231d'
-  const soft = sourceStyles.getPropertyValue('--rs-soft') || '#4f5f56'
+  const ink = sourceStyles.getPropertyValue('--rs-ink') || '#1f1b18'
+  const soft = sourceStyles.getPropertyValue('--rs-soft') || '#4d443d'
   lines.forEach((line, index) => {
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
     text.setAttribute('x', '12')

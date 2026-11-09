@@ -127,7 +127,7 @@ a {
   align-self: start;
   background: var(--band);
   color: var(--band-ink);
-  border-right: 1px solid var(--band-line);
+  border-right: 1px solid var(--line-strong);
 }
 .app-topbar__primary {
   display: flex;
@@ -214,7 +214,7 @@ a {
   font-weight: 500;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: rgb(243 235 223 / 56%);
+  color: rgb(31 27 24 / 56%);
 }
 .app-nav__group:first-child {
   margin-top: var(--space-1);
@@ -239,19 +239,19 @@ a {
 }
 .app-nav button:hover:not(:disabled) {
   color: var(--band-ink);
-  background: rgb(243 235 223 / 8%);
+  background: rgb(31 27 24 / 4%);
   border-color: transparent;
-  border-left-color: rgb(243 235 223 / 34%);
+  border-left-color: rgb(31 27 24 / 34%);
 }
 .app-nav button[aria-current='page'],
 .app-nav button[aria-current='page']:hover:not(:disabled) {
   color: var(--band-ink);
   font-weight: 650;
-  background: rgb(242 154 107 / 16%);
+  background: rgb(190 74 26 / 11%);
   border-left-color: var(--accent-on-dark);
 }
 .app-nav button:disabled {
-  color: rgb(243 235 223 / 38%);
+  color: rgb(31 27 24 / 38%);
   background: transparent;
   cursor: not-allowed;
 }
@@ -262,19 +262,19 @@ a {
   font-size: 10.5px;
   font-variant-numeric: tabular-nums;
   text-align: center;
-  color: rgb(243 235 223 / 64%);
-  border: 1px solid rgb(243 235 223 / 26%);
+  color: rgb(31 27 24 / 64%);
+  border: 1px solid rgb(31 27 24 / 8%);
   border-radius: var(--r-sm);
   padding: 0 4px;
   line-height: 1.55;
 }
 .app-nav button[aria-current='page'] .app-nav__step {
-  background: var(--accent-on-dark);
-  border-color: var(--accent-on-dark);
-  color: var(--band);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 .app-nav button:disabled .app-nav__step {
-  border-color: rgb(243 235 223 / 14%);
+  border-color: rgb(31 27 24 / 4%);
 }
 
 /* On the graphite rail the blue focus ring is too close to the background:
@@ -444,7 +444,7 @@ a {
   }
   .app-nav button:hover:not(:disabled) {
     border-left-color: transparent;
-    border-bottom-color: rgb(243 235 223 / 34%);
+    border-bottom-color: rgb(31 27 24 / 34%);
   }
   .app-nav button[aria-current='page'],
   .app-nav button[aria-current='page']:hover:not(:disabled) {
@@ -470,25 +470,6 @@ a {
    the stage changes. Opacity/transform only — nothing reflows, input is never
    blocked, and the global reduced-motion block collapses it to an instant
    swap. The keyed wrapper in Shell re-triggers the animation per stage. */
-.app-stage {
-  animation: stage-in var(--motion-slow) var(--ease-emphasis) both;
-}
-@keyframes stage-in {
-  from {
-    opacity: 0;
-    transform: translateY(3px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .app-stage {
-    animation: none;
-  }
-}
-
 .stack > * + * {
   margin-top: var(--space-4);
 }
@@ -669,7 +650,7 @@ a {
   color: var(--medium);
 }
 .callout--danger {
-  border-color: #f0cdc9;
+  border-color: #eac6c1;
   border-left-color: var(--high);
   background: var(--high-soft);
 }
@@ -677,7 +658,7 @@ a {
   color: var(--high);
 }
 .callout--ok {
-  border-color: #c3e2d0;
+  border-color: #cfc7ba;
   border-left-color: var(--ok);
   background: var(--ok-soft);
 }
@@ -1039,7 +1020,7 @@ legend {
 }
 .badge--ok {
   background: var(--ok-soft);
-  border-color: #b7ddc6;
+  border-color: #cfc7ba;
   color: var(--ok);
 }
 
@@ -1908,7 +1889,7 @@ details.disclosure[open] > summary {
 }
 .setup-progress li[data-state='done'] .setup-progress__dot {
   background: var(--ok-soft);
-  border-color: #b7ddc6;
+  border-color: #cfc7ba;
   color: var(--ok);
 }
 .setup-progress li[data-state='current'] .setup-progress__dot {
@@ -1953,7 +1934,7 @@ details.disclosure[open] > summary {
   background: var(--accent);
 }
 .run-bar[data-ready='true'] {
-  border-color: #c3e2d0;
+  border-color: #cfc7ba;
   background: linear-gradient(0deg, var(--ok-soft), var(--ok-soft));
 }
 .run-bar__status {
@@ -2038,7 +2019,7 @@ details.disclosure[open] > summary {
 .mapping-error {
   margin: 8px 0 0;
   padding: 7px 10px;
-  border: 1px solid #f0cdc9;
+  border: 1px solid #eac6c1;
   border-left: 3px solid var(--high);
   border-radius: var(--radius-xs);
   background: var(--high-soft);

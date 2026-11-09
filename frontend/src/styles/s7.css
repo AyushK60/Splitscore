@@ -1147,7 +1147,7 @@
   flex-direction: column;
   gap: 4px;
   font-size: 12.5px;
-  color: var(--muted, #57534e);
+  color: var(--muted, #655b52);
   margin-bottom: 10px;
 }
 
@@ -1156,7 +1156,7 @@
 }
 
 .report-subblock {
-  border-top: 1px solid var(--line, #e7e5e4);
+  border-top: 1px solid var(--line, #ddd3c5);
   padding-top: 8px;
   margin-top: 8px;
 }

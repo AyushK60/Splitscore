@@ -431,7 +431,7 @@
 }
 
 .cnode__tag--outcome {
-  color: #8a3c1c;
+  color: #983711;
   border-color: color-mix(in srgb, var(--rs-copper) 40%, transparent);
   background: color-mix(in srgb, var(--rs-copper) 10%, transparent);
 }

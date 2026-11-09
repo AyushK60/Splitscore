@@ -134,7 +134,7 @@ export function buildFigureSvg(
   rule.setAttribute('x2', String(width - 12))
   rule.setAttribute('y1', String(chartHeight - 4))
   rule.setAttribute('y2', String(chartHeight - 4))
-  rule.setAttribute('stroke', '#cfc6b5')
+  rule.setAttribute('stroke', '#c4b8a7')
   rule.setAttribute('stroke-width', '1')
   clone.appendChild(rule)
 
@@ -142,7 +142,7 @@ export function buildFigureSvg(
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
     text.setAttribute('x', '12')
     text.setAttribute('y', String(chartHeight + 20 + index * 22))
-    text.setAttribute('fill', row.heading ? '#18231d' : '#5c6b62')
+    text.setAttribute('fill', row.heading ? '#1f1b18' : '#655b52')
     text.setAttribute('font-family', 'Segoe UI, Helvetica, Arial, sans-serif')
     text.setAttribute('font-size', row.heading ? '14' : '10.5')
     text.setAttribute('font-weight', row.heading ? '600' : '400')

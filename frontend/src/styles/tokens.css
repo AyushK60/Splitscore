@@ -36,20 +36,21 @@
   --accent-ink: #ffffff;
   --accent-soft: #f6e2d6;
   --accent-line: #e6bca3;
-  --accent-on-dark: #f29a6b;
+  --accent-on-dark: var(--accent);
 
   /* Signal: crimson. What the audit flags, never a button colour. */
   --signal: #a3202b;
   --signal-soft: #f7e1e1;
-  --signal-on-dark: #f29a6b;
+  --signal-on-dark: var(--signal);
 
-  /* Umber band: the one dark surface per page (rail, plate, method band) */
-  --band: #3a3028;
-  --band-2: #443a31;
-  --band-3: #50453b;
-  --band-ink: #f3ebdf;
-  --band-ink-2: rgb(243 235 223 / 76%);
-  --band-line: rgb(243 235 223 / 18%);
+  /* Sand band: rail, observatory plate and Method band. The product has no dark
+     surfaces; the band is a deeper sand so structure reads without a dark block. */
+  --band: #e4daca;
+  --band-2: #fbf9f5;
+  --band-3: #efe7da;
+  --band-ink: #1f1b18;
+  --band-ink-2: rgb(31 27 24 / 74%);
+  --band-line: rgb(31 27 24 / 16%);
 
   /* Severity: muted, print-like. Colour never carries meaning alone. */
   --high: #a3202b;
@@ -65,6 +66,15 @@
   --warn: var(--medium);
   --err: var(--high);
   --focus: var(--accent);
+
+  /* Chart palette: vivid but warm-only (no blue, green or purple). Series are
+     always also distinguished by label, shape or position, never by hue alone. */
+  --chart-1: #c0431a; /* ember */
+  --chart-2: #2f2b27; /* charcoal */
+  --chart-3: #dc9a2a; /* amber */
+  --chart-4: #c4577a; /* rose */
+  --chart-5: #7e1f2c; /* wine */
+  --chart-6: #a89a88; /* stone */
 
   /* Type */
   --font-display: "Bricolage Grotesque Variable", "Bricolage Grotesque", "Segoe UI Variable Display",
@@ -172,8 +182,8 @@
   --rs-ink-soft: var(--ink-2);
   --rs-line: var(--line);
   --rs-line-strong: var(--line-strong);
-  --rs-copper: var(--signal);
-  --rs-copper-soft: var(--signal-soft);
+  --rs-copper: var(--chart-1);
+  --rs-copper-soft: #f6e2d6;
   --rs-teal: var(--accent);
   --rs-teal-soft: var(--accent-soft);
   --rs-warn: var(--medium);
@@ -185,10 +195,10 @@
   --rs-sans: var(--font-body);
 
   /* s9.css (estimation) */
-  --est-copper: var(--signal);
-  --est-copper-soft: var(--signal-soft);
-  --est-teal: var(--accent);
-  --est-teal-soft: var(--accent-soft);
+  --est-copper: var(--chart-1);
+  --est-copper-soft: #f6e2d6;
+  --est-teal: var(--chart-2);
+  --est-teal-soft: #e6e1da;
 
   /* landing.css / s3.css (.lp). On the graphite band the accent lightens. */
   --lp-ink: var(--band);
@@ -199,9 +209,9 @@
   --lp-paper: var(--bg);
   --lp-paper-hi: var(--surface);
   --lp-copper: var(--accent-on-dark);
-  --lp-copper-light: #f7b48c;
+  --lp-copper-light: var(--accent-deep);
   --lp-copper-deep: var(--accent);
-  --lp-celadon: #d8cbb8;
+  --lp-celadon: #6f6558;
   --lp-celadon-bright: #efe6d8;
   --lp-ink-text: var(--ink);
   --lp-ink-soft: var(--ink-2);
@@ -210,6 +220,6 @@
   --lp-display: var(--font-display);
   --lp-sans: var(--font-body);
   --lp-mono: var(--font-mono);
-  --lp-gutter: clamp(20px, 4.6vw, 84px);
-  --lp-max: 1400px;
+  --lp-gutter: clamp(20px, 3.4vw, 64px);
+  --lp-max: 1680px;
 }
