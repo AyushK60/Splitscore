@@ -607,3 +607,11 @@ details.disclosure {
     pointer-events: none;
   }
 }
+
+/* On very wide screens the workspace hugs the rail instead of floating in the
+   middle of the window, so the left edge never reads as empty. */
+#root:has(> .app-topbar) > .app-main,
+#root:has(> .app-topbar) .app-context .app-crumb {
+  margin-left: 0;
+  margin-right: auto;
+}

@@ -81,14 +81,14 @@
 }
 
 .xw__controllabel {
-  font: 600 10px/1.3 var(--rs-mono);
+  font: 600 11px/1.3 var(--rs-mono);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--rs-soft);
 }
 
 .xw__controlmeta {
-  font: 400 10.5px/1.45 var(--rs-mono);
+  font: 400 13px/1.6 var(--font-body);
   color: color-mix(in srgb, var(--rs-soft) 78%, transparent);
 }
 
@@ -147,7 +147,7 @@
   background: var(--rs-surface);
   border-radius: 2px;
   padding: 5px 11px;
-  font: 600 10.5px/1.2 var(--rs-mono);
+  font: 600 11px/1.2 var(--rs-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--rs-ink);
@@ -208,7 +208,7 @@
   display: grid;
   place-items: center;
   color: var(--rs-soft);
-  font: 400 13px/1.6 var(--rs-mono);
+  font: 400 13px/1.6 var(--font-body);
   text-align: center;
   padding: 30px;
 }
@@ -219,7 +219,7 @@
   color: var(--rs-bad);
   border-radius: 3px;
   padding: 8px 12px;
-  font: 400 12px/1.5 var(--rs-mono);
+  font: 400 13px/1.6 var(--font-body);
 }
 
 .xw__empty {
@@ -251,7 +251,7 @@
 
 .xpc__subtitle {
   display: block;
-  font: 400 10.5px/1.5 var(--rs-mono);
+  font: 400 13px/1.6 var(--font-body);
   letter-spacing: 0;
   text-transform: none;
   color: var(--rs-soft);
@@ -285,7 +285,7 @@
 
 .xpc__helpgrid h3 {
   margin: 0 0 2px;
-  font: 600 10.5px/1.4 var(--rs-mono);
+  font: 600 11px/1.4 var(--rs-mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--rs-ink);
@@ -293,7 +293,7 @@
 
 .xpc__helpgrid p {
   margin: 0;
-  font: 400 11.5px/1.55 var(--rs-mono);
+  font: 400 13px/1.6 var(--font-body);
   color: var(--rs-ink-soft, var(--rs-soft));
 }
 
@@ -306,26 +306,26 @@
 }
 
 .xpc__examplecaption {
-  font: 400 10.5px/1.5 var(--rs-mono);
+  font: 400 13px/1.6 var(--font-body);
   color: var(--rs-soft);
   margin: 0;
 }
 
 .xpc__helpnote {
   margin: 10px 0 0;
-  font: 400 10.5px/1.55 var(--rs-mono);
+  font: 400 13px/1.6 var(--font-body);
   color: var(--rs-soft);
 }
 
 .xpc__count {
-  font: 600 10.5px/1.4 var(--rs-mono);
+  font: 600 11px/1.4 var(--rs-mono);
   letter-spacing: 0.06em;
   color: var(--rs-copper);
 }
 
 .xpc__emptyhint {
   margin: 6px 0 0;
-  font: 400 10.5px/1.55 var(--rs-mono);
+  font: 400 13px/1.6 var(--font-body);
   color: var(--rs-soft);
 }
 
@@ -367,17 +367,17 @@
 }
 
 .xpc__axisrange {
-  font: 400 10px/1 var(--rs-mono);
+  font: 400 11px/1 var(--rs-mono);
   fill: var(--rs-soft);
 }
 
 .xpc__axisnote {
-  font: 500 10px/1 var(--rs-mono);
+  font: 500 11px/1 var(--rs-mono);
   fill: var(--rs-warn);
 }
 
 .xpc__tick {
-  font: 400 10px/1 var(--rs-mono);
+  font: 400 11px/1 var(--rs-mono);
   fill: var(--rs-soft);
 }
 
@@ -409,12 +409,12 @@
 }
 
 .xpc__reordername {
-  font: 500 10px/1 var(--rs-mono);
+  font: 500 11px/1 var(--rs-mono);
   color: var(--rs-soft);
 }
 
 .xpc__reorderhint {
-  font: 400 10px/1.4 var(--rs-mono);
+  font: 400 11px/1.4 var(--rs-mono);
   color: color-mix(in srgb, var(--rs-soft) 75%, transparent);
   margin-left: auto;
 }
@@ -427,7 +427,7 @@
   margin-top: 10px;
   padding-top: 8px;
   border-top: 1px solid var(--rs-line);
-  font: 500 10.5px/1.4 var(--rs-mono);
+  font: 500 11px/1.4 var(--rs-mono);
   color: var(--rs-soft);
 }
 
@@ -488,7 +488,7 @@
 }
 
 .xrow__notetitle {
-  font: 600 10.5px/1.4 var(--rs-mono);
+  font: 600 11px/1.4 var(--rs-mono);
   color: var(--rs-ink);
   margin: 0 0 4px;
 }
@@ -503,7 +503,7 @@
 }
 
 .xrow__guide li {
-  font: 400 10.5px/1.5 var(--rs-mono);
+  font: 400 11px/1.5 var(--rs-mono);
   color: var(--rs-soft);
   padding-left: 12px;
   position: relative;
@@ -524,7 +524,7 @@
 }
 
 .xrow__counts {
-  font: 500 10.5px/1.4 var(--rs-mono);
+  font: 500 11px/1.4 var(--rs-mono);
   color: var(--rs-copper);
 }
 
@@ -538,7 +538,7 @@
 }
 
 .xrow__predicateitem {
-  font: 500 10.5px/1.4 var(--rs-mono);
+  font: 500 11px/1.4 var(--rs-mono);
   color: var(--rs-ink);
   background: var(--rs-sunken);
   border-left: 2px solid var(--rs-copper);
@@ -547,7 +547,7 @@
 }
 
 .xrow__note {
-  font: 400 10.5px/1.5 var(--rs-mono);
+  font: 400 11px/1.5 var(--rs-mono);
   color: var(--rs-soft);
   margin: 6px 0;
 }
@@ -564,7 +564,7 @@
 .xrow__table {
   border-collapse: collapse;
   width: 100%;
-  font: 400 10.5px/1.4 var(--rs-mono);
+  font: 400 11px/1.4 var(--rs-mono);
 }
 
 .xrow__table th {
@@ -599,7 +599,7 @@
 }
 
 .xrow__footnote {
-  font: 400 10px/1.55 var(--rs-mono);
+  font: 400 11px/1.55 var(--rs-mono);
   color: color-mix(in srgb, var(--rs-soft) 80%, transparent);
   margin: 10px 0 0;
 }
@@ -694,7 +694,7 @@
 }
 
 .xfig__sub {
-  font: 400 10.5px/1.5 var(--rs-mono);
+  font: 400 11px/1.5 var(--rs-mono);
   color: var(--rs-soft);
 }
 
@@ -709,7 +709,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font: 600 10px/1.3 var(--rs-mono);
+  font: 600 11px/1.3 var(--rs-mono);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--rs-soft);
@@ -743,7 +743,7 @@
 }
 
 .xfig__note {
-  font: 400 10.5px/1.55 var(--rs-mono);
+  font: 400 11px/1.55 var(--rs-mono);
   color: color-mix(in srgb, var(--rs-soft) 82%, transparent);
   margin: 0;
 }
@@ -774,7 +774,7 @@
 }
 
 .xfig__cellvalue {
-  font: 500 9.5px/1 var(--rs-mono);
+  font: 500 11px/1 var(--rs-mono);
   fill: var(--rs-ink);
 }
 
@@ -793,7 +793,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 14px;
-  font: 500 10.5px/1.4 var(--rs-mono);
+  font: 500 11px/1.4 var(--rs-mono);
   color: var(--rs-soft);
 }
 
@@ -839,12 +839,12 @@
 }
 
 .xmatrix__pairs {
-  font: 400 9.5px/1.3 var(--rs-mono);
+  font: 400 11px/1.3 var(--rs-mono);
   color: var(--rs-soft);
 }
 
 .xmatrix__color {
-  font: 400 9.5px/1.3 var(--rs-mono);
+  font: 400 11px/1.3 var(--rs-mono);
   color: color-mix(in srgb, var(--rs-soft) 75%, transparent);
 }
 
@@ -866,12 +866,12 @@
 }
 
 .xdist__groupname {
-  font: 600 10.5px/1.3 var(--rs-mono);
+  font: 600 11px/1.3 var(--rs-mono);
   color: var(--rs-ink);
 }
 
 .xdist__groupstats {
-  font: 400 10.5px/1.3 var(--rs-mono);
+  font: 400 11px/1.3 var(--rs-mono);
   color: var(--rs-soft);
 }
 
@@ -914,7 +914,7 @@
 }
 
 .xmiss__value {
-  font: 500 10.5px/1.3 var(--rs-mono);
+  font: 500 11px/1.3 var(--rs-mono);
   color: var(--rs-copper);
   white-space: nowrap;
 }
@@ -931,14 +931,14 @@
 }
 
 .xmiss__matrixtitle {
-  font: 600 10px/1.4 var(--rs-mono);
+  font: 600 11px/1.4 var(--rs-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--rs-soft);
 }
 
 .xmiss__note {
-  font: 400 10px/1.5 var(--rs-mono);
+  font: 400 11px/1.5 var(--rs-mono);
   color: color-mix(in srgb, var(--rs-soft) 80%, transparent);
 }
 
@@ -952,19 +952,19 @@
 }
 
 .xexport__label {
-  font: 600 9.5px/1.2 var(--rs-mono);
+  font: 600 11px/1.2 var(--rs-mono);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--rs-soft);
 }
 
 .xexport__error {
-  font: 500 10px/1.3 var(--rs-mono);
+  font: 500 11px/1.3 var(--rs-mono);
   color: var(--rs-bad);
 }
 
 .xexport__hint {
-  font: 400 9.5px/1.3 var(--rs-mono);
+  font: 400 11px/1.3 var(--rs-mono);
   color: color-mix(in srgb, var(--rs-soft) 75%, transparent);
 }
 
@@ -1007,7 +1007,7 @@
 }
 
 .xsim__facts dt {
-  font: 600 9.5px/1.4 var(--rs-mono);
+  font: 600 11px/1.4 var(--rs-mono);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--rs-soft);
@@ -1067,7 +1067,7 @@
 }
 
 .xsim__top {
-  font: 400 10.5px/1.4 var(--rs-mono);
+  font: 400 11px/1.4 var(--rs-mono);
   color: var(--rs-soft);
   overflow: hidden;
   text-overflow: ellipsis;

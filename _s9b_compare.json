@@ -1,0 +1,779 @@
+{
+ "estimation_version": "1.0.0",
+ "estimation_schema_version": "1.0.0",
+ "estimand": "ate",
+ "gate": {
+  "gate": "passed",
+  "adjustment_set_verification": {
+   "treatment": "treatment",
+   "outcome": "outcome",
+   "adjustment_set": [
+    "age",
+    "baseline_score",
+    "region"
+   ],
+   "valid": true,
+   "violations": [],
+   "open_backdoor_paths": [],
+   "path_listing_bounded": false,
+   "interpretation": "Every backdoor path from 'treatment' to 'outcome' is blocked by this set under the assumed DAG, and no member is a descendant of the treatment.",
+   "interpretation_note": "Backdoor admissibility is a property of the assumed graph: it means the drawn structure, taken as given, blocks every unblocked backdoor path. It is not empirical proof that the adjustment removes confounding, and no data is consulted. No causal effect is estimated."
+  },
+  "treatment_node": "treatment",
+  "outcome_node": "outcome",
+  "adjustment_nodes": [
+   "age",
+   "baseline_score",
+   "region"
+  ],
+  "caveat": "The adjustment set was verified against the drawn graph only. Exchangeability, consistency, positivity and correct model specification remain assumptions the estimate depends on; none is proven by this run or its diagnostics."
+ },
+ "analysis": {
+  "rows_in_dataset": 1200,
+  "rows_in_analysis_cohort_frame": 1200,
+  "rows_final": 1200,
+  "treated_rows": 349,
+  "control_rows": 851,
+  "exclusions": [],
+  "covariates": [
+   {
+    "column": "age",
+    "kind": "numeric",
+    "levels": null,
+    "missing_in_cohort": 0
+   },
+   {
+    "column": "baseline_score",
+    "kind": "numeric",
+    "levels": null,
+    "missing_in_cohort": 0
+   },
+   {
+    "column": "region",
+    "kind": "categorical",
+    "levels": [
+     "east",
+     "north",
+     "south"
+    ],
+    "missing_in_cohort": 0
+   }
+  ],
+  "outcome_task": "linear",
+  "outcome_coding": {
+   "kind": "continuous",
+   "interpretation": "The estimate is in the outcome's own units."
+  },
+  "missing_data_policy": "complete_case",
+  "treatment_column": "treatment",
+  "outcome_column": "outcome",
+  "adjustment_columns": [
+   "age",
+   "baseline_score",
+   "region"
+  ],
+  "outcome_units_note": "The outcome was treated as continuous; estimates are in the outcome's units."
+ },
+ "results": [
+  {
+   "status": "estimated",
+   "estimator": "regression_adjustment",
+   "estimate": 1.7311637332722414,
+   "mu1": 11.585784447512232,
+   "mu0": 9.854620714239994,
+   "model_specification": {
+    "outcome_model": "linear_least_squares",
+    "treatment_as_feature": true,
+    "predict_under": [
+     "treatment=1",
+     "treatment=0"
+    ]
+   },
+   "fold_row_counts": null,
+   "truncation": null,
+   "warnings": [],
+   "units": "outcome_units",
+   "treated_mean": 11.585784447512232,
+   "control_mean": 9.854620714239994,
+   "sample_size": 1200,
+   "uncertainty": {
+    "status": "available",
+    "method": "bootstrap_percentile",
+    "level": 0.95,
+    "standard_error": 0.1335655166768726,
+    "ci_lower": 1.487163192479875,
+    "ci_upper": 2.008768180782085,
+    "unavailable_reason": null,
+    "bootstrap": {
+     "reps_requested": 200,
+     "reps_succeeded": 200,
+     "reps_failed": 0,
+     "seed": 123,
+     "interval_type": "percentile",
+     "refit_nuisance_models": true,
+     "sample_failure_messages": []
+    },
+    "assumptions": [
+     "The interval assumes independent observations. Clustered or repeated-measure data need cluster-aware inference this stage does not provide; the interval would then be anti-conservative.",
+     "Every replicate refits the nuisance models on the resampled rows."
+    ]
+   },
+   "diagnostics": {
+    "balance": {
+     "covariates": [
+      {
+       "column": "age",
+       "kind": "numeric",
+       "level": null,
+       "smd_unweighted": 0.3296804379552589,
+       "smd_weighted": null
+      },
+      {
+       "column": "baseline_score",
+       "kind": "numeric",
+       "level": null,
+       "smd_unweighted": 0.26886861359006387,
+       "smd_weighted": null
+      },
+      {
+       "column": "region",
+       "kind": "categorical",
+       "level": "east",
+       "smd_unweighted": -0.25987979833940733,
+       "smd_weighted": null
+      },
+      {
+       "column": "region",
+       "kind": "categorical",
+       "level": "north",
+       "smd_unweighted": -0.18875793527051338,
+       "smd_weighted": null
+      },
+      {
+       "column": "region",
+       "kind": "categorical",
+       "level": "south",
+       "smd_unweighted": 0.41031538109901833,
+       "smd_weighted": null
+      }
+     ],
+     "weighted": false,
+     "interpretation_note": "Standardized mean differences are descriptive summaries of covariate balance in this sample. Denominator convention: the pooled term uses the population-form (non-debiased) variance, (squared treated SD + squared control SD) / 2, applied identically to the unweighted and weighted comparisons so pre/post values are mutually consistent. No SMD threshold (conventional or otherwise) constitutes a test of exchangeability or proof that confounding has been removed; balance can only be assessed relative to the adjustment set that graphical identification licensed."
+    },
+    "overlap": null
+   }
+  },
+  {
+   "status": "estimated",
+   "estimator": "ipw",
+   "estimate": 1.679928925800425,
+   "mu1": 11.544934792183337,
+   "mu0": 9.865005866382912,
+   "model_specification": {
+    "propensity_model": "logistic_l2_C1.0",
+    "weighting": "hajek_normalized"
+   },
+   "fold_row_counts": null,
+   "truncation": null,
+   "warnings": [],
+   "units": "outcome_units",
+   "treated_mean": 11.544934792183337,
+   "control_mean": 9.865005866382912,
+   "sample_size": 1200,
+   "uncertainty": {
+    "status": "available",
+    "method": "bootstrap_percentile",
+    "level": 0.95,
+    "standard_error": 0.16970042181054223,
+    "ci_lower": 1.38823364259319,
+    "ci_upper": 2.032509357134014,
+    "unavailable_reason": null,
+    "bootstrap": {
+     "reps_requested": 200,
+     "reps_succeeded": 200,
+     "reps_failed": 0,
+     "seed": 123,
+     "interval_type": "percentile",
+     "refit_nuisance_models": true,
+     "sample_failure_messages": []
+    },
+    "assumptions": [
+     "The interval assumes independent observations. Clustered or repeated-measure data need cluster-aware inference this stage does not provide; the interval would then be anti-conservative.",
+     "Every replicate refits the nuisance models on the resampled rows."
+    ]
+   },
+   "diagnostics": {
+    "balance": {
+     "covariates": [
+      {
+       "column": "age",
+       "kind": "numeric",
+       "level": null,
+       "smd_unweighted": 0.3296804379552589,
+       "smd_weighted": 0.002665295596890236
+      },
+      {
+       "column": "baseline_score",
+       "kind": "numeric",
+       "level": null,
+       "smd_unweighted": 0.26886861359006387,
+       "smd_weighted": 0.0015113071938791444
+      },
+      {
+       "column": "region",
+       "kind": "categorical",
+       "level": "east",
+       "smd_unweighted": -0.25987979833940733,
+       "smd_weighted": 0.005681767535136612
+      },
+      {
+       "column": "region",
+       "kind": "categorical",
+       "level": "north",
+       "smd_unweighted": -0.18875793527051338,
+       "smd_weighted": -0.01670365850162473
+      },
+      {
+       "column": "region",
+       "kind": "categorical",
+       "level": "south",
+       "smd_unweighted": 0.41031538109901833,
+       "smd_weighted": 0.011592296054827773
+      }
+     ],
+     "weighted": true,
+     "interpretation_note": "Standardized mean differences are descriptive summaries of covariate balance in this sample. Denominator convention: the pooled term uses the population-form (non-debiased) variance, (squared treated SD + squared control SD) / 2, applied identically to the unweighted and weighted comparisons so pre/post values are mutually consistent. No SMD threshold (conventional or otherwise) constitutes a test of exchangeability or proof that confounding has been removed; balance can only be assessed relative to the adjustment set that graphical identification licensed."
+    },
+    "overlap": {
+     "propensity_summary": {
+      "min": 0.07545182857973619,
+      "max": 0.6786377062535258,
+      "quantiles_overall": {
+       "0.01": 0.10065491291240715,
+       "0.05": 0.13171871227019227,
+       "0.25": 0.19813416644546333,
+       "0.5": 0.2736055956814929,
+       "0.75": 0.36932163363784376,
+       "0.95": 0.521310555737724,
+       "0.99": 0.5975206913518192
+      },
+      "quantiles_treated": {
+       "0.01": 0.11974403042689913,
+       "0.05": 0.15145056741258425,
+       "0.25": 0.24551306477008608,
+       "0.5": 0.3313933788944538,
+       "0.75": 0.432229363542858,
+       "0.95": 0.5587078976095113,
+       "0.99": 0.6205917979129683
+      },
+      "quantiles_control": {
+       "0.01": 0.09227069129674707,
+       "0.05": 0.12563206750039696,
+       "0.25": 0.18417378084686914,
+       "0.5": 0.248863409065519,
+       "0.75": 0.3365101270107351,
+       "0.95": 0.4835912661461833,
+       "0.99": 0.5813603681367222
+      }
+     },
+     "propensity_histogram": {
+      "bin_edges": [
+       0.0,
+       0.05,
+       0.1,
+       0.15,
+       0.2,
+       0.25,
+       0.3,
+       0.35,
+       0.4,
+       0.45,
+       0.5,
+       0.55,
+       0.6,
+       0.65,
+       0.7,
+       0.75,
+       0.8,
+       0.85,
+       0.9,
+       0.95,
+       1.0
+      ],
+      "bin_count": 20,
+      "treated_counts": [
+       0,
+       1,
+       16,
+       29,
+       46,
+       50,
+       50,
+       40,
+       47,
+       34,
+       17,
+       14,
+       2,
+       3,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      "control_counts": [
+       0,
+       11,
+       95,
+       159,
+       161,
+       133,
+       105,
+       68,
+       52,
+       28,
+       15,
+       17,
+       6,
+       1,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      "treated_share": [
+       0.0,
+       0.00286533,
+       0.04584527,
+       0.08309456,
+       0.13180516,
+       0.14326648,
+       0.14326648,
+       0.11461318,
+       0.13467049,
+       0.0974212,
+       0.0487106,
+       0.04011461,
+       0.00573066,
+       0.00859599,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "control_share": [
+       0.0,
+       0.01292597,
+       0.11163337,
+       0.18683901,
+       0.18918919,
+       0.15628672,
+       0.12338425,
+       0.07990599,
+       0.06110458,
+       0.03290247,
+       0.01762632,
+       0.0199765,
+       0.00705053,
+       0.00117509,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "definition": "Counts of fitted propensity scores in 20 fixed bins of width 0.05 over [0, 1]; shares are relative frequencies within each arm, so the two arms are comparable despite unequal group sizes. The scores are fitted estimates, not true treatment probabilities."
+     },
+     "extremes": {
+      "below_0.01": 0,
+      "above_0.99": 0,
+      "count_definition": "fitted propensity strictly outside [0.01, 0.99]"
+     },
+     "effective_sample_sizes": {
+      "treated_rows_unweighted": 349,
+      "control_rows_unweighted": 851,
+      "treated_ess_weighted": 292.8762521188407,
+      "control_ess_weighted": 819.7459390017186
+     },
+     "weight_summary": {
+      "max_individual_weight": 10.372391303361745,
+      "quantiles_total_weight": {
+       "0.5": 1.4684505235387644,
+       "0.95": 4.5936875887870805,
+       "0.99": 7.16054561018194
+      }
+     },
+     "warnings": [],
+     "scope_note": "These are empirical overlap diagnostics for the fitted propensity distribution in this dataset. The theoretical positivity assumption \u2014 every analysed stratum having positive probability of both treatment states in the population \u2014 cannot be verified by any dataset, and these diagnostics neither establish nor refute it.",
+     "truncation": null
+    }
+   }
+  },
+  {
+   "status": "estimated",
+   "estimator": "aipw",
+   "estimate": 1.6888916877985225,
+   "mu1": null,
+   "mu0": null,
+   "model_specification": {
+    "propensity_model": "logistic_l2_C1.0",
+    "outcome_models": "linear_least_squares",
+    "cross_fitting": {
+     "strategy": "shuffled_kfold",
+     "splits": 5,
+     "seed": 123,
+     "group_column": null,
+     "out_of_fold_predictions": true
+    }
+   },
+   "fold_row_counts": [
+    240,
+    240,
+    240,
+    240,
+    240
+   ],
+   "truncation": null,
+   "warnings": [
+    "Cross-fitting used shuffled folds. If observations are repeated per entity or chronologically ordered, independent shuffling can leak entity-level structure across folds; name cross_fit.group_column where grouping applies."
+   ],
+   "units": "outcome_units",
+   "treated_mean": null,
+   "control_mean": null,
+   "sample_size": 1200,
+   "uncertainty": {
+    "status": "available",
+    "method": "bootstrap_percentile",
+    "level": 0.95,
+    "standard_error": 0.14945107158428073,
+    "ci_lower": 1.422584628606285,
+    "ci_upper": 1.9750117772193143,
+    "unavailable_reason": null,
+    "bootstrap": {
+     "reps_requested": 200,
+     "reps_succeeded": 200,
+     "reps_failed": 0,
+     "seed": 123,
+     "interval_type": "percentile",
+     "refit_nuisance_models": true,
+     "sample_failure_messages": []
+    },
+    "assumptions": [
+     "The interval assumes independent observations. Clustered or repeated-measure data need cluster-aware inference this stage does not provide; the interval would then be anti-conservative.",
+     "Every replicate refits the nuisance models on the resampled rows."
+    ]
+   },
+   "diagnostics": {
+    "balance": {
+     "covariates": [
+      {
+       "column": "age",
+       "kind": "numeric",
+       "level": null,
+       "smd_unweighted": 0.3296804379552589,
+       "smd_weighted": 0.004661615822748259
+      },
+      {
+       "column": "baseline_score",
+       "kind": "numeric",
+       "level": null,
+       "smd_unweighted": 0.26886861359006387,
+       "smd_weighted": -0.0036732009225590298
+      },
+      {
+       "column": "region",
+       "kind": "categorical",
+       "level": "east",
+       "smd_unweighted": -0.25987979833940733,
+       "smd_weighted": 0.016546780899458453
+      },
+      {
+       "column": "region",
+       "kind": "categorical",
+       "level": "north",
+       "smd_unweighted": -0.18875793527051338,
+       "smd_weighted": -0.021022070281718996
+      },
+      {
+       "column": "region",
+       "kind": "categorical",
+       "level": "south",
+       "smd_unweighted": 0.41031538109901833,
+       "smd_weighted": 0.006139124187790768
+      }
+     ],
+     "weighted": true,
+     "interpretation_note": "Standardized mean differences are descriptive summaries of covariate balance in this sample. Denominator convention: the pooled term uses the population-form (non-debiased) variance, (squared treated SD + squared control SD) / 2, applied identically to the unweighted and weighted comparisons so pre/post values are mutually consistent. No SMD threshold (conventional or otherwise) constitutes a test of exchangeability or proof that confounding has been removed; balance can only be assessed relative to the adjustment set that graphical identification licensed."
+    },
+    "overlap": {
+     "propensity_summary": {
+      "min": 0.06390510655881003,
+      "max": 0.7182679769616319,
+      "quantiles_overall": {
+       "0.01": 0.1003006648825227,
+       "0.05": 0.12686840644583744,
+       "0.25": 0.197873731957468,
+       "0.5": 0.2698947421623582,
+       "0.75": 0.36999847125482366,
+       "0.95": 0.5165794373370193,
+       "0.99": 0.5987615035346059
+      },
+      "quantiles_treated": {
+       "0.01": 0.1148233766835005,
+       "0.05": 0.14762468296442083,
+       "0.25": 0.23680379339769017,
+       "0.5": 0.3221814873597394,
+       "0.75": 0.42830694979811446,
+       "0.95": 0.5396007905987763,
+       "0.99": 0.6216574274494099
+      },
+      "quantiles_control": {
+       "0.01": 0.09352333526199105,
+       "0.05": 0.12440510940168621,
+       "0.25": 0.18822045181480423,
+       "0.5": 0.24821001158034353,
+       "0.75": 0.3376068056273108,
+       "0.95": 0.48385567070495017,
+       "0.99": 0.5844681903167934
+      }
+     },
+     "propensity_histogram": {
+      "bin_edges": [
+       0.0,
+       0.05,
+       0.1,
+       0.15,
+       0.2,
+       0.25,
+       0.3,
+       0.35,
+       0.4,
+       0.45,
+       0.5,
+       0.55,
+       0.6,
+       0.65,
+       0.7,
+       0.75,
+       0.8,
+       0.85,
+       0.9,
+       0.95,
+       1.0
+      ],
+      "bin_count": 20,
+      "treated_counts": [
+       0,
+       0,
+       19,
+       36,
+       45,
+       49,
+       47,
+       45,
+       35,
+       39,
+       17,
+       12,
+       2,
+       2,
+       1,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      "control_counts": [
+       0,
+       12,
+       94,
+       151,
+       173,
+       129,
+       100,
+       82,
+       43,
+       30,
+       11,
+       20,
+       5,
+       0,
+       1,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      "treated_share": [
+       0.0,
+       0.0,
+       0.05444126,
+       0.10315186,
+       0.12893983,
+       0.14040115,
+       0.13467049,
+       0.12893983,
+       0.10028653,
+       0.11174785,
+       0.0487106,
+       0.03438395,
+       0.00573066,
+       0.00573066,
+       0.00286533,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "control_share": [
+       0.0,
+       0.01410106,
+       0.11045828,
+       0.17743831,
+       0.20329025,
+       0.15158637,
+       0.11750881,
+       0.09635723,
+       0.05052879,
+       0.03525264,
+       0.01292597,
+       0.02350176,
+       0.00587544,
+       0.0,
+       0.00117509,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "definition": "Counts of fitted propensity scores in 20 fixed bins of width 0.05 over [0, 1]; shares are relative frequencies within each arm, so the two arms are comparable despite unequal group sizes. The scores are fitted estimates, not true treatment probabilities."
+     },
+     "extremes": {
+      "below_0.01": 0,
+      "above_0.99": 0,
+      "count_definition": "fitted propensity strictly outside [0.01, 0.99]"
+     },
+     "effective_sample_sizes": {
+      "treated_rows_unweighted": 349,
+      "control_rows_unweighted": 851,
+      "treated_ess_weighted": 290.77497421636525,
+      "control_ess_weighted": 819.1075829452603
+     },
+     "weight_summary": {
+      "max_individual_weight": 9.409994570878265,
+      "quantiles_total_weight": {
+       "0.5": 1.4718666515435215,
+       "0.95": 4.733664600791399,
+       "0.99": 7.572012250624058
+      }
+     },
+     "warnings": [],
+     "scope_note": "These are empirical overlap diagnostics for the fitted propensity distribution in this dataset. The theoretical positivity assumption \u2014 every analysed stratum having positive probability of both treatment states in the population \u2014 cannot be verified by any dataset, and these diagnostics neither establish nor refute it.",
+     "truncation": null
+    }
+   }
+  }
+ ],
+ "defaults_applied": [
+  {
+   "field": "cohort.split_assignment_id",
+   "value": null,
+   "meaning": "No train/test partition named: the cohort is every dataset row that survives data preparation."
+  },
+  {
+   "field": "missing_data_policy",
+   "value": "complete_case",
+   "meaning": "Rows with missing values in required columns are excluded and reported."
+  },
+  {
+   "field": "propensity_truncation",
+   "value": null,
+   "meaning": "Propensity scores are used untruncated."
+  }
+ ],
+ "reproducibility": {
+  "dataset_id": "ds-e5fed1158f9b",
+  "dataset_fingerprint_sha256": "4bc249c10b741b555293a4e6f2df462f1a8b207c600677f2c2c33c6692141d90",
+  "graph_id": "cgraph-a4f007da0b",
+  "graph_revision": 0,
+  "graph_spec_fingerprint_sha256": "9df5e28dfd548e86ca46f0c8e298d3efc927f5f0b31f2151d00298fa1eebc66a",
+  "estimation_version": "1.0.0",
+  "estimation_schema_version": "1.0.0",
+  "estimators": [
+   "regression_adjustment",
+   "ipw",
+   "aipw"
+  ],
+  "treatment_node": "treatment",
+  "outcome_node": "outcome",
+  "adjustment_nodes": [
+   "age",
+   "baseline_score",
+   "region"
+  ],
+  "treatment_mapping": {
+   "treated": "1",
+   "control": "0"
+  },
+  "cohort": {
+   "split_assignment_id": null,
+   "partition": null
+  },
+  "missing_data_policy": "complete_case",
+  "cross_fitting": {
+   "splits": 5,
+   "group_column": null
+  },
+  "uncertainty": {
+   "method": "bootstrap",
+   "level": 0.95,
+   "reps": 200,
+   "seed": 123,
+   "resolved_seed": 123
+  },
+  "propensity_truncation": null,
+  "software_versions": {
+   "python": "3.11.9",
+   "numpy": "2.4.6",
+   "pandas": "3.0.6",
+   "scikit_learn": "1.9.1",
+   "statsmodels": "0.15.0"
+  },
+  "limits": {
+   "max_rows": 10000,
+   "min_rows_total": 20,
+   "min_rows_per_arm": 10,
+   "max_covariates": 30,
+   "max_categorical_levels": 12,
+   "max_encoded_features": 300,
+   "max_bootstrap_reps": 2000,
+   "min_bootstrap_reps": 100,
+   "min_crossfit_splits": 2,
+   "max_crossfit_splits": 10
+  }
+ },
+ "scope_note": "The estimate is an average treatment effect computed from this dataset under the assumed graph and the named adjustment set. Graphical identification, exchangeability (no unmeasured confounding), consistency, positivity and correct model specification are assumptions this computation relies on \u2014 none of them is proven by it. Diagnostics describe the data; they do not verify the causal assumptions.",
+ "comparison": {
+  "shared_analysis": "All results below were computed on the same prepared cohort, treatment mapping, adjustment set and estimand; they differ only in the estimator.",
+  "estimates": {
+   "regression_adjustment": 1.7311637332722414,
+   "ipw": 1.679928925800425,
+   "aipw": 1.6888916877985225
+  },
+  "max_pairwise_difference": 0.0512348074718163,
+  "interpretation": "Material disagreement between estimators that share a cohort and adjustment set is a model-specification or instability signal (nuisance misspecification, weak overlap, small-sample noise). It is reported, not resolved: SplitScope does not select a winner and does not combine estimators into a single score."
+ },
+ "created_at_utc": "2026-11-06T08:58:38+00:00",
+ "run_id": "run-38d32e7c2abc"
+}
