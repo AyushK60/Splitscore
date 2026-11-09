@@ -5,79 +5,6 @@
    structure, teal for the workbench's own actions, copper reserved for what
    the audit finds and what the user selects. */
 
-:root {
-  /* Ink and paper: deep ink-green text on warm ivory. */
-  --ink: #18231d;
-  --ink-soft: #2f3d35;
-  --muted: #5c6b62;
-  --line: #e3ddd0;
-  --line-strong: #cfc6b5;
-  --bg: #ffffff;
-  --bg-sunken: #f5f1e7;
-  --bg-raised: #ffffff;
-  --bg-quiet: #faf7f0;
-  --paper: #fbf8f1;
-  --ink-band: #12190f;
-  --ink-band-2: #17211a;
-  --bone: #f3ead9;
-  --bone-dim: rgb(243 234 217 / 72%);
-  --celadon: #b4d0bd;
-  --celadon-deep: #0a6d7d;
-
-  /* The single accent. Action, selection and focus — never decoration. */
-  --accent: #0a6d7d;
-  --accent-ink: #ffffff;
-  --accent-soft: #e7f3f5;
-  --accent-deep: #08505c;
-  --accent-line: #bcd9de;
-
-  /* Severity is a muted, print-like palette so it never shouts over the text. */
-  --high: #9d2b20;
-  --high-soft: #fbe9e6;
-  --medium: #8a5a0a;
-  --medium-soft: #fbf1d9;
-  --low: #3a6186;
-  --low-soft: #ecf2f8;
-  --info: #4d5563;
-  --info-soft: #f0f2f5;
-  --ok: #2a6a4b;
-  --ok-soft: #e9f3ec;
-  --focus: #0a6d7d;
-
-  --radius: 4px;
-  --radius-sm: 3px;
-  --radius-xs: 2px;
-  --shadow: 0 1px 2px rgb(24 35 29 / 5%), 0 6px 18px -14px rgb(24 35 29 / 24%);
-  --shadow-raised: 0 1px 2px rgb(24 35 29 / 6%), 0 16px 40px -26px rgb(24 35 29 / 30%);
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
-  --mono: "JetBrains Mono", "Cascadia Mono", "SF Mono", ui-monospace, Consolas, monospace;
-  --sans: "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont,
-    Roboto, "Helvetica Neue", Arial, sans-serif;
-  --display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino,
-    "Times New Roman", Georgia, serif;
-
-  /* Full-width responsive workspace: the scientific stages use the monitor. */
-  --ws-max: 1800px;
-  --ws-gutter: clamp(18px, 2.6vw, 44px);
-  --ws-reading: 76ch;
-
-  /* Motion (S11): one vocabulary instead of ad-hoc durations.
-     fast  — interaction feedback (hover, press, focus, colour/border changes)
-     base  — controls appearing in place (dropdowns, toasts, inline reveals)
-     slow  — workspace-level transitions (stage appearance), nothing larger
-     Easing: standard for state changes, emphasis for elements that enter. */
-  --motion-fast: 120ms;
-  --motion-base: 180ms;
-  --motion-slow: 260ms;
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-  --ease-emphasis: cubic-bezier(0.2, 0.8, 0.2, 1);
-}
 
 *,
 *::before,
@@ -174,151 +101,184 @@ a {
   text-underline-offset: 2px;
 }
 
-/* ---------- layout ---------- */
+/* ---------- workbench shell: left rail + page header ---------- */
+
+/* The workbench is a two-column grid: a fixed graphite rail (brand, numbered
+   stages) and the content column. Pure layout: the Shell markup is a flat
+   fragment, so the grid lives on #root and only applies when the rail exists
+   (the landing page renders its own full-bleed layout). */
+:root {
+  --rail-w: 248px;
+}
+#root:has(> .app-topbar) {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
 
 .app-topbar {
+  grid-column: 1;
+  grid-row: 1 / span 3;
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgb(18 25 15 / 92%);
-  backdrop-filter: blur(12px) saturate(140%);
-  box-shadow: 0 1px 0 rgb(243 234 217 / 12%);
+  height: 100vh;
+  align-self: start;
+  background: var(--band);
+  color: var(--band-ink);
+  border-right: 1px solid var(--band-line);
+}
+.app-topbar__primary {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .app-header {
-  background: transparent;
-  border-bottom: 0;
-  padding: var(--space-3) var(--ws-gutter);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  border-bottom: 1px solid var(--band-line);
 }
 .app-header__inner {
-  max-width: var(--ws-max);
-  margin: 0 auto;
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3) var(--space-5);
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
 }
 .app-header__brand {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 4px 10px;
   min-width: 0;
+  text-align: left;
 }
 .app-header__mark {
   flex: none;
-  width: 28px;
-  height: 28px;
-  border-radius: 3px;
-  background: var(--bone);
-  color: #12190f;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-md);
+  background: var(--band-ink);
+  color: var(--band);
   display: grid;
   place-items: center;
-  box-shadow: inset 0 0 0 1px rgb(18 25 15 / 25%);
 }
 .app-header__mark svg {
   display: block;
 }
 .app-header__title {
-  font-family: var(--display);
-  font-size: 18px;
-  font-weight: 650;
-  letter-spacing: 0.005em;
-  color: var(--bone);
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-display);
+  color: var(--band-ink);
 }
 .app-header__tagline {
-  color: var(--bone-dim);
-  font-size: 12px;
-  font-family: var(--mono);
-  letter-spacing: 0.04em;
-  border-left: 1px solid rgb(243 234 217 / 18%);
-  padding-left: 10px;
+  flex-basis: 100%;
+  color: var(--band-ink-2);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
 }
 .app-header__meta {
-  margin-left: auto;
-  color: var(--bone-dim);
-  font-size: 12.5px;
-  font-family: var(--mono);
+  color: var(--band-ink-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  margin: 0;
+  min-height: 18px;
 }
 
 .app-nav {
-  background: transparent;
-  border-bottom: 0;
-  padding: 0 var(--ws-gutter);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-3) var(--space-5);
+  scrollbar-width: thin;
+  scrollbar-color: var(--band-3) transparent;
 }
 .app-nav__inner {
-  max-width: var(--ws-max);
-  margin: 0 auto;
   display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  padding-bottom: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+.app-nav__group {
+  margin: var(--space-4) 0 var(--space-1) var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: rgb(236 238 234 / 52%);
+}
+.app-nav__group:first-child {
+  margin-top: var(--space-1);
 }
 .app-nav button {
   appearance: none;
+  width: 100%;
+  justify-content: flex-start;
+  gap: 10px;
   border: 0;
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--r-md) var(--r-md) 0;
   background: transparent;
+  color: var(--band-ink-2);
   font: inherit;
-  font-size: 13.5px;
-  color: var(--bone-dim);
-  padding: 9px 12px 8px;
-  border-radius: 0;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  transition: color var(--motion-fast) var(--ease-standard),
-    border-color var(--motion-fast) var(--ease-standard);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  padding: 7px 10px;
+  transition: color var(--d-fast) var(--ease-out), background-color var(--d-fast) var(--ease-out),
+    border-color var(--d-fast) var(--ease-out);
 }
 .app-nav button:hover:not(:disabled) {
-  color: var(--bone);
-  /* The global control hover paints a pale accent-soft background; on the dark
-     masthead that produced pale text on a pale fill. Navigation keeps its own
-     transparent background so contrast never depends on cascade order. */
-  background: transparent;
-  border-bottom-color: rgb(243 234 217 / 28%);
+  color: var(--band-ink);
+  background: rgb(236 238 234 / 7%);
+  border-color: transparent;
+  border-left-color: rgb(236 238 234 / 30%);
 }
-.app-nav button[aria-current='page'] {
-  color: var(--bone);
-  font-weight: 650;
-  background: transparent;
-  border-bottom-color: var(--celadon);
-}
+.app-nav button[aria-current='page'],
 .app-nav button[aria-current='page']:hover:not(:disabled) {
-  background: transparent;
-  border-bottom-color: var(--celadon);
+  color: var(--band-ink);
+  font-weight: 650;
+  background: rgb(157 171 255 / 14%);
+  border-left-color: var(--accent-on-dark);
 }
 .app-nav button:disabled {
-  color: rgb(243 234 217 / 30%);
+  color: rgb(236 238 234 / 36%);
   background: transparent;
   cursor: not-allowed;
 }
 .app-nav__step {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: rgb(243 234 217 / 55%);
-  border: 1px solid rgb(243 234 217 / 22%);
-  border-radius: 1px;
-  padding: 0 5px;
-  line-height: 1.5;
+  flex: none;
+  min-width: 22px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: rgb(236 238 234 / 60%);
+  border: 1px solid rgb(236 238 234 / 22%);
+  border-radius: var(--r-sm);
+  padding: 0 4px;
+  line-height: 1.55;
 }
 .app-nav button[aria-current='page'] .app-nav__step {
-  background: var(--celadon);
-  border-color: var(--celadon);
-  color: #12190f;
+  background: var(--accent-on-dark);
+  border-color: var(--accent-on-dark);
+  color: var(--band);
 }
 .app-nav button:disabled .app-nav__step {
-  background: none;
-  border-color: rgb(243 234 217 / 12%);
+  border-color: rgb(236 238 234 / 12%);
 }
 
-/* The masthead sits on the ink band: the global teal focus ring is too close
-   to the background luminance there, so focus uses the celadon rail instead. */
-.app-topbar button:focus-visible {
-  outline: 2px solid var(--celadon);
+/* On the graphite rail the blue focus ring is too close to the background:
+   focus uses the light accent instead. */
+.app-topbar :focus-visible {
+  outline: 2px solid var(--accent-on-dark);
   outline-offset: 2px;
 }
 
@@ -330,23 +290,26 @@ a {
   border-color: transparent;
   transform: none;
 }
-.app-header__brand--home:hover .app-header__title,
-.app-header__brand--home:hover .app-header__tagline {
-  color: var(--bone);
+
+/* ---- page header: breadcrumb and next-step guidance --------------------- */
+
+.app-context {
+  grid-column: 2;
+  grid-row: 1;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
 }
-
-/* ---- breadcrumb and next-step guidance ---------------------------------- */
-
 .app-crumb {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 4px 18px;
-  padding: 6px var(--ws-gutter) 7px;
-  border-top: 1px solid rgb(243 234 217 / 10%);
-  font: 400 11.5px/1.5 var(--mono);
-  color: var(--bone-dim);
+  gap: 4px 24px;
+  max-width: var(--ws-max);
+  margin: 0 auto;
+  padding: 14px var(--ws-gutter) 13px;
+  font: 400 12.5px/1.5 var(--font-body);
+  color: var(--ink-3);
 }
 .app-crumb ol {
   display: flex;
@@ -355,58 +318,139 @@ a {
   list-style: none;
   margin: 0;
   padding: 0;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
 }
 .app-crumb li + li::before {
   content: '/ ';
-  color: rgb(243 234 217 / 34%);
+  color: var(--line-strong);
 }
 .app-crumb__link {
   appearance: none;
   border: 0;
   background: transparent;
-  color: var(--bone-dim);
+  color: var(--ink-3);
   font: inherit;
   padding: 0;
   cursor: pointer;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line-strong);
 }
 .app-crumb__link:hover:not(:disabled) {
   background: transparent;
-  color: var(--bone);
+  color: var(--accent);
+  border-color: transparent;
 }
 .app-crumb [aria-current='page'] {
-  color: var(--bone);
+  color: var(--ink);
+  font-weight: 600;
 }
 .app-crumb__next {
   margin: 0;
+  max-width: 78ch;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 10px;
+  gap: 4px 12px;
 }
 .app-crumb__next .app-crumb__action {
   appearance: none;
   border: 0;
   background: transparent;
-  color: var(--celadon);
+  color: var(--accent);
   font: inherit;
+  font-weight: 600;
   padding: 0;
   cursor: pointer;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
 .app-crumb__next .app-crumb__action:hover:not(:disabled) {
   background: transparent;
-  color: var(--bone);
+  color: var(--accent-deep);
+  border-color: transparent;
 }
 .app-crumb__label {
-  color: rgb(243 234 217 / 52%);
-  letter-spacing: 0.08em;
+  color: var(--signal);
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  font-size: 10px;
+  font-size: 10.5px;
+  font-weight: 600;
 }
 
+#root:has(> .app-topbar) > .app-main:not(.app-footer) {
+  grid-column: 2;
+  grid-row: 2;
+  width: 100%;
+}
+#root:has(> .app-topbar) > .app-footer {
+  grid-column: 2;
+  grid-row: 3;
+  width: 100%;
+}
+
+/* Below desktop the rail collapses into a compact top bar with a scrolling
+   stage strip, as before. */
+@media (max-width: 1023px) {
+  #root:has(> .app-topbar) {
+    display: block;
+  }
+  .app-topbar {
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--band-line);
+  }
+  .app-topbar__primary {
+    height: auto;
+  }
+  .app-header {
+    padding: var(--space-3) var(--ws-gutter) var(--space-2);
+    border-bottom: 0;
+  }
+  .app-header__inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .app-header__tagline {
+    display: none;
+  }
+  .app-nav {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 var(--ws-gutter);
+  }
+  .app-nav__inner {
+    flex-direction: row;
+    gap: 2px;
+    width: max-content;
+  }
+  .app-nav__group {
+    display: none;
+  }
+  .app-nav button {
+    width: auto;
+    white-space: nowrap;
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    padding: 10px 12px 9px;
+    min-height: 44px;
+  }
+  .app-nav button:hover:not(:disabled) {
+    border-left-color: transparent;
+    border-bottom-color: rgb(236 238 234 / 30%);
+  }
+  .app-nav button[aria-current='page'],
+  .app-nav button[aria-current='page']:hover:not(:disabled) {
+    background: transparent;
+    border-left-color: transparent;
+    border-bottom-color: var(--accent-on-dark);
+  }
+}
 @media (max-width: 700px) {
   .app-crumb {
     align-items: flex-start;

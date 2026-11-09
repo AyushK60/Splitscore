@@ -1,0 +1,214 @@
+/* ============================================================================
+   SplitScope — design tokens ("the measurement plate")
+   ----------------------------------------------------------------------------
+   Swiss-modernist rigour with a cool-technical palette: graphite ink on a
+   faintly green-grey paper, hairline rules, flat colour, one ultramarine
+   accent for action / selection / focus, and a restrained vermilion "signal"
+   reserved for what the audit flags. Severity keeps its own muted set and is
+   always paired with text.
+
+   This is the ONLY place palette, type, radius, motion and spacing values are
+   defined. Section 1 is the canonical token set. Section 2 maps every legacy
+   variable name that older stylesheets still use onto it, so the whole app
+   inherits the palette from one file.
+   Fonts are self-hosted (bundled by Vite from @fontsource-variable): the
+   product promises no outbound network calls, so nothing loads from a CDN.
+   ========================================================================== */
+
+:root {
+  /* ---- 1. canonical tokens ---------------------------------------------- */
+
+  /* Paper and ink */
+  --bg: #f1f2f0; /* page */
+  --surface: #fbfbf9; /* cards, inputs, tables */
+  --surface-2: #e8eae6; /* subtle fills, hover */
+  --surface-3: #f6f7f4; /* quietest fill between page and surface */
+  --line: #d6d9d3; /* hairline */
+  --line-strong: #bcc0b9; /* control borders, emphasised rules */
+  --ink: #14171a;
+  --ink-2: #454b52; /* secondary text */
+  --ink-3: #5c626a; /* tertiary / meta (AA on --bg and --surface-2) */
+
+  /* Accent: ultramarine. Actions, selection, focus. Never decoration. */
+  --accent: #2540d9;
+  --accent-deep: #1a2fa6;
+  --accent-ink: #ffffff;
+  --accent-soft: #e4e8fb;
+  --accent-line: #b7c1f2;
+  --accent-on-dark: #9dabff;
+
+  /* Signal: vermilion. What the audit flags, never a button colour. */
+  --signal: #b9411a;
+  --signal-soft: #f8e6de;
+  --signal-on-dark: #ff8f66;
+
+  /* Graphite band: the one dark surface per page */
+  --band: #101316;
+  --band-2: #171b1f;
+  --band-3: #1f2429;
+  --band-ink: #eceeea;
+  --band-ink-2: rgb(236 238 234 / 72%);
+  --band-line: rgb(236 238 234 / 14%);
+
+  /* Severity: muted, print-like. Colour never carries meaning alone. */
+  --high: #a4281f;
+  --high-soft: #fbe9e6;
+  --medium: #86570a;
+  --medium-soft: #fbf1d9;
+  --low: #3a5f86;
+  --low-soft: #ecf1f7;
+  --info: #475260;
+  --info-soft: #eff1f4;
+  --ok: #2a6a4b;
+  --ok-soft: #e9f3ec;
+  --warn: var(--medium);
+  --err: var(--high);
+  --focus: var(--accent);
+
+  /* Type */
+  --font-display: "Bricolage Grotesque Variable", "Bricolage Grotesque", "Segoe UI Variable Display",
+    "Segoe UI", system-ui, sans-serif;
+  --font-body: "Instrument Sans Variable", "Instrument Sans", "Segoe UI Variable Text", "Segoe UI",
+    system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", "Cascadia Mono", ui-monospace, Consolas,
+    monospace;
+
+  --fs-xs: 0.78rem;
+  --fs-sm: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  --fs-2xl: clamp(2rem, 1.4rem + 2.2vw, 3.25rem);
+  --fs-3xl: clamp(2.75rem, 1.6rem + 4.5vw, 5.5rem);
+  --fs-hero: clamp(3.1rem, 1.5rem + 7vw, 8rem);
+  --lh-tight: 1.02;
+  --lh-snug: 1.2;
+  --lh-body: 1.6;
+  --tracking-display: -0.035em;
+  --tracking-caps: 0.1em;
+
+  /* Space (4/8 grid) */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4.5rem;
+  --s-9: 7rem;
+  --s-10: 10rem;
+
+  /* Shape and depth: sharp radii, hairlines over shadows */
+  --r-sm: 2px;
+  --r-md: 4px;
+  --r-lg: 6px;
+  --r-pill: 999px;
+  --shadow-1: 0 1px 2px rgb(16 19 22 / 6%);
+  --shadow-2: 0 10px 28px -12px rgb(16 19 22 / 22%);
+  --shadow-3: 0 28px 64px -24px rgb(16 19 22 / 34%);
+
+  /* Motion: calm. One vocabulary, honoured by prefers-reduced-motion. */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --d-fast: 120ms;
+  --d-base: 180ms;
+  --d-slow: 600ms;
+  --d-cinema: 1100ms;
+
+  --container: 1200px;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+
+  /* ---- 2. legacy aliases (do not add new uses; migrate when touched) ----- */
+
+  /* app.css / v2.css */
+  --ink-soft: var(--ink-2);
+  --muted: var(--ink-3);
+  --ink-quiet: var(--ink-3);
+  --bg-sunken: var(--bg);
+  --bg-raised: var(--surface);
+  --bg-quiet: var(--surface-3);
+  --paper: var(--surface);
+  --ink-band: var(--band);
+  --ink-band-2: var(--band-2);
+  --bone: var(--band-ink);
+  --bone-dim: var(--band-ink-2);
+  --celadon: var(--accent-on-dark);
+  --celadon-deep: var(--accent);
+  --border: var(--line);
+  --copper: var(--signal);
+  --teal: var(--accent);
+  --radius: var(--r-lg);
+  --radius-sm: var(--r-md);
+  --radius-xs: var(--r-sm);
+  --shadow: none;
+  --shadow-raised: var(--shadow-2);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --mono: var(--font-mono);
+  --sans: var(--font-body);
+  --display: var(--font-display);
+  --motion-fast: var(--d-fast);
+  --motion-base: var(--d-base);
+  --motion-slow: 260ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasis: var(--ease-out);
+  --ws-max: 1800px;
+  --ws-gutter: clamp(18px, 2.6vw, 44px);
+  --ws-reading: 72ch;
+
+  /* research.css (.rs) */
+  --rs-paper: var(--surface);
+  --rs-surface: var(--surface);
+  --rs-sunken: var(--bg);
+  --rs-ink: var(--ink);
+  --rs-soft: var(--ink-2);
+  --rs-ink-soft: var(--ink-2);
+  --rs-line: var(--line);
+  --rs-line-strong: var(--line-strong);
+  --rs-copper: var(--signal);
+  --rs-copper-soft: var(--signal-soft);
+  --rs-teal: var(--accent);
+  --rs-teal-soft: var(--accent-soft);
+  --rs-warn: var(--medium);
+  --rs-warn-soft: var(--medium-soft);
+  --rs-bad: var(--high);
+  --rs-bad-soft: var(--high-soft);
+  --rs-display: var(--font-display);
+  --rs-mono: var(--font-mono);
+  --rs-sans: var(--font-body);
+
+  /* s9.css (estimation) */
+  --est-copper: var(--signal);
+  --est-copper-soft: var(--signal-soft);
+  --est-teal: var(--accent);
+  --est-teal-soft: var(--accent-soft);
+
+  /* landing.css / s3.css (.lp). On the graphite band the accent lightens. */
+  --lp-ink: var(--band);
+  --lp-ink-2: var(--band-2);
+  --lp-ink-3: var(--band-3);
+  --lp-bone: var(--band-ink);
+  --lp-bone-dim: var(--band-ink-2);
+  --lp-paper: var(--bg);
+  --lp-paper-hi: var(--surface);
+  --lp-copper: var(--accent-on-dark);
+  --lp-copper-light: #c4ccff;
+  --lp-copper-deep: var(--accent);
+  --lp-celadon: #b9c0d2;
+  --lp-celadon-bright: #dfe3ee;
+  --lp-ink-text: var(--ink);
+  --lp-ink-soft: var(--ink-2);
+  --lp-rule: rgb(20 23 26 / 14%);
+  --lp-rule-ink: var(--band-line);
+  --lp-display: var(--font-display);
+  --lp-sans: var(--font-body);
+  --lp-mono: var(--font-mono);
+  --lp-gutter: clamp(20px, 4.6vw, 84px);
+  --lp-max: 1400px;
+}

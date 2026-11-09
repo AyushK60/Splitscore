@@ -8,26 +8,6 @@
    ========================================================================== */
 
 .rs {
-  --rs-paper: #fbf8f1;
-  --rs-surface: #ffffff;
-  --rs-sunken: #f5f1e7;
-  --rs-ink: #18231d;
-  --rs-soft: #4f5f56;
-  --rs-line: #e3ddd0;
-  --rs-line-strong: #cfc6b5;
-  --rs-copper: #b4562a;
-  --rs-copper-soft: #f7e7dc;
-  --rs-teal: #0a6d7d;
-  --rs-teal-soft: #e7f3f5;
-  --rs-warn: #8a5a00;
-  --rs-warn-soft: #fbf1d9;
-  --rs-bad: #9d2b20;
-  --rs-bad-soft: #fbe9e6;
-  --rs-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino,
-    "Times New Roman", Georgia, serif;
-  --rs-mono: "JetBrains Mono", "Cascadia Mono", "SF Mono", ui-monospace, Consolas,
-    "Courier New", monospace;
-
   color: var(--rs-ink);
   /* The workspace shell (.app-main) already carries the full-width gutter and
      max-width since S5; the stage itself spans it. */

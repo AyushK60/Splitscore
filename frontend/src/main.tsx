@@ -1,10 +1,13 @@
-import { StrictMode, Suspense, lazy, useEffect, useRef, type ReactNode } from 'react'
+import { Fragment, StrictMode, Suspense, lazy, useEffect, useRef, type ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import '@fontsource-variable/bricolage-grotesque/opsz.css'
+import '@fontsource-variable/instrument-sans/wght.css'
+import '@fontsource-variable/jetbrains-mono/wght.css'
+import './styles/tokens.css'
 import './styles/app.css'
 import './styles/v2.css'
 import './styles/landing.css'
-import './styles/s3.css'
 import './styles/research.css'
 import './styles/explore.css'
 import './styles/models.css'
@@ -254,6 +257,15 @@ function Shell() {
     ...(audit || comparison ? [{ id: 'export' as ViewId, label: 'Export', step: 12 }] : []),
   ]
 
+  // Visual grouping of the rail only; the order, numbering and routes of the
+  // steps above are unchanged.
+  const GROUP_OF: Partial<Record<ViewId, string>> = {
+    overview: 'Prepare',
+    audit: 'Examine',
+    causal: 'Causal',
+    comparison: 'Report',
+  }
+
   return (
     <>
       <div className="app-topbar">
@@ -290,16 +302,20 @@ function Shell() {
           <nav className="app-nav" aria-label="Primary">
             <div className="app-nav__inner" ref={navRef}>
               {steps.map(({ id, label, step }) => (
-                <button
-                  key={id}
-                  type="button"
-                  aria-current={view === id ? 'page' : undefined}
-                  disabled={busyLabel !== null}
-                  onClick={() => navigate(id)}
-                >
-                  <span className="app-nav__step" aria-hidden="true">{step}</span>
-                  {label}
-                </button>
+                <Fragment key={id}>
+                  {GROUP_OF[id] ? (
+                    <span className="app-nav__group" aria-hidden="true">{GROUP_OF[id]}</span>
+                  ) : null}
+                  <button
+                    type="button"
+                    aria-current={view === id ? 'page' : undefined}
+                    disabled={busyLabel !== null}
+                    onClick={() => navigate(id)}
+                  >
+                    <span className="app-nav__step" aria-hidden="true">{step}</span>
+                    {label}
+                  </button>
+                </Fragment>
               ))}
             </div>
           </nav>

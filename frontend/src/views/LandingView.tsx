@@ -169,7 +169,7 @@ export function LandingView({ onNavigate }: LandingProps) {
                   fill="currentColor"
                   opacity="0.22"
                 />
-                <path d="M10 1v18" stroke="#e07a3c" strokeWidth="1" />
+                <path d="M10 1v18" stroke="var(--signal)" strokeWidth="1.2" />
               </svg>
             </span>
             <span className="lp-brand__name">SplitScope</span>
@@ -197,12 +197,6 @@ export function LandingView({ onNavigate }: LandingProps) {
       <main id="main" tabIndex={-1} className="lp-main">
         {/* ------------------------------- 01 hero ----------------------------- */}
         <section className="lp-hero" aria-labelledby="lp-title">
-          <div className="lp-hero__field" aria-hidden="true">
-            <HeroField phase={phase} paused={!playing || reducedMotion} cycle={cycle} />
-          </div>
-          <div className="lp-hero__scrim" aria-hidden="true" />
-          <div className="lp-hero__grain" aria-hidden="true" />
-
           <div className="lp-hero__inner">
             <div className="lp-hero__copy">
               <p className="lp-kicker">
@@ -212,12 +206,18 @@ export function LandingView({ onNavigate }: LandingProps) {
 
               <h1 id="lp-title" className="lp-title">
                 <span className="lp-title__line">
-                  <span>From data leakage</span>
+                  <span>Audit the</span>
                 </span>
-                <span className="lp-title__line lp-title__line--indent">
+                <span className="lp-title__line">
+                  <span>train/test split</span>
+                </span>
+                <span className="lp-title__line">
                   <span>
-                    to <em>causal insight</em>.
+                    <em>before</em> a model
                   </span>
+                </span>
+                <span className="lp-title__line">
+                  <span>sees it.</span>
                 </span>
               </h1>
 
@@ -255,6 +255,24 @@ export function LandingView({ onNavigate }: LandingProps) {
                 ))}
               </ul>
 
+              {status.kind === 'error' ? (
+                <p className="lp-hero__warn" role="status">
+                  The catalogue has not loaded: {status.message} The workbench still opens —
+                  uploading and demo loading need the local API.
+                </p>
+              ) : null}
+            </div>
+
+            <figure className="lp-plate" aria-label="Boundary observatory, an illustrative plate">
+              <div className="lp-plate__head">
+                <p className="lp-readout__label">Plate 01 · boundary observatory</p>
+                <p className="lp-readout__step">{phaseNumber} / 04</p>
+              </div>
+
+              <div className="lp-hero__field" aria-hidden="true">
+                <HeroField phase={phase} paused={!playing || reducedMotion} cycle={cycle} />
+              </div>
+
               <div className="lp-console">
                 <div className="lp-console__controls" role="group" aria-label="Observatory controls">
                   <button
@@ -266,7 +284,9 @@ export function LandingView({ onNavigate }: LandingProps) {
                       playing ? 'Pause the observatory sequence' : 'Resume the observatory sequence'
                     }
                   >
-                    <span aria-hidden="true">{playing ? '❙❙' : '▶'}</span>
+                    <svg className="lp-icon" viewBox="0 0 16 16" aria-hidden="true">
+                      {playing ? <path d="M5 3v10M11 3v10" /> : <path d="M5 3l8 5-8 5z" />}
+                    </svg>
                     {playing ? 'Pause' : 'Play'}
                   </button>
                   <button
@@ -276,7 +296,9 @@ export function LandingView({ onNavigate }: LandingProps) {
                     disabled={reducedMotion}
                     aria-label="Replay the observatory sequence from the beginning"
                   >
-                    <span aria-hidden="true">↻</span>
+                    <svg className="lp-icon" viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v3h3" />
+                    </svg>
                     Replay
                   </button>
                   <button
@@ -286,7 +308,10 @@ export function LandingView({ onNavigate }: LandingProps) {
                     aria-pressed={phase === 'evidence'}
                     aria-label="Inspect the implicated pair of records"
                   >
-                    <span aria-hidden="true">⌕</span>
+                    <svg className="lp-icon" viewBox="0 0 16 16" aria-hidden="true">
+                      <circle cx="7" cy="7" r="4" />
+                      <path d="M10 10l3.5 3.5" />
+                    </svg>
                     Inspect pair
                   </button>
                 </div>
@@ -319,53 +344,44 @@ export function LandingView({ onNavigate }: LandingProps) {
                 ) : null}
               </div>
 
-              {status.kind === 'error' ? (
-                <p className="lp-hero__warn" role="status">
-                  The catalogue has not loaded: {status.message} The workbench still opens —
-                  uploading and demo loading need the local API.
-                </p>
-              ) : null}
-            </div>
+              <figcaption className="lp-readout" aria-label="Observatory readout">
+                <div className="lp-readout__main">
+                  <h2 className="lp-readout__title" aria-live="polite">
+                    {currentPhase.title}
+                  </h2>
+                  <p className="lp-readout__body">{currentPhase.body}</p>
+                  <p className="lp-readout__note">{currentPhase.hint}</p>
+                </div>
 
-            <aside className="lp-readout" aria-label="Observatory readout">
-              <div className="lp-readout__head">
-                <p className="lp-readout__label">Plate 01 · boundary observatory</p>
-                <p className="lp-readout__step">{phaseNumber} / 04</p>
-              </div>
+                <div className="lp-readout__side">
+                  <div
+                    className="lp-readout__evidence"
+                    data-show={showEvidence ? 'true' : 'false'}
+                    aria-hidden={showEvidence ? undefined : true}
+                  >
+                    <p className="lp-readout__evidence-label">Matched fields</p>
+                    <ul className="lp-readout__matches">
+                      <li>customer_id</li>
+                      <li>signup_ts</li>
+                      <li>plan_tier</li>
+                      <li>region</li>
+                    </ul>
+                    <p className="lp-readout__evidence-note">
+                      Illustrative pair · row-000412 / row-000887 · not a computed result
+                    </p>
+                  </div>
 
-              <h2 className="lp-readout__title" aria-live="polite">
-                {currentPhase.title}
-              </h2>
-              <p className="lp-readout__body">{currentPhase.body}</p>
-
-              <div
-                className="lp-readout__evidence"
-                data-show={showEvidence ? 'true' : 'false'}
-                aria-hidden={showEvidence ? undefined : true}
-              >
-                <p className="lp-readout__evidence-label">Matched fields</p>
-                <ul className="lp-readout__matches">
-                  <li>customer_id</li>
-                  <li>signup_ts</li>
-                  <li>plan_tier</li>
-                  <li>region</li>
-                </ul>
-                <p className="lp-readout__evidence-note">
-                  Illustrative pair · row-000412 / row-000887 · not a computed result
-                </p>
-              </div>
-
-              <p className="lp-readout__note">{currentPhase.hint}</p>
-
-              <button
-                type="button"
-                className="lp-link lp-readout__cta"
-                disabled={busy || !demoReady}
-                onClick={() => void openDemo()}
-              >
-                Run this audit on the synthetic demo <span aria-hidden="true">↗</span>
-              </button>
-            </aside>
+                  <button
+                    type="button"
+                    className="lp-link lp-readout__cta"
+                    disabled={busy || !demoReady}
+                    onClick={() => void openDemo()}
+                  >
+                    Run this audit on the synthetic demo <span aria-hidden="true">↗</span>
+                  </button>
+                </div>
+              </figcaption>
+            </figure>
           </div>
 
           <div className="lp-hero__index">
@@ -516,14 +532,13 @@ export function LandingView({ onNavigate }: LandingProps) {
 
         {/* ------------------------------ 05 begin ----------------------------- */}
         <section className="lp-final" aria-labelledby="lp-final-h">
-          <div className="lp-final__grain" aria-hidden="true" />
           <div className="lp-final__inner">
             <div className="lp-final__copy">
-              <p className="lp-index lp-index--ink">05 — Begin</p>
+              <p className="lp-index">05 — Begin</p>
               <h2 id="lp-final-h" className="lp-final__title" data-reveal="">
                 Audit the split <em>before</em> you trust the score.
               </h2>
-              <p className="lp-lede lp-lede--ink" data-reveal="" style={delay(80)}>
+              <p className="lp-lede" data-reveal="" style={delay(80)}>
                 Open a synthetic demo in one click, or load your own CSV — it stays in server memory
                 and expires with the session.
               </p>

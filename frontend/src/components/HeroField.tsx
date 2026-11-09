@@ -106,35 +106,13 @@ export function HeroField({ phase, paused, cycle }: HeroFieldProps) {
     <svg
       key={cycle}
       className="hs-scene obs-scene"
-      viewBox={narrow ? '500 150 820 420' : '0 0 1440 900'}
-      preserveAspectRatio={narrow ? 'xMidYMid slice' : 'xMidYMid slice'}
+      viewBox={narrow ? '490 140 880 540' : '490 140 860 560'}
+      preserveAspectRatio="xMidYMid meet"
       data-phase={phase}
       data-paused={paused ? 'true' : 'false'}
       aria-hidden="true"
       focusable="false"
     >
-      <defs>
-        <radialGradient id="obs-bloom" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#e8834a" stopOpacity="0.24" />
-          <stop offset="55%" stopColor="#c2592a" stopOpacity="0.09" />
-          <stop offset="100%" stopColor="#c2592a" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="obs-cool" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#b4d0bd" stopOpacity="0.13" />
-          <stop offset="100%" stopColor="#b4d0bd" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="obs-scan" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#b4d0bd" stopOpacity="0" />
-          <stop offset="62%" stopColor="#b4d0bd" stopOpacity="0.07" />
-          <stop offset="100%" stopColor="#d6ecdd" stopOpacity="0.34" />
-        </linearGradient>
-      </defs>
-
-      {/* ambient depth */}
-      <ellipse cx="430" cy="470" rx="520" ry="360" fill="url(#obs-cool)" />
-      <ellipse cx="1080" cy="330" rx="460" ry="300" fill="url(#obs-cool)" opacity="0.55" />
-      <ellipse className="obs-bloom" cx="930" cy="330" rx="330" ry="220" fill="url(#obs-bloom)" />
-
       {/* floor rules give the scene a horizon without a fake perspective grid */}
       <g className="obs-floor">
         {[120, 300, 480, 660, 840].map((y) => (
@@ -217,7 +195,7 @@ export function HeroField({ phase, paused, cycle }: HeroFieldProps) {
 
       {/* scanner: crosses the training register and stops at the rule */}
       <g className="hs-scan-band">
-        <rect x="470" y="140" width="120" height="560" fill="url(#obs-scan)" />
+        <rect className="obs-scan__fill" x="470" y="140" width="120" height="560" />
         <line className="obs-scan__edge" x1="590" y1="140" x2="590" y2="700" />
       </g>
 

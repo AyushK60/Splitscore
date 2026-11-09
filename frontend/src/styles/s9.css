@@ -16,12 +16,6 @@
    variables only on .eststudio made those rules compute `stroke: none` there —
    the forest plot's uncertainty whiskers silently vanished. They are defined
    on :root so every consumer of the shared rules sees the same palette. */
-:root {
-  --est-copper: #b4562a;
-  --est-copper-soft: #f6ece3;
-  --est-teal: #0a6d7d;
-  --est-teal-soft: #e7f3f5;
-}
 
 .eststudio {
   display: flex;
@@ -367,7 +361,7 @@
   font-size: 12.5px;
   border: 1px solid var(--line-strong);
   border-radius: 2px;
-  background: var(--bg);
+  background: var(--surface);
   color: var(--ink);
 }
 
@@ -1050,7 +1044,7 @@
   font-size: 11px;
   border: 1px solid var(--line-strong);
   border-radius: 2px;
-  background: var(--bg);
+  background: var(--surface);
 }
 
 .estfig__legend {

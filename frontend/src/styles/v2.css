@@ -1,129 +1,409 @@
-/* SplitScope V2 — interior calibration.
-   Loaded after app.css. Since S5 the shared identity lives in app.css's
-   :root (forensic-archive workspace palette); this layer no longer overrides
-   tokens or chrome — it only calibrates typography, surfaces and controls on
-   top of that single palette. Severity colours stay in app.css. */
+/* SplitScope — foundation layer.
+   Loaded after app.css. Palette, type, radius and motion come from tokens.css;
+   this file calibrates the shared primitives (type, buttons, inputs, surfaces,
+   tables, badges, callouts, empty states) so every stage inherits one voice:
+   hairlines over shadows, a grotesque display face over a quiet body, flat
+   colour, and one ultramarine accent for action, selection and focus. */
 
-/* ---------- product masthead ---------- */
+/* ---------- base ---------- */
 
-.app-header {
-  padding-top: var(--space-3);
+body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: var(--lh-body);
+  background: var(--bg);
+  color: var(--ink);
+  font-optical-sizing: auto;
 }
 
-/* The brand returns to the landing page; it must not inherit button chrome. */
-.app-header__brand--home {
-  appearance: none;
-  border: 0;
-  background: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  border-radius: 3px;
-  transition: opacity 120ms ease;
-}
-.app-header__brand--home:hover {
-  opacity: 0.82;
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
 }
 
-.app-nav {
-  padding-top: 2px;
-}
-.app-nav button {
-  font-weight: 560;
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--r-md);
 }
 
-/* ---------- page headers and typography ---------- */
-
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  line-height: var(--lh-snug);
+  letter-spacing: -0.022em;
+  font-weight: 620;
+}
 h1 {
-  font-size: 30px;
-  letter-spacing: -0.028em;
-  font-weight: 700;
+  font-size: clamp(1.9rem, 1.4rem + 1.6vw, 2.75rem);
+  line-height: 1.04;
+  letter-spacing: var(--tracking-display);
+  font-weight: 680;
 }
 h2 {
-  font-size: 20px;
-  letter-spacing: -0.02em;
+  font-size: 1.375rem;
+  margin-top: var(--space-6);
+}
+h3 {
+  font-size: 1.0625rem;
+  letter-spacing: -0.015em;
+}
+h4 {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+  font-weight: 650;
+}
+code,
+.mono,
+kbd,
+samp {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  font-feature-settings: 'zero' 1;
+}
+a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+a:hover {
+  color: var(--accent-deep);
 }
 
 .app-main {
   padding-top: var(--space-6);
 }
 
-/* ---------- surfaces ---------- */
+/* The brand returns to the landing page; it must not inherit button chrome. */
+button.app-header__brand--home {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--r-md);
+  transition: opacity var(--d-fast) var(--ease-out);
+}
+button.app-header__brand--home:hover:not(:disabled) {
+  opacity: 0.82;
+  background: none;
+  border: 0;
+  color: inherit;
+}
+
+/* ---------- surfaces: hairlines, not shadows ---------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: none;
+  transition: border-color var(--d-base) var(--ease-out);
+}
+.card__title {
+  font-family: var(--font-display);
+  font-size: 1.1875rem;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+}
+.card__head {
+  border-bottom: 1px solid var(--line);
+}
 
 .panel {
-  border-radius: 3px;
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
 }
 
+.banner,
+.callout,
+.notice {
+  border-radius: var(--r-md);
+}
 .banner--info {
   border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+.banner--synthetic,
+.callout--synthetic {
+  background: var(--medium-soft);
+  border-color: #e4d2a4;
+}
+.callout--info {
+  border-color: var(--accent-line);
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+}
+.callout--info .callout__title {
+  color: var(--accent-deep);
+}
+.callout--warn {
+  border-color: #e6d3a6;
+}
+.callout--danger {
+  border-color: #eac6c1;
+}
+.callout--ok {
+  border-color: #bfdccb;
+}
+.callout__title {
+  font-family: var(--font-body);
+  font-weight: 650;
 }
 
-/* ---------- buttons and forms ---------- */
+/* ---------- stats: large display numerals, small mono labels ---------- */
+
+.stat {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--ink);
+  border-radius: 0;
+  padding: var(--space-3) 0 var(--space-2);
+}
+.stat__label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--tracking-caps);
+  color: var(--ink-3);
+}
+.stat__value {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 1.5rem + 1.2vw, 2.6rem);
+  font-weight: 640;
+  line-height: 1.02;
+  letter-spacing: var(--tracking-display);
+  margin-top: var(--space-2);
+}
+.stat__hint {
+  color: var(--ink-3);
+}
+
+/* ---------- buttons ---------- */
 
 button,
 .btn {
-  font-weight: 560;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 550;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 8px 15px;
+  min-height: 36px;
+  transition: background-color var(--d-fast) var(--ease-out), border-color var(--d-fast) var(--ease-out),
+    color var(--d-fast) var(--ease-out), transform var(--d-fast) var(--ease-out);
 }
-
+button:hover:not(:disabled),
+.btn:hover {
+  border-color: var(--ink);
+  background: var(--surface);
+  color: var(--ink);
+}
+button:active:not(:disabled),
+.btn:active {
+  transform: translateY(1px);
+}
 button.btn--primary,
 .btn--primary {
-  background: linear-gradient(180deg, #0b7787 0%, var(--accent) 100%);
+  background: var(--accent);
   border-color: var(--accent);
-  box-shadow:
-    0 1px 2px rgb(24 35 29 / 16%),
-    inset 0 1px 0 rgb(255 255 255 / 14%);
+  color: var(--accent-ink);
+  font-weight: 600;
+  box-shadow: none;
 }
 button.btn--primary:hover:not(:disabled) {
   background: var(--accent-deep);
   border-color: var(--accent-deep);
+  color: var(--accent-ink);
+  transform: translateY(-1px);
+}
+button.btn--primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+button.btn--ghost {
+  color: var(--accent);
+}
+button.btn--ghost:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent-deep);
+}
+button.btn--small {
+  min-height: 30px;
+  padding: 4px 11px;
+  font-size: 0.8125rem;
+  border-radius: var(--r-md);
+}
+button:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.5;
 }
 
+/* ---------- form controls ---------- */
+
+label {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--ink);
+}
+.hint {
+  color: var(--ink-3);
+}
+
+input[type='text'],
+input[type='number'],
+input[type='search'],
+select,
+textarea {
+  font-family: var(--font-body);
+  background: var(--surface);
+  border-color: var(--line-strong);
+  border-radius: var(--r-md);
+  min-height: 38px;
+  padding: 7px 10px;
+}
+textarea {
+  min-height: 0;
+}
 input[type='text']:hover,
 input[type='number']:hover,
 input[type='search']:hover,
 select:hover,
 textarea:hover {
-  border-color: var(--line-strong);
+  border-color: var(--ink-3);
+}
+input[type='text']:focus,
+input[type='number']:focus,
+input[type='search']:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--ink-3);
+  opacity: 1;
+}
+fieldset {
+  border-radius: var(--r-md);
+}
+legend {
+  font-family: var(--font-display);
+  font-weight: 620;
 }
 
-/* ---------- tables ---------- */
+.segmented {
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+.segmented__option {
+  border-radius: var(--r-sm);
+}
+.segmented__option[aria-pressed='true'],
+.segmented__option[aria-checked='true'] {
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+.filter-chip {
+  border-radius: var(--r-pill);
+}
 
+/* ---------- tables: hairline rows, mono small-caps headers ---------- */
+
+.table-wrap {
+  background: var(--surface);
+  border-radius: var(--r-md);
+}
 thead th {
-  background: var(--bg-quiet);
-  color: var(--muted);
-  border-bottom: 1px solid var(--line-strong);
+  background: var(--surface-3);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--tracking-caps);
+  border-bottom: 1px solid var(--ink);
 }
 tbody tr:last-child td {
   border-bottom: 0;
+}
+tbody tr:hover td {
+  background: var(--surface-3);
 }
 td,
 th {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- badges ---------- */
+
+.badge {
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
 /* ---------- findings ---------- */
 
+.finding {
+  box-shadow: none;
+  border-radius: var(--r-md);
+  transition: border-color var(--d-base) var(--ease-out);
+}
+.finding:hover {
+  border-top-color: var(--line-strong);
+  border-right-color: var(--line-strong);
+  border-bottom-color: var(--line-strong);
+}
 .finding__headline {
-  font-weight: 660;
+  font-family: var(--font-display);
+  font-weight: 620;
+  font-size: 1rem;
+  letter-spacing: -0.015em;
 }
 
 /* ---------- loading, empty and error states ---------- */
 
+.loading {
+  font-weight: 500;
+}
 .empty {
-  border-color: var(--line-strong);
-  background:
-    linear-gradient(180deg, rgb(231 243 245 / 45%) 0%, rgb(255 255 255 / 0%) 55%),
-    var(--bg-raised);
-  padding: var(--space-6) var(--space-5);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface-3);
+  padding: var(--space-7) var(--space-5);
+  text-align: left;
 }
 .empty__title {
-  font-size: 16px;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 640;
+  letter-spacing: -0.022em;
+  line-height: 1.15;
+}
+.empty .muted {
+  max-width: 54ch;
+}
+.empty__action {
+  justify-content: flex-start;
 }
 
-.loading {
-  font-weight: 560;
+details.disclosure {
+  border-radius: var(--r-md);
 }
 
 /* ---------- footer ---------- */
@@ -136,16 +416,35 @@ th {
 }
 .app-footer p {
   max-width: 76ch;
-  color: var(--muted);
+  color: var(--ink-3);
 }
 
 /* ---------- responsive ---------- */
 
 @media (max-width: 720px) {
-  h1 {
-    font-size: 24px;
-  }
   .app-main {
     padding-top: var(--space-5);
+  }
+  button,
+  .btn {
+    min-height: 44px;
+  }
+  button.btn--small {
+    min-height: 40px;
+  }
+  input[type='text'],
+  input[type='number'],
+  input[type='search'],
+  select {
+    min-height: 44px;
+    max-width: 100%;
+  }
+}
+
+/* ---------- print: the rail grid is a screen-only layout ---------- */
+
+@media print {
+  #root:has(> .app-topbar) {
+    display: block !important;
   }
 }
