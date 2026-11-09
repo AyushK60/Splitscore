@@ -1,7 +1,7 @@
-"""Independent numerical tests for the S9B overlap-histogram extension.
+"""Independent numerical tests for the estimation UI overlap-histogram extension.
 
-The S9B overlap figure needs an aggregated per-arm propensity distribution. The
-only backend change S9B makes is this bounded addition to the S9A overlap
+The estimation UI overlap figure needs an aggregated per-arm propensity distribution. The
+only backend change estimation UI makes is this bounded addition to the estimation overlap
 payload; it is verified here against hand-computed bin assignments, not against
 the implementation's own output.
 """
@@ -93,6 +93,6 @@ def test_overlap_payload_carries_the_histogram_next_to_the_quantiles():
     payload = overlap_payload(propensity, treatment, outcome)
     histogram = payload["propensity_histogram"]
     assert sum(histogram["treated_counts"]) + sum(histogram["control_counts"]) == 200
-    # The existing S9A summary is unchanged and still present.
+    # The existing estimation summary is unchanged and still present.
     assert payload["propensity_summary"]["min"] == pytest.approx(propensity.min())
     assert "effective_sample_sizes" in payload

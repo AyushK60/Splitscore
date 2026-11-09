@@ -1,13 +1,13 @@
 /**
- * Stage 4a happy-path E2E: the real user journey against the real backend.
+ * Happy-path E2E: the real user journey against the real backend.
  *
  * Target: the production build served by `python -m app.main` (see
- * playwright.config.ts). Nothing is mocked — audit, comparison and export all run
+ * playwright.config.ts). Nothing is mocked - audit, comparison and export all run
  * on the server, and every assertion is made on what the UI renders or on files
  * the browser actually downloaded.
  *
  * Fixture: `datasets/repeated_entity.csv` (committed, synthetic). Row ids are the
- * documented ones — `row-000001` upward in file order — so downloaded assignments
+ * documented ones - `row-000001` upward in file order - so downloaded assignments
  * can be joined back to the fixture *independently* of anything the server reports.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -22,7 +22,7 @@ const DEMO_PANEL = 'Repeated-entity subscription panel'
 const DEMO_NAME = 'repeated_entity.csv'
 
 // --------------------------------------------------------------------------- //
-// Small helpers (CSV parsing and download capture only — no audit logic)
+// Small helpers (CSV parsing and download capture only - no audit logic)
 // --------------------------------------------------------------------------- //
 
 function parseCsv(text: string): string[][] {
@@ -120,13 +120,13 @@ test('happy path: load demo, audit, evidence, group comparison, report downloads
   const builtIndex = fileURLToPath(new URL('../dist/index.html', import.meta.url))
   expect(
     existsSync(builtIndex),
-    'frontend/dist/index.html is missing — npm run test:e2e builds it before starting the backend',
+    'frontend/dist/index.html is missing - npm run test:e2e builds it before starting the backend',
   ).toBe(true)
 
   // -- 1. Open the app ----------------------------------------------------- //
   await page.goto('/#/overview')
   await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible()
-  // The S5 workspace entry: a functional panel, not a second landing page.
+  // The integrity workspace entry: a functional panel, not a second landing page.
   await expect(page.getByRole('heading', { name: /Load a dataset to begin/, level: 1 })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Choose a CSV file' })).toBeVisible()
 

@@ -2,8 +2,8 @@
 
 A causal graph belongs to the dataset it was drawn for, in the same way a Study
 Card does. The registry enforces that ownership on every read and write, keeps
-a bounded number of graphs, and — because the underlying store expires datasets
-— makes graph lifetime follow dataset lifetime: a graph whose dataset is no
+a bounded number of graphs, and - because the underlying store expires datasets
+- makes graph lifetime follow dataset lifetime: a graph whose dataset is no
 longer in memory is unreachable, and dataset eviction prunes its graphs.
 
 Nothing is persisted. That is stated in every payload rather than discovered
@@ -37,7 +37,7 @@ from app.causal.validation import validate_spec
 STORAGE_NOTE = (
     "Causal graphs live in this server's memory alongside the dataset. They expire with it and "
     "are lost when the process restarts, so export a graph you need to keep. The export contains "
-    "graph metadata and assumptions only — never dataset rows."
+    "graph metadata and assumptions only - never dataset rows."
 )
 
 

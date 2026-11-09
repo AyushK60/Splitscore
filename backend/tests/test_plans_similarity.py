@@ -1,9 +1,9 @@
-"""S5-C: evaluation plans (F05) and the train/test similarity explorer (F07).
+"""Evaluation plans (F05) and the train/test similarity explorer (F07).
 
 Every expected number here is hand-written from the fixture, not derived by
 calling the implementation. Plan folds must reproduce exact row counts, and
 the similarity explorer must return the geometrically nearest pairs under the
-documented method — checked against an independent hand computation.
+documented method - checked against an independent hand computation.
 """
 
 from __future__ import annotations

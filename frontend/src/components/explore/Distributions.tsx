@@ -86,7 +86,7 @@ export function Distributions({ schema, predicates, selectionActive }: Props) {
     <figure className="xfig" data-figure="distribution">
       <figcaption className="xfig__caption">
         <span className="xfig__title">
-          Distribution — {column}
+          Distribution - {column}
           {isNumeric ? ' (numeric)' : ' (categorical)'}
         </span>
         <span className="xfig__sub">
@@ -99,7 +99,7 @@ export function Distributions({ schema, predicates, selectionActive }: Props) {
         </span>
         <FigureExport
           figureId={`distribution-${column}`}
-          title={`Distribution — ${column} (${isNumeric ? 'numeric' : 'categorical'})`}
+          title={`Distribution - ${column} (${isNumeric ? 'numeric' : 'categorical'})`}
           settings={`${isNumeric ? `${bins} equal-width bins` : 'per-level counts'}${
             data?.group_by ? ` · grouped by ${data.group_by}` : ''
           }`}
@@ -128,7 +128,7 @@ export function Distributions({ schema, predicates, selectionActive }: Props) {
               <option key={name} value={name}>
                 {name}
                 {schema.columns.find((c) => c.name === name)?.detected_type
-                  ? ` — ${schema.columns.find((c) => c.name === name)?.detected_type}`
+                  ? ` - ${schema.columns.find((c) => c.name === name)?.detected_type}`
                   : ''}
               </option>
             ))}
@@ -178,7 +178,7 @@ export function Distributions({ schema, predicates, selectionActive }: Props) {
           {data.groups.map((group) => (
             <div key={group.group} className="xdist__group">
               <span className="xdist__groupname">
-                {group.group} — {group.rows.toLocaleString('en-US')} rows
+                {group.group} - {group.rows.toLocaleString('en-US')} rows
               </span>
               {group.box && (
                 <span className="xdist__groupstats">

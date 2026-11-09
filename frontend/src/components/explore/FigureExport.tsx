@@ -15,7 +15,7 @@ import { useApp } from '../../state/AppState'
 /**
  * Export menu for one figure: SVG, PNG and a JSON provenance manifest.
  *
- * `getSvg` must return the LIVE chart element — exports always reflect the
+ * `getSvg` must return the LIVE chart element - exports always reflect the
  * currently rendered state (visible axes, active brushes, current selection),
  * never a cached snapshot.
  */
@@ -80,7 +80,7 @@ export function FigureExport({
         }
         const source = getSvg()
         if (!source) {
-          setError('Nothing is drawn yet — wait for the chart to render, then export.')
+          setError('Nothing is drawn yet - wait for the chart to render, then export.')
           return
         }
         const standalone = buildStandaloneSvg(source, meta(), context())

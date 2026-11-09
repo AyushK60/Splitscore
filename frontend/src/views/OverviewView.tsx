@@ -1,5 +1,5 @@
 /**
- * Workspace entry (S5).
+ * Workspace entry.
  *
  * The workbench has ONE public landing page; this is not a second one. It is
  * the instrument's entry panel: when no dataset is active it offers the three
@@ -36,7 +36,7 @@ function SessionOverview({ onNavigate }: { onNavigate: (view: ViewId) => void })
   const splitLabel =
     roles.split && roles.split_train_value && roles.split_test_value
       ? `${roles.split}: ${roles.split_train_value} / ${roles.split_test_value}`
-      : 'not chosen yet — set it in Data'
+      : 'not chosen yet - set it in Data'
   const stages: Array<{
     id: ViewId
     title: string
@@ -53,7 +53,7 @@ function SessionOverview({ onNavigate }: { onNavigate: (view: ViewId) => void })
       id: 'audit',
       title: 'Audit results',
       state: audit
-        ? `Audit run — ${audit.result.findings.length} finding${audit.result.findings.length === 1 ? '' : 's'}`
+        ? `Audit run - ${audit.result.findings.length} finding${audit.result.findings.length === 1 ? '' : 's'}`
         : 'Not audited yet in this session',
       action: audit ? 'Review findings and the risk scorecard' : 'Run the audit from Data',
     },
@@ -79,7 +79,7 @@ function SessionOverview({ onNavigate }: { onNavigate: (view: ViewId) => void })
 
   return (
     <div className="rs we">
-      <p className="rs-eyebrow">Workspace — session active</p>
+      <p className="rs-eyebrow">Workspace - session active</p>
       <h1 className="rs-h1">Where this session stands</h1>
       <p className="rs-lede">
         A dataset is loaded in memory. Everything below reads the same session context; nothing
@@ -163,14 +163,14 @@ export function OverviewView({ onNavigate }: { onNavigate: (view: ViewId) => voi
       <p className="rs-eyebrow">Workspace entry</p>
       <h1 className="rs-h1">Load a dataset to begin</h1>
       <p className="rs-lede">
-        The workbench audits a train/test split for leakage. Everything starts from one dataset —
+        The workbench audits a train/test split for leakage. Everything starts from one dataset -
         bring your own file, or open a bundled synthetic demonstration with its leak built in.
       </p>
 
       <div className="we__entry">
         <section className="we__panel we__panel--upload" aria-labelledby="we-upload">
           <h2 id="we-upload" className="we__paneltitle">
-            1 — Upload a dataset
+            1 - Upload a dataset
           </h2>
           <p className="we__paneltext">
             Your own CSV with the rows you want to audit. The file is read into server memory for
@@ -213,11 +213,11 @@ export function OverviewView({ onNavigate }: { onNavigate: (view: ViewId) => voi
 
         <section className="we__panel" aria-labelledby="we-demos">
           <h2 id="we-demos" className="we__paneltitle">
-            2 — Open a synthetic demonstration
+            2 - Open a synthetic demonstration
           </h2>
           <p className="we__paneltext">
             Seven bundled datasets, each generated with a specific problem built in. They are
-            teaching data — not real people or events — and each states what it demonstrates. The
+            teaching data - not real people or events - and each states what it demonstrates. The
             causal demonstration is the one to open for effect estimation.
           </p>
           {!demos ? (

@@ -1,7 +1,7 @@
 /**
- * Shared API error presentation for the estimation studio (S9B) and the
- * causal research stage (S9C). Both surfaces show the backend's own message,
- * its structured fix/violation details, and the typed 410/409 explanations —
+ * Shared API error presentation for the estimation studio and the
+ * causal research stage. Both surfaces show the backend's own message,
+ * its structured fix/violation details, and the typed 410/409 explanations -
  * never a generic "something went wrong" for a refusal the backend named.
  */
 

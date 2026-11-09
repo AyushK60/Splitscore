@@ -5,7 +5,7 @@ import { useEffect, type RefObject } from 'react'
  * the viewport. Elements start at `data-reveal=""` (hidden by CSS) and are
  * switched to `data-reveal="in"` once, then unobserved.
  *
- * Under `prefers-reduced-motion` — or without IntersectionObserver — every
+ * Under `prefers-reduced-motion` - or without IntersectionObserver - every
  * element is revealed immediately, so content is never hidden from a user who
  * opted out of motion or from a browser that cannot observe scroll.
  */

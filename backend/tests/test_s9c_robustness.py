@@ -1,9 +1,9 @@
-"""S9C-B robustness experiments: reproducibility, failure honesty, boundaries.
+"""robustness robustness experiments: reproducibility, failure honesty, boundaries.
 
 Every experiment must be reproducible from its recorded seed, must report
 failures per repetition instead of averaging them away, and must refuse
 out-of-bounds parameters up front. The original estimate is cross-checked
-against the verified S9A engine (run_estimation), so the robustness layer is
+against the verified estimation engine (run_estimation), so the robustness layer is
 never its own oracle.
 """
 

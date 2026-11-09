@@ -1,4 +1,4 @@
-"""Self-contained printable HTML for the S7 evidence dossier.
+"""Self-contained printable HTML for the evidence dossier.
 
 No external CSS, fonts, scripts or images. Every user-supplied value is escaped.
 The print stylesheet is the PDF path: the browser's Print / Save as PDF action
@@ -209,7 +209,7 @@ def _summary(section: dict[str, Any]) -> str:
     return (
         _section_heading(section)
         + f"<p><strong>Study:</strong> {_esc(data.get('study_title'))}"
-        + (f" — {_esc(data.get('objective'))}" if data.get("objective") else "")
+        + (f" - {_esc(data.get('objective'))}" if data.get("objective") else "")
         + "</p>"
         + f"<p><strong>Audited split:</strong> {_esc(split.get('label'))} · "
         + f"{_esc(split.get('train_rows'))} train / {_esc(split.get('test_rows'))} test rows.</p>"
@@ -719,7 +719,7 @@ def _reproducibility(section: dict[str, Any]) -> str:
 
 
 # --------------------------------------------------------------------------- #
-# S10-B — causal sections
+# dossier - causal sections
 # --------------------------------------------------------------------------- #
 
 

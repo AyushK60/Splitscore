@@ -1,10 +1,10 @@
 /**
- * Landing — the SplitScope product front door.
+ * Landing - the SplitScope product front door.
  *
  * Art direction: "forensic archive". The page reads like a research plate at
  * night and a printed specification by day: bottle-ink and bone ivory, a copper
- * ember for anything the audit *finds*, celadon for structure. One motif — the
- * vertical split boundary — runs from the hero through every band, and the
+ * ember for anything the audit *finds*, celadon for structure. One motif - the
+ * vertical split boundary - runs from the hero through every band, and the
  * display serif is the voice of the page while monospace handles instrument
  * labels.
  *
@@ -50,7 +50,7 @@ const CAPABILITIES: Capability[] = [
   {
     num: '01',
     title: 'Detect contamination',
-    body: 'An evidence suite reads the split from both sides. Each finding carries a severity, its denominators, the assumptions it depends on, and the exact rows behind it — a check that cannot run is listed as not run, never as a pass.',
+    body: 'An evidence suite reads the split from both sides. Each finding carries a severity, its denominators, the assumptions it depends on, and the exact rows behind it - a check that cannot run is listed as not run, never as a pass.',
     checks: [
       'exact duplicates',
       'near-duplicates',
@@ -81,7 +81,7 @@ const CAPABILITIES: Capability[] = [
   {
     num: '04',
     title: 'Export and retrace',
-    body: 'Compose one evidence dossier from the runs in this session, then download structured JSON, a self-contained printable HTML file or per-strategy assignment CSVs — with role settings, check coverage and row identifiers intact.',
+    body: 'Compose one evidence dossier from the runs in this session, then download structured JSON, a self-contained printable HTML file or per-strategy assignment CSVs - with role settings, check coverage and row identifiers intact.',
     action: 'Go to reports',
     view: 'export',
   },
@@ -90,7 +90,7 @@ const CAPABILITIES: Capability[] = [
 const STEPS = [
   {
     title: 'Load a dataset',
-    body: 'A CSV or a bundled synthetic demo is parsed into a bounded in-memory store with a SHA-256 fingerprint — never written to disk.',
+    body: 'A CSV or a bundled synthetic demo is parsed into a bounded in-memory store with a SHA-256 fingerprint - never written to disk.',
   },
   {
     title: 'Map column roles',
@@ -223,7 +223,7 @@ export function LandingView({ onNavigate }: LandingProps) {
 
               <p className="lp-hero__lead">
                 SplitScope audits the boundary between training and test data before a model ever
-                sees it — five evidence-based checks, the exact rows behind every finding, and
+                sees it - five evidence-based checks, the exact rows behind every finding, and
                 split alternatives you can compare. Evaluation you can defend starts with knowing
                 what your split actually shares.
               </p>
@@ -257,7 +257,7 @@ export function LandingView({ onNavigate }: LandingProps) {
 
               {status.kind === 'error' ? (
                 <p className="lp-hero__warn" role="status">
-                  The catalogue has not loaded: {status.message} The workbench still opens —
+                  The catalogue has not loaded: {status.message} The workbench still opens -
                   uploading and demo loading need the local API.
                 </p>
               ) : null}
@@ -385,7 +385,7 @@ export function LandingView({ onNavigate }: LandingProps) {
           </div>
 
           <div className="lp-hero__index">
-            <span>01 — Boundary observatory</span>
+            <span>01 - Boundary observatory</span>
             <span className="lp-hero__index-mid">Illustrative fixture · not a computed result</span>
             <span>Scroll ↓</span>
           </div>
@@ -395,7 +395,7 @@ export function LandingView({ onNavigate }: LandingProps) {
         <section className="lp-band lp-band--paper" id="lp-capabilities" aria-labelledby="lp-cap-h">
           <div className="lp-band__grid">
             <div className="lp-band__rail">
-              <p className="lp-index">02 — Capabilities</p>
+              <p className="lp-index">02 - Capabilities</p>
               <h2 id="lp-cap-h" className="lp-h2" data-reveal="">
                 Four things it can prove, <em>row by row</em>.
               </h2>
@@ -447,7 +447,7 @@ export function LandingView({ onNavigate }: LandingProps) {
           <div className="lp-band__wide">
             <div className="lp-method__head">
               <div>
-                <p className="lp-index lp-index--ink">03 — Method</p>
+                <p className="lp-index lp-index--ink">03 - Method</p>
                 <h2 id="lp-method-h" className="lp-h2 lp-h2--ink" data-reveal="">
                   Five steps, <em>one confirmation gate</em>.
                 </h2>
@@ -473,7 +473,7 @@ export function LandingView({ onNavigate }: LandingProps) {
 
             <div className="lp-method__foot" data-reveal="" style={delay(180)}>
               <p>
-                Start with the guided demo — no file, no setup: roles, target and entity are
+                Start with the guided demo - no file, no setup: roles, target and entity are
                 pre-filled, and you can change every one of them.
               </p>
               <button
@@ -496,7 +496,7 @@ export function LandingView({ onNavigate }: LandingProps) {
         >
           <div className="lp-band__grid">
             <div className="lp-band__rail">
-              <p className="lp-index">04 — Evidence</p>
+              <p className="lp-index">04 - Evidence</p>
               <h2 id="lp-evidence-h" className="lp-h2" data-reveal="">
                 Verified <em>on this build</em>.
               </h2>
@@ -534,12 +534,12 @@ export function LandingView({ onNavigate }: LandingProps) {
         <section className="lp-final" aria-labelledby="lp-final-h">
           <div className="lp-final__inner">
             <div className="lp-final__copy">
-              <p className="lp-index">05 — Begin</p>
+              <p className="lp-index">05 - Begin</p>
               <h2 id="lp-final-h" className="lp-final__title" data-reveal="">
                 Audit the split <em>before</em> you trust the score.
               </h2>
               <p className="lp-lede" data-reveal="" style={delay(80)}>
-                Open a synthetic demo in one click, or load your own CSV — it stays in server memory
+                Open a synthetic demo in one click, or load your own CSV - it stays in server memory
                 and expires with the session.
               </p>
               <div className="lp-hero__actions" data-reveal="" style={delay(140)}>
@@ -579,7 +579,7 @@ export function LandingView({ onNavigate }: LandingProps) {
           <p className="lp-footer__tag">Research Integrity &amp; Causal Intelligence Studio</p>
         </div>
         <p className="lp-footer__statement">
-          SplitScope audits splits, not models. Findings are evidence about the split you selected —
+          SplitScope audits splits, not models. Findings are evidence about the split you selected -
           never a guarantee that data is safe or that a model will perform well.
         </p>
         <p className="lp-footer__meta">

@@ -47,7 +47,7 @@ describe('collapsed and expanded evidence', () => {
     expect(toggle).toHaveAttribute('aria-expanded', 'true')
 
     // Default level is "Quick explanation": the count sentence, why it matters
-    // and the counts with their explicit units — nothing else.
+    // and the counts with their explicit units - nothing else.
     expect(screen.getByText('Why this matters')).toBeInTheDocument()
     expect(screen.getByText('Fixture rationale: many test rows belong to a training entity.')).toBeInTheDocument()
     expect(
@@ -141,7 +141,7 @@ describe('explanation levels', () => {
       'true',
     )
 
-    // More context replaces quick — it never stacks.
+    // More context replaces quick - it never stacks.
     setLevel('More context')
     expect(screen.getByText('How this happens')).toBeInTheDocument()
     expect(screen.queryByText('Why this matters')).toBeNull()

@@ -1,4 +1,4 @@
-"""Typed contracts and bounds for the S6 Model Lab.
+"""Typed contracts and bounds for the Model Lab.
 
 The contracts are deliberately small and explicit. A statistical fit is defined
 by: the task, the outcome, the predictors, the missing-data policy, whether an

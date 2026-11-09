@@ -3,7 +3,7 @@
 Label: this is a *candidate screen*, not a leakage verdict. It flags feature
 columns that are almost perfectly predictive of the target on their own and
 reports why, which columns were involved, what the evidence is, and what the
-method cannot say. Candidate association is not proof of leakage — a feature
+method cannot say. Candidate association is not proof of leakage - a feature
 can be legitimately that good.
 
 Method (both bounded to the configured example/feature limits):
@@ -46,8 +46,8 @@ LIMITATIONS = [
     "The screen only sees single columns. Interaction proxies (two columns that "
     "are innocuous alone) are out of scope for this version.",
     "Purity and stump separation are computed on the pooled split (train and "
-    "test together) because the question — 'does this column carry the target?' "
-    "— does not depend on the split.",
+    "test together) because the question - 'does this column carry the target?' "
+    "- does not depend on the split.",
     "Categorical purity is only computed when the target behaves like a class "
     "variable (at most "
     f"{TARGET_MAX_CLASSES} distinct values). Continuous targets are screened "
@@ -121,7 +121,7 @@ def run(ctx: RuleContext) -> RuleOutput:
     examples = [
         EvidenceExample(
             label=(
-                f"Candidate '{item['column']}' — purity {float(item['purity']):.3f}, "
+                f"Candidate '{item['column']}' - purity {float(item['purity']):.3f}, "
                 f"coverage {float(item['coverage']):.1%}"
             ),
             details={
@@ -230,7 +230,7 @@ def _screen_categorical(
         "coverage": coverage,
         "evidence": (
             f"{rows} of {total} non-missing rows carry value '{format_value(value)}', and "
-            f"{purity:.1%} of them have target class '{dominant_class}' — measured over the "
+            f"{purity:.1%} of them have target class '{dominant_class}' - measured over the "
             "pooled split."
         ),
     }

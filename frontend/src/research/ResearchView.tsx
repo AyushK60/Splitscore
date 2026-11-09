@@ -1,13 +1,13 @@
 /**
- * S9C — Causal Research stage.
+ * estimation - Causal Research stage.
  *
- * One stage with three focused views: Subgroup effects (S9C-A), Robustness
- * (S9C-B) and What-If (S9C-C). The stage never re-collects the study by hand:
+ * One stage with three focused views: Subgroup effects, Robustness
+ * and What-If. The stage never re-collects the study by hand:
  * it builds on a stored estimation run, rebuilding that run's exact request
  * from its recorded reproducibility block, so every advanced analysis is
  * computed on the same cohort, adjustment set and graph fingerprint as the
  * estimate it refines. A stale or missing estimation run is an explicit
- * dead-end that points back to the estimation studio — never a silent
+ * dead-end that points back to the estimation studio - never a silent
  * re-specification.
  */
 
@@ -72,7 +72,7 @@ export function ResearchView({ onNavigate }: { onNavigate: (view: 'estimation' |
   }, [refreshRuns])
 
   // Load the selected stored run and its graph; refuse a stale run as the
-  // study context — the numbers it would propagate are labelled not current.
+  // study context - the numbers it would propagate are labelled not current.
   useEffect(() => {
     if (!datasetId || !selectedRunId) {
       setStudy(null)
@@ -149,7 +149,7 @@ export function ResearchView({ onNavigate }: { onNavigate: (view: 'estimation' |
         <p className="rsheader__lede">
           Advanced analyses build on a completed estimation run: they reuse its verified
           adjustment set, cohort and graph fingerprint, so every number here is computed on the
-          same study — never re-specified silently.
+          same study - never re-specified silently.
         </p>
       </header>
 

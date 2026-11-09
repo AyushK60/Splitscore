@@ -1,35 +1,35 @@
-"""Graphical identification status for one treatment/outcome pair (S8C).
+"""Graphical identification status for one treatment/outcome pair.
 
 This module answers exactly one question, from the *assumed graph alone*:
 
-    "Under the classical backdoor criterion, which observed adjustment sets —
-    if any — are admissible for the total effect of X on Y, and what does the
+    "Under the classical backdoor criterion, which observed adjustment sets -
+    if any - are admissible for the total effect of X on Y, and what does the
     drawn structure say about why?"
 
 What it deliberately does **not** answer:
 
 * whether the effect is identifiable by *some other* method (front-door,
-  instrumental variables, generalised adjustment, do-calculus) — a backdoor
+  instrumental variables, generalised adjustment, do-calculus) - a backdoor
   failure is reported as a backdoor failure, never as proof of general
   non-identifiability;
-* the size or sign of any effect — S8C produces no causal numbers.
+* the size or sign of any effect - identification produces no causal numbers.
 
 Every explanation is rule-based on graph structure (roles, colliders,
 descendants, observedness). No LLM, no correlation, no dataset statistics.
 
 Possible identification outcomes (``status``):
 
-* ``backdoor_adjustment_available`` — a complete search found ≥1 admissible
+* ``backdoor_adjustment_available`` - a complete search found ≥1 admissible
   observed set (possibly the empty set).
-* ``no_eligible_backdoor_set`` — the search ran to completion within all
+* ``no_eligible_backdoor_set`` - the search ran to completion within all
   bounds and found none. Qualified explicitly as backdoor-only.
-* ``search_incomplete`` — a documented bound truncated the search.
-* ``invalid_graph`` — the graph failed structural validation.
-* ``invalid_scope`` — treatment/outcome missing, unknown, or identical.
-* ``missing_dataset_variables`` — treatment or outcome is declared unobserved,
+* ``search_incomplete`` - a documented bound truncated the search.
+* ``invalid_graph`` - the graph failed structural validation.
+* ``invalid_scope`` - treatment/outcome missing, unknown, or identical.
+* ``missing_dataset_variables`` - treatment or outcome is declared unobserved,
   so no adjustment could ever support estimation on the dataset.
-* ``unsupported_identification_method`` — a method other than ``backdoor``
-  was requested (S8C implements only the classical backdoor criterion).
+* ``unsupported_identification_method`` - a method other than ``backdoor``
+  was requested (identification implements only the classical backdoor criterion).
 """
 
 from __future__ import annotations
@@ -155,7 +155,7 @@ def _explain_structure(
                     f"{names} cause(s) both the treatment and the outcome in the assumed "
                     "graph, so the backdoor paths they carry would otherwise leave a "
                     "spurious association between treatment and outcome. Adjusting for them "
-                    "blocks those paths — under the assumed structure and the classical "
+                    "blocks those paths - under the assumed structure and the classical "
                     "total-effect criterion."
                 ),
                 node_ids=confounders,
@@ -181,7 +181,7 @@ def _explain_structure(
                         "the outcome. Adjusting for a mediator removes the part of the total "
                         "effect that travels through it, so the classical backdoor criterion "
                         "for the *total* effect forbids it. (Mediation analysis is a separate "
-                        "question, outside S8C.)"
+                        "question, outside identification.)"
                     ),
                     node_ids=mediator_like,
                 )
@@ -219,7 +219,7 @@ def _explain_structure(
                 body=(
                     f"{names} receive(s) two or more incoming edges in the assumed graph, so "
                     "conditioning on them can induce association where the assumed structure "
-                    "has none (collider bias) — including opening otherwise-blocked backdoor "
+                    "has none (collider bias) - including opening otherwise-blocked backdoor "
                     "paths. This is why some candidate sets fail the criterion even though "
                     "every member looks like an ordinary covariate."
                 ),
@@ -337,7 +337,7 @@ def identify_backdoor(
                     code="unsupported_identification_method",
                     title="Identification method not supported",
                     body=(
-                        f"S8C implements the classical backdoor criterion only; '{method}' is "
+                        f"identification implements the classical backdoor criterion only; '{method}' is "
                         "not available. Front-door, instrumental variables, generalised "
                         "adjustment and do-calculus are outside this stage, and SplitScope "
                         "will not simulate them."
@@ -361,7 +361,7 @@ def identify_backdoor(
                     title="Select a treatment and an outcome first",
                     body=(
                         "Graphical identification needs one treatment and one distinct "
-                        "outcome. Select both — here or in the graph's analysis scope — and "
+                        "outcome. Select both - here or in the graph's analysis scope - and "
                         "run identification again."
                     ),
                 )
@@ -459,7 +459,7 @@ def identify_backdoor(
     if status == "no_eligible_backdoor_set":
         caveats.append(
             "This failure is specific to the classical backdoor criterion. It does not prove "
-            "the effect is unidentifiable by every method; S8C does not implement front-door, "
+            "the effect is unidentifiable by every method; identification does not implement front-door, "
             "instrumental-variable or generalised-adjustment strategies, and will not claim to."
         )
 

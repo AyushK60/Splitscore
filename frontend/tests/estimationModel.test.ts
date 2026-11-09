@@ -1,5 +1,5 @@
 /**
- * S9B model helpers: request construction, signatures and staleness rules.
+ * estimation UI model helpers: request construction, signatures and staleness rules.
  *
  * These are pure functions, so they are tested directly; the heavy rendering
  * behaviour lives in the component tests beside this file.
@@ -35,7 +35,7 @@ function config(overrides: Partial<EstimationConfig> = {}): EstimationConfig {
 }
 
 describe('buildRequest', () => {
-  it('maps every field to the strict S9A request shape', () => {
+  it('maps every field to the strict estimation request shape', () => {
     const request = buildRequest(
       config({
         treatedValue: 'yes',

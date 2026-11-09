@@ -3,7 +3,7 @@
 A brush is a *predicate over immutable row ids*, evaluated server-side on the
 full population. The response carries the exact selected-id count plus the ids
 themselves (capped, in file order), so every linked view can highlight by id
-and every count shown to the user is the true count over the whole dataset —
+and every count shown to the user is the true count over the whole dataset -
 not a count over whichever rows happened to be drawn.
 
 Multiple predicates on the same column are unioned; predicates across
@@ -126,7 +126,7 @@ class SelectionResult:
 def population_mask(dataset: Dataset, predicates: list[Predicate]) -> np.ndarray:
     """Boolean mask of the filtered population.
 
-    Union within a column, intersection across columns — the same combination
+    Union within a column, intersection across columns - the same combination
     rule :func:`evaluate_selection` applies, exposed for aggregate endpoints
     that compute selection overlays server-side (so a distribution chart can
     show the exact selected-cohort histogram instead of a client-side guess).

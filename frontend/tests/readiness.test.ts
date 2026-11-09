@@ -43,7 +43,7 @@ describe('readiness: shared prerequisites', () => {
 
     expect(result.ready).toBe(false)
     expect(result.blockers).toContain(
-      'Confirm the suggested column roles — accept them or adjust them — before running the audit.',
+      'Confirm the suggested column roles - accept them or adjust them - before running the audit.',
     )
   })
 
@@ -140,7 +140,7 @@ describe('readiness: generated split path', () => {
     const result = readiness(input({ splitMode: 'generate', generate: null }))
 
     expect(result.ready).toBe(false)
-    expect(result.blockers).toContain('Choose how to split the rows — no strategy is selected yet.')
+    expect(result.blockers).toContain('Choose how to split the rows - no strategy is selected yet.')
     expect(result.runLabel).toBe('Run audit (generate the split now)')
   })
 

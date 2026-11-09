@@ -1,8 +1,7 @@
 /**
- * Hand-written S9B estimation fixtures.
+ * Hand-written estimation fixtures.
  *
- * These mirror the real S9A payload shape (captured from the running backend,
- * see docs/S9B_API_INTEGRATION.md) but every number is chosen by hand so the
+ * These mirror the real estimation payload shape (captured from the running backend) but every number is chosen by hand so the
  * assertions can be read directly from the fixture: RA 2.0, IPW 1.6, AIPW 1.8,
  * with intervals that straddle zero only where the test says so.
  */

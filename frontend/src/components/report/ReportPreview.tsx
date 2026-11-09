@@ -410,7 +410,7 @@ function AuditSection({ data }: { data: DossierAudit }) {
           <ul>
             {data.not_evaluated.map((check) => (
               <li key={check.rule_id}>
-                <span className="mono">{check.rule_id}</span> · {check.title} — {check.reason}
+                <span className="mono">{check.rule_id}</span> · {check.title} - {check.reason}
               </li>
             ))}
           </ul>
@@ -448,7 +448,7 @@ function ScorecardSection({ data }: { data: RiskScorecard }) {
             <ul>
               {category.rules.map((rule) => (
                 <li key={rule.rule_id}>
-                  <span className="mono">{rule.rule_id}</span> — {statusLabel(rule.status)}
+                  <span className="mono">{rule.rule_id}</span> - {statusLabel(rule.status)}
                   {rule.finding_count ? ` · ${integer(rule.finding_count)} finding(s)` : ''}
                 </li>
               ))}
@@ -927,7 +927,7 @@ function LimitationsSection({ data }: { data: DossierLimitations }) {
         <ul>
           {data.model_warnings.map((entry) => (
             <li key={entry.run_id}>
-              <span className="mono">{entry.run_id}</span> —{' '}
+              <span className="mono">{entry.run_id}</span> -{' '}
               {entry.warnings.map((warning) => warning.message).join(' ')}
             </li>
           ))}
@@ -940,7 +940,7 @@ function LimitationsSection({ data }: { data: DossierLimitations }) {
         <ul>
           {data.not_evaluated.map((check) => (
             <li key={check.rule_id}>
-              <span className="mono">{check.rule_id}</span> — {check.reason}
+              <span className="mono">{check.rule_id}</span> - {check.reason}
             </li>
           ))}
         </ul>
@@ -986,7 +986,7 @@ function ReproducibilitySection({ data }: { data: DossierReproducibility }) {
   )
 }
 
-// S10-B renderers for the seven new dossier sections.
+// dossier renderers for the seven new dossier sections.
 // Written with the same primitives the v1 renderers use (SectionShell,
 // report-kv, report-table) and the same honesty rules: unavailable data is
 // shown as '—', caveats are carried verbatim, nothing is invented.

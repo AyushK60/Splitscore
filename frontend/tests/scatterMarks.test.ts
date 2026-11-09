@@ -1,7 +1,7 @@
 /**
  * Scatter render rules: deterministic jitter, discrete-axis detection, sampled
  * correlation and visibility tiers. These are display rules only; the tests
- * pin the honesty boundary — jitter never changes the underlying value and
+ * pin the honesty boundary - jitter never changes the underlying value and
  * correlation ignores non-numeric or non-finite cells.
  */
 import { describe, expect, it } from 'vitest'
@@ -78,7 +78,7 @@ describe('pearson correlation', () => {
   it('formats a signed coefficient and the unavailable state', () => {
     expect(formatCorrelation(0.834)).toBe('r +0.83')
     expect(formatCorrelation(-0.124)).toBe('r −0.12')
-    expect(formatCorrelation(null)).toBe('r —')
+    expect(formatCorrelation(null)).toBe('r -')
   })
 })
 

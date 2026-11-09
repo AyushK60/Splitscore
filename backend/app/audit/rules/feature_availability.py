@@ -8,11 +8,11 @@ nothing about when a value becomes known in the real process that produces it.
 What it reports:
 
 * a feature declared ``after_prediction`` (future-only information used as a
-  predictor) — a high-severity finding;
+  predictor) - a high-severity finding;
 * a derived feature whose declared dependencies include an ``after_prediction``
-  input — medium, because the future-only information reaches the model
+  input - medium, because the future-only information reaches the model
   through the derived column;
-* a feature declared ``unknown`` — info, so the gap is visible without
+* a feature declared ``unknown`` - info, so the gap is visible without
   pretending the column was cleared.
 
 Undeclared features are counted and reported in the metrics; the ledger is an

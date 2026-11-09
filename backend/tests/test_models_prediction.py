@@ -1,4 +1,4 @@
-"""Independent oracles for the S6 predictive engine (F10).
+"""Independent oracles for the predictive engine (F10).
 
 The expectations are recomputed here from the stored test predictions:
 

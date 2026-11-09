@@ -3,7 +3,7 @@
 Label: this is a *process check*. Reusing the same test split for many
 evaluate-and-adjust cycles is a leakage mechanism that lives in the workflow,
 not in the data. The only evidence SplitScope actually has for it is its own
-session run history, so this check reads — and only reads — the run records
+session run history, so this check reads - and only reads - the run records
 the application accumulated in memory this session.
 
 Honest states:
@@ -33,7 +33,7 @@ MAX_LISTED_RUNS = 5
 LIMITATIONS = [
     "The evidence is this session's in-memory run history only. It resets when "
     "the server restarts, and it cannot see evaluations performed outside "
-    "SplitScope — a notebook that tuned against the same test split leaves no "
+    "SplitScope - a notebook that tuned against the same test split leaves no "
     "record here.",
     "Auditing the same split repeatedly is normal, prudent practice while "
     "investigating a dataset. The finding marks the risk of making *selection "
@@ -110,7 +110,7 @@ def run(ctx: RuleContext) -> RuleOutput:
                 f"The session contains {len(prior)} prior audit run(s) of this same split "
                 "(same dataset, same split definition). If model or configuration choices are "
                 "being made based on these repeated evaluations, the test split is gradually "
-                "becoming a training input — the classic validation-reuse risk. The split "
+                "becoming a training input - the classic validation-reuse risk. The split "
                 "itself may be perfectly clean; the risk is in the process around it."
             ),
             evidence_summary=(

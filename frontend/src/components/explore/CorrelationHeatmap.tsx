@@ -10,7 +10,7 @@ import { FigureExport } from './FigureExport'
  * Every cell is one pairwise coefficient computed server-side over the full
  * population, with its own valid-pair count. Cells whose coefficient is
  * undefined (constant column, too few complete pairs) render as hatched
- * "undefined" — never as zero. The caption states the missingness policy and
+ * "undefined" - never as zero. The caption states the missingness policy and
  * the standing caveat: association, not causation.
  */
 
@@ -111,7 +111,7 @@ export function CorrelationHeatmap({ schema, onRequestScatter }: Props) {
   return (
     <figure className="xfig" data-figure="correlation">
       <figcaption className="xfig__caption">
-        <span className="xfig__title">Correlation matrix — {method}</span>
+        <span className="xfig__title">Correlation matrix - {method}</span>
         <span className="xfig__sub">
           {data
             ? `${data.population.toLocaleString('en-US')} rows · pairwise complete observations · ${data.min_pairs} pair minimum`
@@ -119,7 +119,7 @@ export function CorrelationHeatmap({ schema, onRequestScatter }: Props) {
         </span>
         <FigureExport
           figureId={`correlation-${method}`}
-          title={`Correlation matrix (${method}) — ${columns.join(', ')}`}
+          title={`Correlation matrix (${method}) - ${columns.join(', ')}`}
           settings={`${method} · ${columns.length} variables · pairwise complete`}
           counts={data ? `${data.population.toLocaleString('en-US')} rows · ${data.cells.length} pairs` : ''}
           notes={[
@@ -265,7 +265,7 @@ export function CorrelationHeatmap({ schema, onRequestScatter }: Props) {
         {focusedCell ? (
           focusedCell.coefficient === null ? (
             <p>
-              <strong>{focusedCell.x} × {focusedCell.y}</strong> — undefined on{' '}
+              <strong>{focusedCell.x} × {focusedCell.y}</strong> - undefined on{' '}
               {focusedCell.n_valid} complete pairs
               {focusedCell.warning === 'constant_x' || focusedCell.warning === 'constant_y'
                 ? ' (a variable is constant, so the coefficient does not exist)'
@@ -279,7 +279,7 @@ export function CorrelationHeatmap({ schema, onRequestScatter }: Props) {
               <strong>
                 {focusedCell.x} × {focusedCell.y}
               </strong>{' '}
-              — {focusedCell.method} r = {focusedCell.coefficient.toFixed(3)} on{' '}
+              - {focusedCell.method} r = {focusedCell.coefficient.toFixed(3)} on{' '}
               {focusedCell.n_valid.toLocaleString('en-US')} complete pairs (policy:{' '}
               {focusedCell.missing_policy.replace(/_/g, ' ')}). Click the cell to open the scatter.
             </p>

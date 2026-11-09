@@ -1,5 +1,5 @@
 /**
- * S9C-A — Subgroup Effects.
+ * subgroup - Subgroup Effects.
  *
  * One large forest plot of subgroup ATEs from the cross-fitted AIPW
  * estimating equation, the overall effect as a reference, a supporting table,
@@ -198,7 +198,7 @@ export function SubgroupResult({ payload }: { payload: SubgroupRunPayload }) {
     figureId: 's9c_subgroup_forest',
     title: 'Subgroup average treatment effects (forest plot)',
     settings: `AIPW pseudo-outcome averages · subgroup: ${payload.subgroup.column} · ${formatInteger(payload.analysis.rows_final)} cohort rows`,
-    note: 'Each subgroup estimate averages the cross-fitted AIPW pseudo-outcome over that subgroup\u2019s rows, with influence-function uncertainty. Heterogeneity is exploratory evidence about this sample under the assumed graph — not a verified mechanism.',
+    note: 'Each subgroup estimate averages the cross-fitted AIPW pseudo-outcome over that subgroup\u2019s rows, with influence-function uncertainty. Heterogeneity is exploratory evidence about this sample under the assumed graph - not a verified mechanism.',
     provenance: [
       `run_id: ${payload.run_id}`,
       `created_at_utc: ${payload.created_at_utc}`,
@@ -392,7 +392,7 @@ export function SubgroupResult({ payload }: { payload: SubgroupRunPayload }) {
                     </>
                   ) : (
                     <text x={left + 12} y={y + 4} className="estrow__failure">
-                      Not estimated — {group.unavailable_reason ?? 'unavailable'}
+                      Not estimated - {group.unavailable_reason ?? 'unavailable'}
                     </text>
                   )}
                 </g>
@@ -504,7 +504,7 @@ function GroupDetail({ group }: { group: SubgroupGroup }) {
   if (group.status !== 'estimated') {
     return (
       <div className="estsum__detailcard estsum__detailcard--failed">
-        <p className="estsum__detailtitle">{group.label} — not estimated</p>
+        <p className="estsum__detailtitle">{group.label} - not estimated</p>
         <p>{group.unavailable_reason ?? 'No subgroup estimate is available.'}</p>
       </div>
     )

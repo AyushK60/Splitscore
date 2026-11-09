@@ -1,4 +1,4 @@
-"""S3 research foundation: study metadata, roles, profiling and provenance."""
+"""study research foundation: study metadata, roles, profiling and provenance."""
 
 from app.research.profiling import build_profile
 from app.research.provenance import build_manifest, schema_fingerprint, validate_manifest

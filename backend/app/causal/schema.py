@@ -4,7 +4,7 @@ The specification is the *scientific* object: nodes, directed assumed edges,
 the analysis scope and the recorded assumptions. Screen coordinates live on the
 node as an optional, display-only ``layout`` block and are excluded from the
 graph fingerprint, so a graph's scientific identity never depends on how it was
-last arranged on a canvas (S8B will edit positions freely without silently
+last arranged on a canvas (graph editor will edit positions freely without silently
 changing what the graph claims).
 
 Conventions mirrored from the research module:

@@ -1,8 +1,8 @@
-"""S5 integrity capabilities (F04) and the category risk scorecard (F06).
+"""integrity capabilities (F04) and the category risk scorecard (F06).
 
 Every check gets positive, negative and ambiguous/unsupported fixtures with
 independently hand-written expected results. The five original checks are
-covered by their own suites and are asserted here only where S5 must prove it
+covered by their own suites and are asserted here only where integrity must prove it
 did not disturb them (rule ids, not-evaluated bookkeeping, catalogue).
 """
 
@@ -24,7 +24,7 @@ ROLES_FEATURES = make_roles(features=["x", "y"], split="split")
 
 
 # --------------------------------------------------------------------------- #
-# SS-AVL-001 — feature availability ledger
+# SS-AVL-001 - feature availability ledger
 # --------------------------------------------------------------------------- #
 
 
@@ -98,7 +98,7 @@ def test_derived_feature_inheriting_a_future_only_input_is_medium():
 
 
 # --------------------------------------------------------------------------- #
-# SS-TGT-002 — target proxy candidates
+# SS-TGT-002 - target proxy candidates
 # --------------------------------------------------------------------------- #
 
 PROXY_ROLES = make_roles(features=["signal", "noise"], target="label", split="split")
@@ -177,7 +177,7 @@ def test_ambiguous_borderline_purity_is_not_flagged():
 
 
 # --------------------------------------------------------------------------- #
-# SS-ENT-002 — identifier-like feature reuse
+# SS-ENT-002 - identifier-like feature reuse
 # --------------------------------------------------------------------------- #
 
 MEM_ROLES = make_roles(features=["badge"], target=None, split="split")
@@ -234,7 +234,7 @@ def test_identifier_screen_needs_a_minimum_row_count():
 
 
 # --------------------------------------------------------------------------- #
-# SS-CHR-002 — declared prediction horizon
+# SS-CHR-002 - declared prediction horizon
 # --------------------------------------------------------------------------- #
 
 HZ_ROLES = make_roles(features=["x"], timestamp="ts", split="split")
@@ -301,7 +301,7 @@ def test_horizon_requires_a_timestamp_role():
 
 
 # --------------------------------------------------------------------------- #
-# SS-PPF-001 — preprocessing fit boundary
+# SS-PPF-001 - preprocessing fit boundary
 # --------------------------------------------------------------------------- #
 
 
@@ -368,7 +368,7 @@ def test_unrecorded_fit_context_is_medium_and_honest():
 
 
 # --------------------------------------------------------------------------- #
-# SS-VRU-001 — validation reuse
+# SS-VRU-001 - validation reuse
 # --------------------------------------------------------------------------- #
 
 from app.audit.types import RunHistoryEntry  # noqa: E402
@@ -504,7 +504,7 @@ def test_runs_of_other_splits_do_not_accumulate():
 
 
 # --------------------------------------------------------------------------- #
-# F06 — risk scorecard
+# F06 - risk scorecard
 # --------------------------------------------------------------------------- #
 
 
@@ -561,7 +561,7 @@ def test_original_five_rule_ids_are_unchanged():
 
 def test_continuous_measurement_columns_are_not_screened():
     # A float measurement column is all-distinct and shares one value by
-    # coincidence — it is not an identifier and must not be flagged.
+    # coincidence - it is not an identifier and must not be flagged.
     rows = []
     for index in range(6):
         rows.append({"badge": f"T-{index}", "measure": f"{index + 0.5}", "split": "train"})

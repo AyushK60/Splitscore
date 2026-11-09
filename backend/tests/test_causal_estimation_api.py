@@ -1,6 +1,6 @@
-"""S9A API integration: real upload path, real registry, real store, real gate.
+"""estimation API integration: real upload path, real registry, real store, real gate.
 
-Case 25 of the S9A brief lives here, together with the lifecycle guarantees:
+Case 25 of the estimation brief lives here, together with the lifecycle guarantees:
 dataset ownership (404 across datasets), expiry (typed 410), fingerprint-mismatch
 refusal (409), the structured gate refusals (422), run storage with staleness
 re-checking, and the strict request schema. Nothing is mocked.

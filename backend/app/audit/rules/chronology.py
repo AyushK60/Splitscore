@@ -1,8 +1,8 @@
 """SS-CHR-001: chronological split violation.
 
 Label: this is a *chronology check*. It verifies one necessary condition for a
-future-prediction split — that no training record is newer than the earliest test
-record — and it says nothing about other temporal leakage mechanisms such as
+future-prediction split - that no training record is newer than the earliest test
+record - and it says nothing about other temporal leakage mechanisms such as
 rolling aggregates, lag features computed across the boundary, or label delay.
 """
 

@@ -1,11 +1,11 @@
-"""S8C identification: known-answer backdoor fixtures, search behaviour, API.
+"""identification identification: known-answer backdoor fixtures, search behaviour, API.
 
 Every expected adjustment set, violation code and identification status in
 this file is written by hand from the graphical definition of the classical
-backdoor criterion — never derived from the implementation — mirroring the
-S8A test conventions.
+backdoor criterion - never derived from the implementation - mirroring the
+graph test conventions.
 
-Cases 1-10 of the S8C brief are labelled explicitly in the test names.
+Cases 1-10 of the identification brief are labelled explicitly in the test names.
 API tests run against the real upload path, the real registry and the real
 error envelope; nothing is mocked.
 """
@@ -86,7 +86,7 @@ def test_case_3_collider_sets():
     assert _minimal_sets(search) == [[]]
     # Conditioning on the collider destroys admissibility. Here the collider is
     # also a descendant of the treatment, so the post-treatment rule fires
-    # first — the pure open-backdoor-path violation is exercised in Case 7,
+    # first - the pure open-backdoor-path violation is exercised in Case 7,
     # where the collider is not a descendant of the treatment.
     evaluation = evaluate_adjustment_set(dag, "x", "y", ["c"], observed)
     assert not evaluation.valid
@@ -242,7 +242,7 @@ def test_inclusion_minimal_is_not_minimum_cardinality():
     observed = {"x", "y", "p", "q"}
     sets = _minimal_sets(search_adjustment_sets(dag, "x", "y", observed))
     assert sets == [["p", "q"]]
-    # Now add an observed confounder that subsumes nothing — verify every
+    # Now add an observed confounder that subsumes nothing - verify every
     # reported set is inclusion-minimal by direct check.
     dag2 = DAG(
         ["x", "y", "a", "b"],

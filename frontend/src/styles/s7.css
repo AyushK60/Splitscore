@@ -1,5 +1,5 @@
 /* ==========================================================================
-   S7 Report / Export Studio
+   dossier Report / Export Studio
    --------------------------------------------------------------------------
    The studio uses the workbench's warm paper and ink tokens. Dossier pages
    are deliberately editorial: serif display headings, compact mono labels,
@@ -1141,7 +1141,7 @@
   }
 }
 
-/* S10-B — methodology presentation selector and causal sub-blocks. */
+/* dossier - methodology presentation selector and causal sub-blocks. */
 .report-config__presentation {
   display: flex;
   flex-direction: column;

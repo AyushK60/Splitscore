@@ -46,7 +46,7 @@ def export_dossier(
     request: DossierRequest,
     format: str = "json",
 ) -> Response:
-    """Compose (and optionally download) the S7 dossier from named stored runs.
+    """Compose (and optionally download) the dossier dossier from named stored runs.
 
     The body is identical for both formats; ``format=json`` returns the API
     object, while ``format=html`` wraps that same object in a self-contained
@@ -109,9 +109,9 @@ def export_dossier(
                 {"run_id": stored.run_id, "label": stored.label, "payload": stored.payload}
             )
 
-    # S10-B: stored estimation runs (S9A/S9C) with cross-dataset and staleness
+    # dossier: stored estimation runs with cross-dataset and staleness
     # refusal. A run computed against different dataset bytes is refused
-    # outright — the dossier never silently substitutes numbers from another
+    # outright - the dossier never silently substitutes numbers from another
     # cohort, and never presents a stale result as current.
     estimation_runs: list[dict[str, Any]] = []
     seen_estimation: set[str] = set()

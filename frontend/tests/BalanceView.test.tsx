@@ -1,5 +1,5 @@
 /**
- * View B — Covariate Balance.
+ * View B - Covariate Balance.
  *
  * Pins the Love-plot mapping: unadjusted and (only where weights exist)
  * weighted SMDs, the 0.1 heuristic guide, undefined values shown as undefined,

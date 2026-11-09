@@ -4,7 +4,7 @@
  *
  * Everything here is *concise editorial copy* layered on top of the finding
  * the backend actually produced. Counts, units, examples, assumptions and
- * limitations always come from the finding itself — never from this file — so
+ * limitations always come from the finding itself - never from this file - so
  * the numbers stay exactly as the engine counted them.
  *
  * Accuracy rules baked into the copy:
@@ -47,7 +47,7 @@ export type KnownRuleId =
   | 'SS-NEAR-001'
 
 /**
- * "More context" — how the sharing happens, in everyday language.
+ * "More context" - how the sharing happens, in everyday language.
  * One paragraph per rule; deliberately mechanism-only (no counts: the finding
  * supplies those).
  */
@@ -70,7 +70,7 @@ const MECHANISM: Record<KnownRuleId, string> = {
     'shortcut rather than useful prediction.',
   'SS-NEAR-001':
     'Rows on the two sides are very similar to each other. These are similarity candidates, not ' +
-    'confirmed copies — but if they are genuinely near-duplicate records, the test rows are ' +
+    'confirmed copies - but if they are genuinely near-duplicate records, the test rows are ' +
     'easier than they look.',
 }
 
@@ -122,7 +122,7 @@ export function quickCountLine(count: {
 
 /**
  * Technical level: the audit settings that actually applied to this rule,
- * read from the run's own configuration. Values are rendered verbatim — no
+ * read from the run's own configuration. Values are rendered verbatim - no
  * interpretation is added here.
  */
 export function settingsForRule(

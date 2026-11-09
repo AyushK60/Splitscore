@@ -1,5 +1,5 @@
 /* ============================================================================
-   S9B — Effect Estimation Studio
+   estimation UI - Effect Estimation Studio
    ----------------------------------------------------------------------------
    Extends the SplitScope instrument language: warm paper surfaces, ink-green
    structure, teal for the workbench's own actions, copper reserved for the
@@ -12,8 +12,8 @@
 
 /* The estimation palette is part of the shared instrument language: shared
    chart rules (.estrow__interval, .estrow__cap, .estrow__dot) are also rendered
-   by the S9C research stage, which sits outside .eststudio. Defining the
-   variables only on .eststudio made those rules compute `stroke: none` there —
+   by the estimation research stage, which sits outside .eststudio. Defining the
+   variables only on .eststudio made those rules compute `stroke: none` there -
    the forest plot's uncertainty whiskers silently vanished. They are defined
    on :root so every consumer of the shared rules sees the same palette. */
 
@@ -2084,8 +2084,8 @@
 }
 
 /* ==========================================================================
-   S9C — Causal Research stage (subgroups, robustness, what-if)
-   Reuses the S9B tokens: copper accent, quiet surfaces, esttable/estfig grid.
+   estimation - Causal Research stage (subgroups, robustness, what-if)
+   Reuses the estimation UI tokens: copper accent, quiet surfaces, esttable/estfig grid.
    ========================================================================== */
 
 .rs-stage {

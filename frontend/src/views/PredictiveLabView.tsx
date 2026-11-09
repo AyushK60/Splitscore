@@ -1,5 +1,5 @@
 /**
- * S6 Model Lab — predictive evaluation (F10).
+ * Model Lab - predictive evaluation (F10).
  *
  * Everything shown here comes from a fitted server run: candidates compared on
  * a validation partition, one selected model refitted on fit+validation, and a
@@ -246,7 +246,7 @@ export function PredictiveLabView({ onNavigate }: Props): JSX.Element {
   if (!dataset) {
     return (
       <div className="rs xw">
-        <p className="rs-eyebrow">Model Lab — predictive evaluation</p>
+        <p className="rs-eyebrow">Model Lab - predictive evaluation</p>
         <h1 className="rs-h1">No dataset is loaded</h1>
         <p className="xw__empty">
           Predictive evaluation needs a dataset, a declared outcome and a split. Load a bundled
@@ -266,7 +266,7 @@ export function PredictiveLabView({ onNavigate }: Props): JSX.Element {
     <div className="rs xw mlab">
       <header className="xw__header">
         <div>
-          <p className="rs-eyebrow">Model Lab — predictive evaluation</p>
+          <p className="rs-eyebrow">Model Lab - predictive evaluation</p>
           <h1 className="rs-h1">Compare candidates, then evaluate once on held-out data</h1>
         </div>
         <div className="xw__identity" aria-label="Dataset identity">
@@ -303,8 +303,8 @@ export function PredictiveLabView({ onNavigate }: Props): JSX.Element {
                 value={task}
                 onChange={(event) => selectTask(event.target.value as PredictionTask)}
               >
-                <option value="classification">Classification — categorical outcome</option>
-                <option value="regression">Regression — numeric outcome</option>
+                <option value="classification">Classification - categorical outcome</option>
+                <option value="regression">Regression - numeric outcome</option>
               </select>
             </label>
 
@@ -351,7 +351,7 @@ export function PredictiveLabView({ onNavigate }: Props): JSX.Element {
 
             <div className="mlab__field">
               <span>
-                Predictors — {predictors.length} of {columns.length - 1} available
+                Predictors - {predictors.length} of {columns.length - 1} available
               </span>
               <div className="xw__chips">
                 {columns
@@ -726,7 +726,7 @@ function PredictionReport({ result, onExport }: { result: PredictionResult; onEx
           <ul style={{ margin: 0 }}>
             {metrics.undefined.map((entry) => (
               <li key={`${entry.metric}-${entry.reason}`}>
-                <strong>{entry.metric}</strong> — {entry.reason}
+                <strong>{entry.metric}</strong> - {entry.reason}
               </li>
             ))}
           </ul>

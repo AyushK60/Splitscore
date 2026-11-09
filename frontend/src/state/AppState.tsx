@@ -380,7 +380,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         // Choosing "create a split" means the file's own split column takes no
         // part in this run. Clearing it keeps the submitted roles, the report
-        // and the split that is actually audited in agreement — the file itself
+        // and the split that is actually audited in agreement - the file itself
         // is never modified, and choosing the existing path again offers the
         // suggestion once more.
         if (mode !== 'generate' || !previous.roles.split) return next

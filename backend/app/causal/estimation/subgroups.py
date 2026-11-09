@@ -1,4 +1,4 @@
-"""Subgroup and heterogeneous treatment-effect analysis (S9C-A).
+"""Subgroup and heterogeneous treatment-effect analysis.
 
 Subgroup average treatment effects are computed from the **cross-fitted AIPW
 estimating equation**: the pseudo-outcome
@@ -9,8 +9,8 @@ estimating equation**: the pseudo-outcome
 
 is formed once on the whole analysis cohort with out-of-fold nuisance
 predictions, and the subgroup ATE for group g is the average of psi within
-that group. This is the group-specific estimating equation — doubly robust
-under the identification assumptions plus within-group positivity — not a
+that group. This is the group-specific estimating equation - doubly robust
+under the identification assumptions plus within-group positivity - not a
 filtered overall model prediction re-labelled as heterogeneity. Because the
 pseudo-outcome is a per-row estimating quantity, each subgroup's uncertainty
 comes from its own influence values:
@@ -77,7 +77,7 @@ SUBGROUP_SCOPE_NOTE = (
     "Each subgroup estimate is an average treatment effect computed from the cross-fitted "
     "AIPW estimating equation on that subgroup's rows, under the same assumed graph, "
     "adjustment set and cohort as the overall analysis. Heterogeneity described here is "
-    "exploratory evidence about this sample under those assumptions — not a verified "
+    "exploratory evidence about this sample under those assumptions - not a verified "
     "mechanism and not a prediction about any individual."
 )
 

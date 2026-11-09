@@ -4,7 +4,7 @@
  * Scoped by area:
  *   - `src/` is browser application code (browser globals, React Hooks rules).
  *   - `tests/` is Vitest component-test code (node + vitest globals are not
- *     used — tests import from vitest explicitly — but jsdom code still runs in
+ *     used - tests import from vitest explicitly - but jsdom code still runs in
  *     a DOM, so browser globals are allowed there too).
  *   - `e2e/`, `playwright.config.ts` and `vite.config.ts` are Node tooling.
  *   - `eslint.config.js` itself is Node tooling.

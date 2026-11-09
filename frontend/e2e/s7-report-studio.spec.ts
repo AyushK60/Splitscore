@@ -1,12 +1,12 @@
 /**
- * S7 — Report / Export Studio and visual-polish journey.
+ * dossier - Report / Export Studio and visual-polish journey.
  *
  * This is the contract test for the decision layer: the studio must compose the
  * runs that actually exist, the downloaded JSON and print HTML must match the
  * preview, section toggles must change the artifact rather than only the screen,
  * and the scatter/matrix marks must remain legible and honest under selection.
  *
- * Screenshots are captured at the viewport sizes named in the S7 brief so the
+ * Screenshots are captured at the viewport sizes named in the dossier brief so the
  * visual review is reproducible instead of relying on a stale image folder.
  */
 import { mkdirSync, readFileSync } from 'node:fs'
@@ -20,7 +20,7 @@ import { expect, loadDemoFromEntry, test } from './fixtures'
 
 const DEMO = 'Repeated-entity subscription panel'
 const DATASET_NAME = 'repeated_entity.csv'
-const SHOTS = fileURLToPath(new URL('../../docs/screenshots/s7', import.meta.url))
+const SHOTS = fileURLToPath(new URL('../test-results/shots/s7', import.meta.url))
 const TMP = join(tmpdir(), 'splitscope-s7-e2e')
 
 test.use({ viewport: { width: 1920, height: 1080 } })
@@ -48,7 +48,7 @@ async function goTo(page: Page, name: string): Promise<void> {
   await page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name }).click()
 }
 
-test('S7: audit, compare, fit, inspect marks and export one evidence dossier', async ({ page }) => {
+test('dossier: audit, compare, fit, inspect marks and export one evidence dossier', async ({ page }) => {
   await loadDemoFromEntry(page, DEMO)
 
   // --- compact chrome: brand and primary nav share one sticky row ---------- //
@@ -146,7 +146,7 @@ test('S7: audit, compare, fit, inspect marks and export one evidence dossier', a
   await expect(page.locator('#report-models')).toContainText(modelRunId)
   await expect(page.locator('#report-comparison')).toContainText('Group holdout')
   await expect(page.locator('#report-audit')).toContainText('SS-ENT-001')
-  await expect(page.locator('.report-toc a')).toHaveCount(17) // S10-B: the default dossier now requests all 17 sections
+  await expect(page.locator('.report-toc a')).toHaveCount(17) // dossier: the default dossier now requests all 17 sections
   await expect(page.locator('.report-studio__identity')).toContainText(DATASET_NAME)
   await expect(page.locator('.report-config__actions')).toBeVisible()
   await scrollTo(page, 0)
@@ -202,10 +202,10 @@ test('S7: audit, compare, fit, inspect marks and export one evidence dossier', a
     integrity: { raw_data_embedded: boolean; row_predictions_embedded: boolean }
   }
   expect(dossier.report_kind).toBe('dossier')
-  expect(dossier.schema_version).toBe('1.1.0') // S10-B: additive section schema
+  expect(dossier.schema_version).toBe('1.1.0') // dossier: additive section schema
   expect(dossier.dataset.name).toBe(DATASET_NAME)
   expect(dossier.dataset.sha256).toHaveLength(64)
-  expect(dossier.included_sections).toHaveLength(17) // S10-B: default requests all sections
+  expect(dossier.included_sections).toHaveLength(17) // dossier: default requests all sections
   expect(dossier.summary.findings_total).toBeGreaterThan(0)
   expect(dossier.summary.evaluated_rule_count).toBeGreaterThan(0)
   expect(dossier.summary.not_evaluated_count).toBeGreaterThan(0)
@@ -292,7 +292,7 @@ test('S7: audit, compare, fit, inspect marks and export one evidence dossier', a
   )
   expect(mobileOverflow).toBeLessThanOrEqual(1)
 
-  // Both archive downloads from the pre-S7 export view are still present.
+  // Both archive downloads from the pre-dossier export view are still present.
   await expect(page.getByRole('button', { name: 'Download JSON report' })).toHaveCount(1)
   await expect(page.getByRole('button', { name: 'Download self-contained HTML report' })).toHaveCount(1)
 })

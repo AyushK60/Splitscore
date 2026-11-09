@@ -289,7 +289,7 @@ def post_manifest_validate(
 
 
 # --------------------------------------------------------------------------- #
-# S10-A — research run history and reproducibility manifests
+# history - research run history and reproducibility manifests
 # --------------------------------------------------------------------------- #
 
 

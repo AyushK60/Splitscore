@@ -1,9 +1,9 @@
 /**
- * S9B estimation model helpers.
+ * estimation UI estimation model helpers.
  *
- * Pure functions: form state → the S9A request body, a stable signature for
+ * Pure functions: form state → the estimation request body, a stable signature for
  * request/response ordering, labels for the three named estimators, selection
- * of the diagnostics a view should display, and — most importantly — a
+ * of the diagnostics a view should display, and - most importantly - a
  * deterministic staleness comparison between a stored run and the study as it
  * stands now.
  *
@@ -88,7 +88,7 @@ export function defaultConfig(): EstimationConfig {
   }
 }
 
-/** The request body exactly as the S9A contract expects it (strict schema). */
+/** The request body exactly as the estimation contract expects it (strict schema). */
 export function buildRequest(
   config: EstimationConfig,
   graphFingerprint: string | null,

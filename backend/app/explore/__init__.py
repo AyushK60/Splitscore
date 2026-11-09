@@ -1,4 +1,4 @@
-"""S4 Scientific Visual Explorer — bounded, deterministic data services for the
+"""Scientific Visual Explorer - bounded, deterministic data services for the
 exploration workspace.
 
 The explorer's contract with the rest of SplitScope:
@@ -11,7 +11,7 @@ The explorer's contract with the rest of SplitScope:
   point-level *rendering* data is sampled, and every sampled payload states the
   method, the stride and both counts.
 * **Undefined stays undefined.** A correlation of a constant column, a pair
-  with too few complete observations, an all-missing histogram — all come back
+  with too few complete observations, an all-missing histogram - all come back
   as ``null`` with a warning code, never as a fabricated zero.
 * **Local only.** Nothing here writes to disk; inputs come from the store.
 """

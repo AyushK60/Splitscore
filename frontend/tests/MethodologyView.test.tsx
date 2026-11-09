@@ -1,5 +1,5 @@
 /**
- * View E — Methodology & Interpretation.
+ * View E - Methodology & Interpretation.
  *
  * Pins the deterministic interpretation sentence, the provenance fields, the
  * exclusions, the known synthetic effect (kept separate from the estimate) and

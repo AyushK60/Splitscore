@@ -1,4 +1,4 @@
-"""S7 research dossier composition (F19/F21/F22, report layer).
+"""research dossier composition (F19/F21/F22, report layer).
 
 The dossier is assembled from results the process already holds: the loaded
 dataset, its Study Card and profile, and explicitly named audit, comparison and
@@ -27,8 +27,8 @@ from app.reports.dossier_estimation import (
 )
 from app.reports.methodology import build_methodology
 
-# v1.1.0 (S10-B): adds the causal_graph, identification, causal_estimation,
-# subgroups, robustness, what_if and methodology sections. Additive only —
+# v1.1.0: adds the causal_graph, identification, causal_estimation,
+# subgroups, robustness, what_if and methodology sections. Additive only -
 # every v1.0.0 section keeps its id, shape and semantics.
 DOSSIER_SCHEMA_VERSION = "1.1.0"
 
@@ -658,7 +658,7 @@ def build_dossier(
         reason="No model run was named. Fit and select a model in Model Lab to include it.",
     )
 
-    # -- S10-B: causal sections from stored estimation runs ------------------- #
+    # -- dossier: causal sections from stored estimation runs ------------------- #
     estimation_reason = (
         "No estimation run was named for this dossier. Run the Effect Estimation Studio, "
         "then select the stored run in the Report Studio."
@@ -803,7 +803,7 @@ def build_dossier(
         "schema_version": DOSSIER_SCHEMA_VERSION,
         "generated_at_utc": reproducibility["generated_at_utc"],
         "app": {"name": APP_NAME, "version": APP_VERSION},
-        "title": f"SplitScope evidence dossier — {dataset.name}",
+        "title": f"SplitScope evidence dossier - {dataset.name}",
         "dataset": {
             "dataset_id": dataset.dataset_id,
             "name": dataset.name,

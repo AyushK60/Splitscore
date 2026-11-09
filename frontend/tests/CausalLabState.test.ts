@@ -2,10 +2,10 @@
  * Causal Lab reducer and adapter contracts.
  *
  * The reducer is the local-draft authority: these tests pin the invariants the
- * S8B brief demands — invalid structures are refused without mutating the
+ * graph editor brief demands - invalid structures are refused without mutating the
  * draft, deleting a node cascades to its edges and analysis scope, undo/redo
  * never loses the redo stack ordering, and payloads round-trip with layout
- * coordinates intact. Teaching examples must satisfy the S8A schema exactly.
+ * coordinates intact. Teaching examples must satisfy the graph schema exactly.
  */
 import { describe, expect, it } from 'vitest'
 
@@ -142,7 +142,7 @@ describe('draft <-> payload round-trip', () => {
     expect(state.draft.nodes[0].label).toBe('TENURE')
   })
 
-  it('toSpec produces exactly the S8A create/update body contract', () => {
+  it('toSpec produces exactly the graph create/update body contract', () => {
     const draft = draftFromPayload(payloadFixture())
     const spec = toSpec(draft, 'ds-test', 'cgraph-fixture01')
     expect(spec.schema_version).toBe('1.0.0')
@@ -311,7 +311,7 @@ describe('canvas adapters', () => {
   })
 })
 
-describe('teaching examples satisfy the S8A schema', () => {
+describe('teaching examples satisfy the graph schema', () => {
   const examples = ['chain', 'fork', 'collider'] as const
 
   for (const kind of examples) {

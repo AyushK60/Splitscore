@@ -1,8 +1,8 @@
-"""F07 — train/test similarity exploration (bounded, deterministic).
+"""F07 - train/test similarity exploration (bounded, deterministic).
 
 The exploration half of the near-duplicate method: the same documented distance
-— normalised Chebyshev (L-infinity) after pooled median imputation and robust
-scaling — computed as an *exploration service* rather than a rule. It returns
+- normalised Chebyshev (L-infinity) after pooled median imputation and robust
+scaling - computed as an *exploration service* rather than a rule. It returns
 the K nearest cross-split pairs and a nearest-neighbour distance summary for
 the test population, so a researcher can inspect the closest train/test
 neighbours of any split, not only the audit's thresholded candidates.
@@ -354,7 +354,7 @@ def compute_similarity(
             "method": "robust (median / IQR) over the pooled train+test rows of the analysed split",
             "columns_used": str(len(used_columns)),
             "imputation": "column median over the pooled rows; gaps imputed before scaling",
-            "purpose": "diagnostic only — never exported as a fitted pipeline",
+            "purpose": "diagnostic only - never exported as a fitted pipeline",
         },
         split=split.describe(),
         populations={

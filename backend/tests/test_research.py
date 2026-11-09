@@ -1,4 +1,4 @@
-"""S3 research foundation: Study Card, roles, profiling and provenance.
+"""study research foundation: Study Card, roles, profiling and provenance.
 
 Expected values are written by hand or computed with an independent library
 (``hashlib``, ``statistics``) so a test cannot pass merely because production

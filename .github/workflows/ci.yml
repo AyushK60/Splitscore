@@ -1,16 +1,3 @@
-# CI for SplitScope.
-#
-# This workflow mirrors the local verification commands documented in README.md.
-# It has NOT been executed on GitHub-hosted runners; it is configuration only,
-# written to be proportional to this project (two jobs, no secrets, no
-# external services).
-#
-# Local equivalents (see README.md):
-#   backend:  python -m pytest -q ; python scripts/evaluate_synthetic.py
-#             python scripts/generate_datasets.py --check
-#   frontend: npm run test ; npm run lint ; npm run typecheck ; npm run build
-#             npx playwright test   (Playwright starts/stops its own backend)
-
 name: CI
 
 on:
@@ -23,7 +10,7 @@ concurrency:
 
 jobs:
   backend:
-    name: Backend tests + synthetic evaluation
+    name: Backend tests and evaluation
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -37,7 +24,7 @@ jobs:
             backend/requirements.txt
             backend/requirements-dev.txt
 
-      - name: Install backend dependencies (declared, pinned)
+      - name: Install backend dependencies
         working-directory: backend
         run: python -m pip install -r requirements.txt -r requirements-dev.txt
 
@@ -45,10 +32,10 @@ jobs:
         working-directory: backend
         run: python -m pytest -q
 
-      - name: Synthetic evaluation (exit 1/2 propagates as a failed step)
+      - name: Synthetic evaluation
         run: python scripts/evaluate_synthetic.py
 
-      - name: Committed demo datasets are reproducible
+      - name: Check demo datasets are reproducible
         run: python scripts/generate_datasets.py --check
 
   frontend:
@@ -64,19 +51,18 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      # The E2E suite starts `python -m app.main` itself (Playwright webServer),
-      # so the backend runtime dependencies must be importable by `python`.
+      # The E2E suite starts the backend itself, so it needs the runtime dependencies.
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: pip
           cache-dependency-path: backend/requirements.txt
 
-      - name: Install backend runtime dependencies (for the E2E webServer)
+      - name: Install backend runtime dependencies
         working-directory: backend
         run: python -m pip install -r requirements.txt
 
-      - name: Frontend dependencies (clean install from the lockfile)
+      - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
 
@@ -96,15 +82,11 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      # Installs the browser binary only (system dependencies are handled by
-      # --with-deps on the hosted Linux runner). `npm run test:e2e` rebuilds
-      # first so the bundle under test is never stale; the config keeps
-      # retries: 0 and starts a fresh backend per run, stopped on completion.
-      - name: Install Playwright Chromium with system dependencies
+      - name: Install Playwright Chromium
         working-directory: frontend
         run: npx playwright install --with-deps chromium
 
-      - name: End-to-end journey (Chromium, managed servers)
+      - name: End-to-end tests
         working-directory: frontend
         run: npx playwright test
 

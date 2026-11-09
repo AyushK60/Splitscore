@@ -548,7 +548,7 @@ def build_near_duplicates() -> tuple[pd.DataFrame, dict[str, Any]]:
 
 
 # --------------------------------------------------------------------------- #
-# 7. Confounded treatment-effect study (S9B demonstration)
+# 7. Confounded treatment-effect study
 # --------------------------------------------------------------------------- #
 
 

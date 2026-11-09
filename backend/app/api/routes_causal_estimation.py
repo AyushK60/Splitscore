@@ -1,13 +1,13 @@
-"""Causal effect estimation routes (S9A).
+"""Causal effect estimation routes.
 
-The estimation endpoints extend the S8A/S8C route rules unchanged: the dataset
+The estimation endpoints extend the graph/identification route rules unchanged: the dataset
 must be live (typed 410 when expired/evicted), a graph id under a different
 dataset is 404, and every failure returns the single structured error
 envelope. Estimation runs are stored in the existing bounded run store with
 ``kind="estimation"``; a stored run is re-checked against the dataset and
 graph fingerprints on retrieval and reported stale when either changed.
 
-The routes never estimate anything themselves — all numerics live in
+The routes never estimate anything themselves - all numerics live in
 :mod:`app.causal.estimation.service`, whose identification gate runs before
 every estimation. No user-supplied code, payload or function can reach the
 estimators: the request selects among three named, server-defined estimators,
@@ -89,7 +89,7 @@ def estimation_validate(
     """Check estimation readiness without computing anything.
 
     Runs the full identification gate (fingerprint, structural validation,
-    column anchors, S8C backdoor verdict) and reports the cohort that *would*
+    column anchors, identification backdoor verdict) and reports the cohort that *would*
     be analysed, with no estimate attached.
     """
     from app.causal.estimation.preparation import prepare_cohort
@@ -248,7 +248,7 @@ def get_estimation_run(dataset_id: str, run_id: str) -> dict[str, Any]:
 
 
 # --------------------------------------------------------------------------- #
-# S9C — subgroup effects, robustness experiments, what-if scenarios
+# estimation - subgroup effects, robustness experiments, what-if scenarios
 # --------------------------------------------------------------------------- #
 
 

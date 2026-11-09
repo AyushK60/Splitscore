@@ -1,18 +1,18 @@
 /**
- * S9C — Causal Research journeys against the real backend.
+ * estimation - Causal Research journeys against the real backend.
  *
- * No mocks: every number comes from the S9A/S9C services computing on the
+ * No mocks: every number comes from the estimation/estimation services computing on the
  * bundled `causal_effect` demo.
  *
- * Journey A — subgroup effects: run a comparison in the estimation studio,
+ * Journey A - subgroup effects: run a comparison in the estimation studio,
  *   build on the stored run in Causal research, estimate subgroup effects on
  *   `region`, and inspect the forest plot, table and contrast.
- * Journey B — robustness and what-if: subsampling distribution with the
+ * Journey B - robustness and what-if: subsampling distribution with the
  *   original reference, then a model-based scenario with disclosed defaults.
- * Journey C — staleness honesty: a structural graph edit marks the stored run
+ * Journey C - staleness honesty: a structural graph edit marks the stored run
  *   stale and the research stage refuses to build on it.
- * Journey D — responsive QA at 1440 / 1024 / 768 / 390 with screenshots in
- *   docs/screenshots/s9c/.
+ * Journey D - responsive QA at 1440 / 1024 / 768 / 390 with screenshots in
+ *   test-results/shots/s9c/.
  */
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
@@ -23,7 +23,7 @@ import type { Page } from '@playwright/test'
 import { expect, loadDemoFromEntry, test } from './fixtures'
 
 const DEMO = 'Confounded treatment-effect study'
-const SHOTS = fileURLToPath(new URL('../../docs/screenshots/s9c', import.meta.url))
+const SHOTS = fileURLToPath(new URL('../test-results/shots/s9c', import.meta.url))
 
 test.use({ viewport: { width: 1440, height: 900 } })
 test.setTimeout(300_000)
@@ -87,7 +87,7 @@ async function openResearchWithRun(page: Page): Promise<string> {
   return await datasetId(page)
 }
 
-test('S9C journey A — subgroup effects on the confounded demonstration study', async ({ page }) => {
+test('estimation journey A - subgroup effects on the confounded demonstration study', async ({ page }) => {
   await openResearchWithRun(page)
 
   // Treatment and outcome are never offered as subgroup variables.
@@ -106,9 +106,9 @@ test('S9C journey A — subgroup effects on the confounded demonstration study',
   // The forest plot names the overall reference and the exploratory intent.
   await expect(page.getByTestId('subgroup-forest')).toContainText('overall')
   await expect(page.getByTestId('subgroup-forest')).toContainText('exploratory')
-  // Regression guard (S9C audit): the uncertainty whiskers must actually paint.
+  // Regression guard: the uncertainty whiskers must actually paint.
   // A scoped-CSS regression once computed `stroke: none` on these lines and the
-  // intervals vanished while the dots stayed visible — the chart looked fine at
+  // intervals vanished while the dots stayed visible - the chart looked fine at
   // a glance and lied about the uncertainty. Assert real painted geometry.
   const whisker = page.locator('[data-testid="subgroup-forest-chart"] .estrow__interval').first()
   await expect
@@ -121,7 +121,7 @@ test('S9C journey A — subgroup effects on the confounded demonstration study',
   await screenshot(page, 'subgroup-forest-1440.png', true)
 })
 
-test('S9C journey B — robustness distribution and a what-if scenario', async ({ page }) => {
+test('estimation journey B - robustness distribution and a what-if scenario', async ({ page }) => {
   await openResearchWithRun(page)
 
   await page.getByTestId('research-tab-robustness').click()
@@ -144,7 +144,7 @@ test('S9C journey B — robustness distribution and a what-if scenario', async (
   await screenshot(page, 'whatif-1440.png', true)
 })
 
-test('S9C journey C — a structural graph edit makes the stored run unusable here', async ({ page }) => {
+test('estimation journey C - a structural graph edit makes the stored run unusable here', async ({ page }) => {
   const dsId = await openResearchWithRun(page)
   await expect(page.getByTestId('research-study-meta')).toBeVisible()
 
@@ -187,7 +187,7 @@ test('S9C journey C — a structural graph edit makes the stored run unusable he
   )
   expect(save.ok()).toBeTruthy()
 
-  // Re-selecting the stored run must surface the named stale refusal here —
+  // Re-selecting the stored run must surface the named stale refusal here -
   // the research stage never builds on a run whose study has changed.
   await page.getByTestId('research-run-select').selectOption({ index: 0 })
   await page.getByTestId('research-run-select').selectOption({ index: 1 })
@@ -202,7 +202,7 @@ async function datasetId(_page: Page): Promise<string> {
   return lastDatasetId
 }
 
-test('S9C journey D — responsive QA at four widths', async ({ page }) => {
+test('estimation journey D - responsive QA at four widths', async ({ page }) => {
   await openResearchWithRun(page)
   await page.getByTestId('subgroup-variable').selectOption('region')
   await page.getByTestId('subgroup-run').click()

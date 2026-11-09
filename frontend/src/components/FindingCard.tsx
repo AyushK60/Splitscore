@@ -1,8 +1,8 @@
 /**
  * Finding card with three explanation levels.
  *
- * Every finding can be read at three depths — Quick explanation (default),
- * More context, Technical details — through one accessible control. Exactly one
+ * Every finding can be read at three depths - Quick explanation (default),
+ * More context, Technical details - through one accessible control. Exactly one
  * level is rendered at a time; the levels never repeat the same paragraph.
  *
  * Findings come from the backend verbatim: title, severity and its rationale,
@@ -218,7 +218,7 @@ export function FindingCard({
                   <ExampleBlock example={firstExample} index={0} />
                   {finding.examples.length > 1 ? (
                     <p className="tiny muted" style={{ marginBottom: 0 }}>
-                      First of {finding.examples.length} attached examples — switch to “Technical
+                      First of {finding.examples.length} attached examples - switch to “Technical
                       details” to see all of them.
                     </p>
                   ) : null}
@@ -344,7 +344,7 @@ export function FindingCard({
                   {technical.notRun.map((check) => (
                     <li key={check.rule_id}>
                       <strong>{check.title}</strong>{' '}
-                      <span className="hint mono">{check.rule_id}</span> — {check.reason}
+                      <span className="hint mono">{check.rule_id}</span> - {check.reason}
                     </li>
                   ))}
                 </ul>

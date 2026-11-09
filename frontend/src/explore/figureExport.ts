@@ -5,13 +5,13 @@ import type { SelectionState } from './ExploreState'
  * Scientific figure export (F22 preliminary).
  *
  * Three formats, one provenance story:
- *  - **SVG** — a serialization of the LIVE chart: the same geometry the user
+ *  - **SVG** - a serialization of the LIVE chart: the same geometry the user
  *    sees, with computed styles baked in (CSS custom properties resolved to
  *    literal values, so the file renders correctly outside the app), a
  *    print-safe paper background and a caption block carrying title, counts,
  *    active filters and dataset identity.
- *  - **PNG** — the same SVG rasterised at 2× for report embedding.
- *  - **JSON manifest** — the figure's full provenance: dataset fingerprint,
+ *  - **PNG** - the same SVG rasterised at 2× for report embedding.
+ *  - **JSON manifest** - the figure's full provenance: dataset fingerprint,
  *    active predicates, sampling description, counts, chart settings and the
  *    caption. No raw rows are embedded; the manifest references the dataset,
  *    it does not carry it.
@@ -37,7 +37,7 @@ export interface FigureContext {
 }
 
 export function captionLines(meta: FigureMeta, context: FigureContext): string[] {
-  const lines: string[] = [meta.title, [meta.settings, meta.counts].filter(Boolean).join(' — ')]
+  const lines: string[] = [meta.title, [meta.settings, meta.counts].filter(Boolean).join(' - ')]
   if (meta.sampling) lines.push(meta.sampling)
   if (context.selection.predicates.length > 0) {
     lines.push(

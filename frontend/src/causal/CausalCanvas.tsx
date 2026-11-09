@@ -139,7 +139,7 @@ export interface CausalCanvasProps {
   draft: CausalDraft
   issues: CausalIssue[]
   selected: Selection
-  /** Nodes in the currently tested adjustment set (S8C identification). */
+  /** Nodes in the currently tested adjustment set. */
   highlightIds?: Set<string>
   onConnect: (connection: Connection) => void
   onMoveNode: (nodeId: string, x: number, y: number) => void
@@ -182,7 +182,7 @@ function CanvasInner(props: CausalCanvasProps) {
   // The `fitView` prop only runs at mount. Refit after the node population
   // settles so nothing sits outside the viewport. The fit is debounced because
   // a fit issued in the same tick the node was added runs before React Flow
-  // has measured the node's dimensions — it would fit the *previous* graph and
+  // has measured the node's dimensions - it would fit the *previous* graph and
   // strand the newest node off-canvas.
   useEffect(() => {
     if (nodeCount === 0) return

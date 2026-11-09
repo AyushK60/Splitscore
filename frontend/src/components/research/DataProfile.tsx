@@ -81,7 +81,7 @@ export function DataProfile({ profile, onOpenDictionary }: Props) {
         <p className="rs-note">
           Repeated rows: {dataset.duplicate_row_groups} group(s). First examples:{' '}
           {dataset.duplicate_example_row_ids.join(', ')}. Repetition inside one file is a fact about
-          the file — not by itself evidence about a split.
+          the file - not by itself evidence about a split.
         </p>
       ) : null}
 
@@ -185,7 +185,7 @@ export function DataProfile({ profile, onOpenDictionary }: Props) {
                 <div>
                   <dt>Outlier candidates</dt>
                   <dd>
-                    {selected.numeric.outlier_candidates} under {selected.numeric.outlier_rule} —
+                    {selected.numeric.outlier_candidates} under {selected.numeric.outlier_rule} -
                     candidates, not errors
                   </dd>
                 </div>

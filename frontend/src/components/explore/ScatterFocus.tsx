@@ -15,7 +15,7 @@ import { FigureExport } from './FigureExport'
  * Single scatter plot with a box brush.
  *
  * Dragging a rectangle creates two range predicates (one per axis) in the
- * shared selection engine — the same predicates a parallel-coordinates brush
+ * shared selection engine - the same predicates a parallel-coordinates brush
  * produces, so a scatter selection highlights in every other view. Points are
  * the backend's render sample; the pair's valid count is exact.
  */
@@ -62,7 +62,7 @@ export function ScatterFocus({
     // observer only reads it. The previous version fed `rect.height` back into
     // the SVG's height, and because an inline SVG adds its line-box descent to
     // the container, every callback grew the SVG by a few pixels and triggered
-    // the next callback — an unbounded document-growth loop that only the
+    // the next callback - an unbounded document-growth loop that only the
     // Scatter tab could reach. Height now comes from CSS, so the loop cannot
     // re-form, and the equality guard stops any residual sub-pixel churn.
     const applySize = (width: number, height: number) => {
@@ -207,7 +207,7 @@ export function ScatterFocus({
     <figure className="xfig" data-figure="scatter">
       <figcaption className="xfig__caption">
         <span className="xfig__title">
-          Scatter — {x} (x) × {y} (y)
+          Scatter - {x} (x) × {y} (y)
         </span>
         <span className="xfig__sub">
           {series
@@ -219,7 +219,7 @@ export function ScatterFocus({
         </span>
         <FigureExport
           figureId="scatter"
-          title={`Scatter — ${x} (x) × ${y} (y)`}
+          title={`Scatter - ${x} (x) × ${y} (y)`}
           settings={`${series ? `render sample of ${series.filtered_population.toLocaleString('en-US')} rows` : ''}${
             colorColumn ? ` · coloured by ${colorColumn}` : ''
           }`}
@@ -434,7 +434,7 @@ export function ScatterFocus({
         </div>
       )}
       <p className="xfig__note">
-        Drag a rectangle to select observations — the selection joins the same shared pool as the
+        Drag a rectangle to select observations - the selection joins the same shared pool as the
         parallel-coordinates brushes and the row-evidence inspector.
         {jitterLabel
           ? ` The ${jitterLabel} marks carry a deterministic display offset of at most 4px because those axes have few distinct values; values, ranges and counts are not altered.`

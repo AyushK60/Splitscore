@@ -1,4 +1,4 @@
-"""S10-B — academic methodology generator for the research dossier.
+"""dossier - academic methodology generator for the research dossier.
 
 Structured, academically styled methodology prose composed **only** from
 verified analysis metadata the process already holds: the Study Card, the
@@ -9,7 +9,7 @@ estimation runs. Nothing is invented:
 * a confidence interval or significance level is reported only when a stored
   result carries one;
 * a missing input becomes an explicit "Not provided" / "Not evaluated"
-  statement with the reason — never a blank that reads as omission by choice.
+  statement with the reason - never a blank that reads as omission by choice.
 
 Two presentation levels are supported (``concise`` default, ``technical``);
 they differ in how much configuration detail is spelled out. Neither level
@@ -24,7 +24,7 @@ from typing import Any
 METHODOLOGY_VERSION = "1.0.0"
 
 NOT_PROVIDED = "Not provided by the study card."
-NOT_EVALUATED = "Not evaluated — no qualifying analysis run was included in this dossier."
+NOT_EVALUATED = "Not evaluated - no qualifying analysis run was included in this dossier."
 
 
 def _sentence(items: list[str]) -> str:
@@ -269,7 +269,7 @@ def build_methodology(
                 "text": (
                     f"Robustness was examined with the '{experiment.get('kind')}' experiment. Where the "
                     "experiment is a hypothetical unmeasured-confounder simulation, it is a scenario "
-                    "analysis conditioned on the observed data — not a formal sensitivity bound."
+                    "analysis conditioned on the observed data - not a formal sensitivity bound."
                 ),
             }
         )

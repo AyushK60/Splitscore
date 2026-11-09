@@ -46,13 +46,13 @@ class UploadLimits:
 
     Three independent bounds, deliberately not conflated:
 
-    * ``max_bytes`` — the raw upload, checked on the server while reading the
+    * ``max_bytes`` - the raw upload, checked on the server while reading the
       request body. The browser is never trusted for this.
-    * ``max_parsed_bytes`` — the estimated in-memory size of the *parsed* frame.
+    * ``max_parsed_bytes`` - the estimated in-memory size of the *parsed* frame.
       A CSV expands substantially when it becomes Python objects (roughly 3-5x
       for text), so a file that passes the byte cap can still be rejected here
       with a message naming the parsed-memory limit instead of exhausting RAM.
-    * ``max_rows`` / ``max_columns`` — shape limits, unrelated to file size.
+    * ``max_rows`` / ``max_columns`` - shape limits, unrelated to file size.
       Raising the byte cap does not raise them.
     """
 

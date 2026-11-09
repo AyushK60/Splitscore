@@ -7,15 +7,15 @@ import { causalLabReducer, initialLabState, type CausalLabState, type LabAction 
  * The unsaved causal draft outlives the Causal Lab route.
  *
  * The draft (nodes, edges, scope, assumptions, undo/redo) is scientific work the
- * user may have spent minutes on. Before S11 it lived in `useReducer` inside
+ * user may have spent minutes on. It used to live in `useReducer` inside
  * `CausalLabView`, so navigating to any other stage unmounted the view and
- * silently discarded an uncommitted draft. The reducer itself is unchanged —
+ * silently discarded an uncommitted draft. The reducer itself is unchanged -
  * only its state now lives here, at the workbench level, so an ordinary
  * navigation preserves it exactly as it left it.
  *
  * `draftDatasetId` records which dataset the draft belongs to. The lab uses it
  * to distinguish "returning to my unsaved draft" from "switched dataset, the
- * draft is stale" — a dataset change resets the draft, because the scientific
+ * draft is stale" - a dataset change resets the draft, because the scientific
  * context (observed columns) has genuinely changed.
  */
 interface CausalDraftContextValue {

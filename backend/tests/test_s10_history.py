@@ -1,9 +1,9 @@
-"""S10-A research run history and reproducibility manifests.
+"""research run history and reproducibility manifests.
 
 The history is a *projection* of the existing store, so these tests verify the
-projection against runs the process actually produced — an audit, a split
-comparison, a statistical model, an estimation comparison and the three S9C
-analyses — including ownership, ordering, staleness honesty, bounded storage
+projection against runs the process actually produced - an audit, a split
+comparison, a statistical model, an estimation comparison and the three estimation
+analyses - including ownership, ordering, staleness honesty, bounded storage
 and manifest integrity (the hash is recomputed here from the returned
 manifest, an independent check of the canonicalisation contract).
 """
@@ -60,7 +60,7 @@ def _run_analysis_spread(dataset_id: str) -> None:
         },
     )
     assert model.status_code == 200, model.text
-    # An estimation comparison (S9A) on the demo graph.
+    # An estimation comparison on the demo graph.
     graphs = client.get(f"/api/datasets/{dataset_id}/causal-graphs").json()
     graph = graphs["graphs"][0] if graphs.get("graphs") else None
     if graph is None:
@@ -161,7 +161,7 @@ def test_history_is_dataset_scoped_and_refuses_foreign_datasets():
     history = _history(other)
     assert history["runs"] == []
     # The store's established semantics: a dataset that is not in memory is
-    # 410 (expired/evicted), not 404 — same as every dataset-scoped route.
+    # 410 (expired/evicted), not 404 - same as every dataset-scoped route.
     missing = client.get("/api/datasets/does-not-exist/history")
     assert missing.status_code == 410
 

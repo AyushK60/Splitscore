@@ -1,7 +1,7 @@
-"""Research run history and reproducibility manifests (S10-A).
+"""Research run history and reproducibility manifests.
 
 One coherent read-only view over the runs the process already stores, grouped
-and typed per dataset — never a second storage system. The bounded in-memory
+and typed per dataset - never a second storage system. The bounded in-memory
 store (``app.core.store``) remains the only home of run state; history is a
 projection of it that adds the identity, parameter, staleness and
 reproducibility structure the raw stored payloads carry implicitly.
@@ -9,7 +9,7 @@ reproducibility structure the raw stored payloads carry implicitly.
 Honesty rules enforced here:
 
 * A field the run did not record is ``"not_recorded"`` (or ``None`` with a
-  reason) — never inferred, never invented.
+  reason) - never inferred, never invented.
 * A run whose dataset fingerprint no longer matches the live dataset, or
   whose causal graph is gone or structurally changed, is reported **stale**
   with the reason spelled out; the numbers themselves are never edited.
@@ -302,7 +302,7 @@ def build_run_history(
         "stale_count": sum(1 for entry in entries if entry["stale"]),
         "storage_note": (
             "Runs live in this server's bounded in-memory store (LRU, with a TTL). Expired or "
-            "evicted runs are absent from this history entirely — they are not recoverable. "
+            "evicted runs are absent from this history entirely - they are not recoverable. "
             "This projection adds identity and staleness structure; it stores nothing itself."
         ),
     }

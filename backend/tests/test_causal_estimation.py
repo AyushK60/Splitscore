@@ -1,4 +1,4 @@
-"""S9A causal estimation: known-effect synthetic fixtures and independent cross-checks.
+"""estimation causal estimation: known-effect synthetic fixtures and independent cross-checks.
 
 Every expected effect in this file comes from the data-generating process
 written next to the test, never from the implementation under test. Recovery
@@ -7,7 +7,7 @@ equality: a finite-sample estimate is not required to equal its generating
 parameter. Independent references (statsmodels OLS, hand-computed arithmetic)
 cross-check the estimators so they are never their own oracle.
 
-The 25 S9A brief cases are labelled in test names. API integration is case 25,
+The 25 estimation brief cases are labelled in test names. API integration is case 25,
 in ``test_causal_estimation_api.py``.
 """
 
@@ -729,7 +729,7 @@ def test_crossfit_group_aware_folds_keep_entities_whole():
 
 def test_regression_adjustment_matches_statsmodels_ols_reference():
     """For a linear outcome, g-computation with OLS equals the T coefficient
-    of the covariate-adjusted OLS regression — a fully independent formula."""
+    of the covariate-adjusted OLS regression - a fully independent formula."""
     frame = _frame_from_rng(600, 26, effect=1.5)
     dataset = _dataset(frame)
     record = _record(dataset, _confounded_spec(dataset.dataset_id))
@@ -746,7 +746,7 @@ def test_regression_adjustment_matches_statsmodels_ols_reference():
 
 def test_ipw_hajek_combination_matches_documented_formula():
     """The Hájek weights are recomputed from the returned propensities with
-    plain arithmetic — an independent check of the weighting combination."""
+    plain arithmetic - an independent check of the weighting combination."""
     frame = _frame_from_rng(600, 27, effect=1.5)
     dataset = _dataset(frame)
     record = _record(dataset, _confounded_spec(dataset.dataset_id))
@@ -778,7 +778,7 @@ def test_ipw_hajek_combination_matches_documented_formula():
 
 
 def test_aipw_interval_matches_pseudo_outcome_arithmetic():
-    """The cross-fitted AIPW SE is the SD of the pseudo-outcome over √n —
+    """The cross-fitted AIPW SE is the SD of the pseudo-outcome over √n -
     recomputed here from the returned pseudo-outcomes."""
     frame = _frame_from_rng(600, 28, effect=1.5)
     dataset = _dataset(frame)
@@ -858,7 +858,7 @@ def test_weighted_balance_collapses_after_ipw():
 
 
 def test_gate_refuses_unverifiable_client_claims_about_the_set():
-    """A set the client claims is fine is re-verified by S8C from the graph."""
+    """A set the client claims is fine is re-verified by identification from the graph."""
     dag = DAG(["x", "t", "y"], [("x", "t"), ("x", "y"), ("t", "y")])
     observed = {"x", "t", "y"}
     verdict = evaluate_adjustment_set(dag, "t", "y", [], observed)

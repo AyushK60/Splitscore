@@ -1,11 +1,11 @@
 /**
- * F05 — evidence-based split comparison visuals.
+ * F05 - evidence-based split comparison visuals.
  *
  * Every mark is computed from the actual audited assignments and folds:
  * allocation bars from achieved train/test row counts, entity-overlap bars
  * from the entity-overlap shares the checks measured, fold strips from plan
  * fold facts, and risk-category rows from the finding counts per rule. Nothing
- * here ranks strategies or implies model performance — no such engine exists.
+ * here ranks strategies or implies model performance - no such engine exists.
  */
 
 import type { ComparisonResult, Finding } from '../api/types'
@@ -64,7 +64,7 @@ export function SplitVisual({ comparison }: { comparison: ComparisonResult }) {
       <h3 className="splitviz__title">What each candidate actually does</h3>
       <p className="splitviz__note">
         Bars are computed from the audited assignments and folds. Longer test or overlap bars are
-        not better or worse — they are consequences of the strategy choice.
+        not better or worse - they are consequences of the strategy choice.
       </p>
 
       {supported.map((row) => {

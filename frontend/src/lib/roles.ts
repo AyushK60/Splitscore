@@ -13,7 +13,7 @@
  *   the user had it there, which it no longer is);
  * - the split role owns its train/test labels; changing the split column clears
  *   the labels so a stale mapping can never be submitted;
- * - clearing a special role does not silently re-add the column to features —
+ * - clearing a special role does not silently re-add the column to features -
  *   that stays an explicit user choice, and the returned `releaseNote` tells the
  *   UI what to explain.
  *

@@ -1,19 +1,19 @@
-"""Covariate-balance and overlap/positivity diagnostics for S9A (S9B will render them).
+"""Covariate-balance and overlap/positivity diagnostics for estimation (estimation UI will render them).
 
 Balance. Standardized mean differences (SMDs) per covariate, computed twice:
 unweighted (pre-weighting) and, when propensity weights are supplied,
 Hájek-weighted (post-weighting). Categorical covariates are compared through
-binary level indicators — a well-defined category-level comparison, reported
+binary level indicators - a well-defined category-level comparison, reported
 per level. An SMD is a *descriptive* statistic: no threshold on it verifies
 exchangeability, and this module never claims that it does.
 
 Overlap. Real numerical summaries of the fitted propensity distribution:
 arm-wise quantiles, extremes, weight summaries and Kish effective sample
 sizes. Empirical overlap in this dataset is carefully distinguished from the
-theoretical positivity assumption — a dataset cannot prove that every
+theoretical positivity assumption - a dataset cannot prove that every
 covariate stratum had positive treatment probability in the population.
 
-Every function returns structured numbers for S9B to render; nothing here
+Every function returns structured numbers for estimation UI to render; nothing here
 pre-renders graphs.
 """
 
@@ -50,8 +50,8 @@ BALANCE_NOTE = (
 
 POSITIVITY_NOTE = (
     "These are empirical overlap diagnostics for the fitted propensity distribution in this "
-    "dataset. The theoretical positivity assumption — every analysed stratum having positive "
-    "probability of both treatment states in the population — cannot be verified by any "
+    "dataset. The theoretical positivity assumption - every analysed stratum having positive "
+    "probability of both treatment states in the population - cannot be verified by any "
     "dataset, and these diagnostics neither establish nor refute it."
 )
 

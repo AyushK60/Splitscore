@@ -27,7 +27,7 @@ STUDY_SCHEMA_VERSION = "1.0"
 MANIFEST_SCHEMA_VERSION = "1.0"
 
 #: Roles a column can carry. The first group is the original V1 vocabulary;
-#: the second is the research vocabulary S3 introduces for study design.
+#: the second is the research vocabulary study introduces for study design.
 ColumnRole = Literal[
     "entity",
     "timestamp",
@@ -276,7 +276,7 @@ STUDY_FIELDS: tuple[FieldSpec, ...] = (
         label="Study design",
         section="Design",
         required=True,
-        help="How the data were produced — as declared by you, not detected.",
+        help="How the data were produced - as declared by you, not detected.",
         kind="select",
     ),
     FieldSpec(

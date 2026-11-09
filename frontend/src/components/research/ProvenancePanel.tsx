@@ -6,7 +6,7 @@ import { useApp } from '../../state/AppState'
 
 /**
  * Provenance: the identity of the analysed bytes and the manifest that records
- * it. Re-import is deliberately conservative — a mismatched fingerprint is
+ * it. Re-import is deliberately conservative - a mismatched fingerprint is
  * reported and nothing is applied to the wrong dataset.
  */
 

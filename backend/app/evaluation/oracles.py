@@ -15,8 +15,8 @@ for quartiles in robust scaling), the oracle states which convention it uses
 and hand-built fixtures are designed so that the choice cannot change the
 answer (symmetric data with unambiguous quartiles).
 
-These oracles compute *complete* expected outcomes — every detectable case,
-not just the planted ones — because generated data can introduce additional
+These oracles compute *complete* expected outcomes - every detectable case,
+not just the planted ones - because generated data can introduce additional
 matches beyond what the generator planted.
 """
 
@@ -84,7 +84,7 @@ def _severity_target_copy(coverage: float, baseline: float | None, high: float, 
 
 
 # --------------------------------------------------------------------------- #
-# SS-DUP-001 — exact feature duplicates across the boundary
+# SS-DUP-001 - exact feature duplicates across the boundary
 # --------------------------------------------------------------------------- #
 
 
@@ -156,7 +156,7 @@ def duplicate_truth(
 
 
 # --------------------------------------------------------------------------- #
-# SS-ENT-001 — entity overlap
+# SS-ENT-001 - entity overlap
 # --------------------------------------------------------------------------- #
 
 
@@ -225,7 +225,7 @@ def entity_truth(
 
 
 # --------------------------------------------------------------------------- #
-# SS-CHR-001 — chronology violation
+# SS-CHR-001 - chronology violation
 # --------------------------------------------------------------------------- #
 
 
@@ -305,7 +305,7 @@ def chronology_truth(
 
 
 # --------------------------------------------------------------------------- #
-# SS-TGT-001 — feature exactly matching the target
+# SS-TGT-001 - feature exactly matching the target
 # --------------------------------------------------------------------------- #
 
 
@@ -428,7 +428,7 @@ def target_copy_truth(
 
 
 # --------------------------------------------------------------------------- #
-# SS-NEAR-001 — near-duplicate candidates (Chebyshev distance, opt-in)
+# SS-NEAR-001 - near-duplicate candidates (Chebyshev distance, opt-in)
 # --------------------------------------------------------------------------- #
 
 

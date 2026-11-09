@@ -7,7 +7,7 @@ returns a :class:`RuleOutput` that is either a set of findings, or an explicit
 
 Rules never raise for expected conditions: they return a status. The engine
 still wraps each rule in a guard so that an unexpected exception in one rule
-cannot take down the whole audit — it is reported as a rule of status
+cannot take down the whole audit - it is reported as a rule of status
 ``error``, which is visibly different from "clean".
 """
 

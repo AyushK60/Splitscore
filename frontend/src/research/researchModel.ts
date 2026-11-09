@@ -1,7 +1,7 @@
 /**
- * S9C research model helpers.
+ * estimation research model helpers.
  *
- * Pure functions: rebuild the exact S9A estimation request from a stored run's
+ * Pure functions: rebuild the exact estimation estimation request from a stored run's
  * reproducibility block (so subgroup/robustness/what-if analyses are computed
  * on the *same* study as the estimation run they build on), plus shared
  * plotting arithmetic for the forest plot, robustness distributions and the
@@ -20,7 +20,7 @@ import type {
 /**
  * Rebuild the estimation request a stored run actually used. The
  * reproducibility block echoes every request field, so an advanced analysis
- * can target the identical study — including the graph fingerprint as the
+ * can target the identical study - including the graph fingerprint as the
  * staleness guard.
  */
 export function requestFromRun(repro: EstimationReproducibility): EstimationRequestPayload {

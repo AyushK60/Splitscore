@@ -1,11 +1,11 @@
 /**
- * The Identification mode (S8C).
+ * The Identification mode.
  *
  * A focused reasoning panel beside the unchanged canvas: treatment/outcome
  * scope, the backend's graphical-identification status, suggested adjustment
  * sets, a custom set the researcher can test, a d-separation probe, and
  * rule-based explanations that come verbatim from the backend's structured
- * payload — never invented in the frontend.
+ * payload - never invented in the frontend.
  *
  * Honesty contracts preserved here:
  * - results are tied to an exact scientific signature; editing the graph's
@@ -37,7 +37,7 @@ const STATUS_TONE: Record<string, { label: string; tone: 'ok' | 'warn' | 'error'
     label: 'No eligible observed backdoor set found',
     tone: 'warn',
   },
-  search_incomplete: { label: 'Search incomplete — bounds reached', tone: 'warn' },
+  search_incomplete: { label: 'Search incomplete - bounds reached', tone: 'warn' },
   invalid_scope: { label: 'Scope not usable', tone: 'error' },
   missing_dataset_variables: { label: 'Treatment or outcome not measured', tone: 'error' },
   unsupported_identification_method: { label: 'Method not supported', tone: 'error' },
@@ -47,7 +47,7 @@ const STATUS_TONE: Record<string, { label: string; tone: 'ok' | 'warn' | 'error'
 const VIOLATION_LABELS: Record<string, string> = {
   unknown_variable: 'Not a variable of this graph',
   adjustment_contains_scope: 'Contains the treatment or the outcome',
-  unobserved_variable: 'Unobserved — nothing could be conditioned on in the data',
+  unobserved_variable: 'Unobserved - nothing could be conditioned on in the data',
   post_treatment_variable: 'Descendant of the treatment (post-treatment)',
   open_backdoor_path: 'A backdoor path remains open',
 }
@@ -109,7 +109,7 @@ function SetChips({
   return (
     <div className="clab-chip-row">
       {variables.length === 0 ? (
-        <span className="clab-note clab-note--quiet">Empty set — adjust for nothing.</span>
+        <span className="clab-note clab-note--quiet">Empty set - adjust for nothing.</span>
       ) : (
         variables.map((nodeId) => (
           <button
@@ -178,7 +178,7 @@ export function IdentificationPanel(props: IdentificationPanelProps) {
 
   const candidateList = useMemo(() => {
     if (search) return search.eligible_candidates
-    // Before any run, offer every observed node that is not the scope pair —
+    // Before any run, offer every observed node that is not the scope pair -
     // the backend remains the authority on eligibility.
     return draft.nodes
       .filter(
@@ -257,7 +257,7 @@ export function IdentificationPanel(props: IdentificationPanelProps) {
         <div className="clab-stale" data-testid="identification-save-gate" role="status">
           <p>
             {props.graphId
-              ? 'The graph has unsaved changes. Identification always runs on the saved revision — save first, then run.'
+              ? 'The graph has unsaved changes. Identification always runs on the saved revision - save first, then run.'
               : 'Save this graph first; identification runs against the backend’s stored structure.'}
           </p>
           <button type="button" className="btn btn--small" onClick={props.onSaveRequest}>
@@ -310,8 +310,8 @@ export function IdentificationPanel(props: IdentificationPanelProps) {
             <p className="clab-note">
               The search finished within all bounds and found no observed set satisfying the
               classical backdoor criterion. This is specific to the backdoor criterion on this
-              assumed graph — it does <em>not</em> prove the effect is unidentifiable by every
-              method (front-door and instrumental-variable strategies are outside S8C).
+              assumed graph - it does <em>not</em> prove the effect is unidentifiable by every
+              method (front-door and instrumental-variable strategies are outside identification).
             </p>
           )}
         </section>
@@ -321,7 +321,7 @@ export function IdentificationPanel(props: IdentificationPanelProps) {
         <section className="clab-ident-section" aria-label="Suggested adjustment sets">
           <h4>Suggested sets (inclusion-minimal, verified)</h4>
           {search.sets.length === 0 ? (
-            <p className="clab-note clab-note--quiet">None reported{search.search_status === 'incomplete' ? ' — and the search is incomplete.' : '.'}</p>
+            <p className="clab-note clab-note--quiet">None reported{search.search_status === 'incomplete' ? ' - and the search is incomplete.' : '.'}</p>
           ) : (
             search.sets.map((candidate, index) => (
               <div key={index} className="clab-ident-set" data-testid="suggested-set">
@@ -346,7 +346,7 @@ export function IdentificationPanel(props: IdentificationPanelProps) {
           )}
           <p className="clab-note clab-note--quiet">
             Inclusion-minimal: no proper subset of a reported set also satisfies the criterion.
-            Minimal does not mean smallest overall — several minimal sets of different sizes can
+            Minimal does not mean smallest overall - several minimal sets of different sizes can
             exist.
           </p>
         </section>
@@ -407,7 +407,7 @@ export function IdentificationPanel(props: IdentificationPanelProps) {
             {evaluation.violations.map((violation, index) => (
               <p key={index} className="clab-ident-violation">
                 <strong>{VIOLATION_LABELS[violation.code] ?? violation.code}</strong>
-                {violation.node_id ? ` — ${chipLabel(violation.node_id, draft)}` : ''}: {violation.message}
+                {violation.node_id ? ` - ${chipLabel(violation.node_id, draft)}` : ''}: {violation.message}
               </p>
             ))}
             {evaluation.open_backdoor_paths.length > 0 && (

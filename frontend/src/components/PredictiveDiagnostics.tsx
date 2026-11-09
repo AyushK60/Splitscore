@@ -1,5 +1,5 @@
 /**
- * S6 predictive diagnostics: PR, reliability, Q–Q, OLS influence and
+ * predictive diagnostics: PR, reliability, Q–Q, OLS influence and
  * permutation importance. Every value comes from the returned model run; these
  * components only plot or tabulate it and state the partition and method.
  */
@@ -438,7 +438,7 @@ export function ImportanceSection({
     importance.metric === 'rmse_increase' ? 'Mean RMSE increase' : 'Mean balanced-accuracy drop'
   return (
     <>
-      <h2 className="mlab__h2">Permutation importance — test partition</h2>
+      <h2 className="mlab__h2">Permutation importance - test partition</h2>
       <p className="mlab__hint">
         {importance.method} Baseline {baselineLabel} = {fmt(importance.baseline_score)}. Higher
         values mean the model&apos;s score got worse when that predictor was permuted.

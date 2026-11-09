@@ -1,12 +1,12 @@
-"""Scientific causal effect estimation (S9A).
+"""Scientific causal effect estimation.
 
-This package turns a *verified graphical identification result* (S8C) into a
+This package turns a *verified graphical identification result* into a
 numerically estimated average treatment effect computed from the uploaded
 dataset. It is the first SplitScope stage allowed to produce a causal number,
 so its contracts are correspondingly strict:
 
-* estimation is gated on a classical backdoor adjustment set that S8C itself
-  verified against the stored graph — a client-supplied set is never trusted;
+* estimation is gated on a classical backdoor adjustment set that identification itself
+  verified against the stored graph - a client-supplied set is never trusted;
 * treatment and outcome mappings are explicit; nothing is inferred from column
   labels;
 * every payload carries row accounting, diagnostics, warnings and full

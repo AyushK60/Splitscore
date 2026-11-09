@@ -1,14 +1,14 @@
-"""The three S9A estimators: regression adjustment, IPW and cross-fitted AIPW.
+"""The three estimation estimators: regression adjustment, IPW and cross-fitted AIPW.
 
 All three estimate the **average treatment effect (ATE)** on one explicit
 analysis cohort, given an explicit 0/1 treatment vector, a numeric outcome and
 typed covariates. Preprocessing (imputation, scaling, one-hot encoding) lives
-inside scikit-learn pipelines that are fitted **only on fitting rows** — for
-the cross-fitted AIPW, within each training fold — so no transformation ever
+inside scikit-learn pipelines that are fitted **only on fitting rows** - for
+the cross-fitted AIPW, within each training fold - so no transformation ever
 learns from a row it scores.
 
 Estimator mathematics (all under the identification assumptions verified by
-the S8C gate, which this module does not re-check):
+the identification gate, which this module does not re-check):
 
 * **Regression adjustment (g-computation).** Fit m(t, x) = E[Y | T = t, X = x]
   on the cohort with the treatment as a design feature; predict m(1, X_i) and
@@ -199,7 +199,7 @@ def _outcome_predict(model: Pipeline, design: pd.DataFrame, outcome_task: str) -
     """E[Y | X] under the fitted outcome model.
 
     For a binary outcome the model is logistic and the expectation is the
-    predicted probability of the coded-1 outcome — never the class label.
+    predicted probability of the coded-1 outcome - never the class label.
     """
     if outcome_task == "logistic":
         return model.predict_proba(design)[:, 1]
@@ -508,7 +508,7 @@ def estimate_aipw(
     )
     truncated, truncation_payload, warnings = _apply_truncation(e_hat, truncation_spec)
     eps = np.finfo(float).eps
-    # Machine-epsilon guard against division by zero only — this is not
+    # Machine-epsilon guard against division by zero only - this is not
     # statistical truncation (that lives in _apply_truncation, explicitly
     # requested and reported). Extreme fitted scores remain extreme and are
     # reported by the overlap diagnostics.

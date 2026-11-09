@@ -1,6 +1,6 @@
-"""S9C independent scientific audit harness.
+"""estimation independent scientific audit harness.
 
-This module re-derives every headline S9C quantity with **independently
+This module re-derives every headline estimation quantity with **independently
 implemented** machinery and compares it against the production payload. It
 deliberately does not import the production estimators to produce its
 expectations:
@@ -119,7 +119,7 @@ def _independent_hajek_ipw(treatment: np.ndarray, outcome: np.ndarray) -> dict[s
     With e(x) constant at the treated fraction p, w1 = T/p and w0 = (1-T)/(1-p),
     the Hájek ratio estimators collapse to the per-arm means, and the
     influence-function SE is sd(phi1 - phi0)/sqrt(n) with
-    phi_k = n * w_k * (Y - mu_k) / sum(w_k) — all recomputed here.
+    phi_k = n * w_k * (Y - mu_k) / sum(w_k) - all recomputed here.
     """
     p = float(treatment.mean())
     w1 = treatment / p
@@ -144,7 +144,7 @@ def _independent_ols_gcomputation(
     outcome: np.ndarray,
     covariate_columns: list[str],
 ) -> float:
-    """statsmodels OLS g-computation ATE — a completely separate fitting path."""
+    """statsmodels OLS g-computation ATE - a completely separate fitting path."""
     design = pd.DataFrame(frame[list(covariate_columns)]).copy()
     design["t"] = treatment
     design = sm.add_constant(design, has_constant="add")
@@ -475,7 +475,7 @@ def test_audit_6_subgroup_engine_consumes_the_same_estimating_equation_as_the_st
 
 def test_audit_7_sensitivity_grid_cells_match_statsmodels_gcomputation():
     """Every (γ, κ) cell for regression_adjustment is re-fit with statsmodels
-    OLS — a different library and pipeline than production — after
+    OLS - a different library and pipeline than production - after
     re-simulating U from the documented generating model and the recorded seed."""
     frame = _confounded_frame(n=600, seed=SEED + 6)
     dataset = _dataset(frame)

@@ -16,13 +16,13 @@ change the data). Missing cells and the conventional missing tokens
 Non-negotiables enforced here:
 
 * the treatment mapping must cover every observed value of the treatment
-  column — an ambiguous encoding is refused with the offending values listed,
+  column - an ambiguous encoding is refused with the offending values listed,
   never silently resolved;
 * a degenerate treatment (one arm below the minimum) is refused;
 * rows are never silently dropped: every exclusion has a reason and a count,
   and the payload reports rows before and after every stage;
 * preprocessing is *specified* here but *fitted* by the estimators inside
-  their folds, so no transformation ever sees held-out rows (S9A leakage rule).
+  their folds, so no transformation ever sees held-out rows (estimation leakage rule).
 
 Column resolution (graph node → dataset column) happens in the service layer;
 this module works on plain column names.

@@ -7,7 +7,7 @@ amount of split hygiene elsewhere repairs it.
 
 SplitScope does not execute or instrument preprocessing, so:
 
-* with **no declaration**, the check is NOT EVALUATED — never passed. The
+* with **no declaration**, the check is NOT EVALUATED - never passed. The
   reason names exactly what is missing and how to declare it;
 * with a **declaration**, each step is judged on its declared ``fit_context``:
   ``full_dataset`` is a high finding; ``unknown`` / ``not_recorded`` are
@@ -16,7 +16,7 @@ SplitScope does not execute or instrument preprocessing, so:
 
 Only a future version that actually executes the preprocessing can claim
 verified pipeline isolation. Until then this rule's vocabulary is
-"declared" and "not evaluated" — never "verified".
+"declared" and "not evaluated" - never "verified".
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ TITLE = "Preprocessing fit boundary (declared)"
 LIMITATIONS = [
     "This check evaluates a declaration. SplitScope does not run the "
     "preprocessing, so 'train_only' means the user recorded train-only "
-    "fitting — not that SplitScope verified it.",
+    "fitting - not that SplitScope verified it.",
     "Declared step lists can be incomplete. An undeclared step is invisible to "
     "this check; completeness of the declaration is the user's responsibility.",
     "The check does not inspect transformer parameters (means, medians, "
@@ -48,7 +48,7 @@ def run(ctx: RuleContext) -> RuleOutput:
             (
                 "No preprocessing declaration was provided. SplitScope does not instrument "
                 "preprocessing execution, and a raw CSV cannot establish where a scaler, "
-                "imputer or feature selector was fitted — so the pipeline fit boundary is NOT "
+                "imputer or feature selector was fitted - so the pipeline fit boundary is NOT "
                 "EVALUATED, not passed. Declare the preprocessing steps and their fit context "
                 "in the audit configuration to record the boundary."
             ),

@@ -6,7 +6,7 @@ import { useExplore } from '../../explore/ExploreState'
 import { useApp } from '../../state/AppState'
 
 /**
- * Row Evidence Inspector — the traceability half of every chart.
+ * Row Evidence Inspector - the traceability half of every chart.
  *
  * The selection engine resolves brushes to immutable row ids; this panel shows
  * the actual observations behind the current selection: the active predicate,
@@ -177,7 +177,7 @@ export function RowEvidence() {
 
           <p className="xrow__footnote">
             {audit
-              ? 'Selections are analysis context, not audit findings — the latest audit result lives in Results.'
+              ? 'Selections are analysis context, not audit findings - the latest audit result lives in Results.'
               : 'Run the audit from Results to bind leakage findings to this dataset; the explorer works independently of it.'}
             {' '}Values are the file's own text; “—” marks an empty cell.
           </p>

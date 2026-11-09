@@ -1,6 +1,6 @@
-"""HTTP routes for the S4 Scientific Visual Explorer.
+"""HTTP routes for the Scientific Visual Explorer.
 
-All routes are scoped to a dataset in the store and reuse the S3 study record
+All routes are scoped to a dataset in the store and reuse the study study record
 for role context. Point-level payloads are sampled (and say so); every
 aggregate is computed on the full population.
 """
@@ -307,7 +307,7 @@ def post_missingness(dataset_id: str, request: MissingnessRequest) -> dict[str, 
 def post_rows(dataset_id: str, request: RowsRequest) -> dict[str, Any]:
     """Concrete rows by immutable id, for the row-evidence inspector.
 
-    Values are returned as the file's own text — the inspector shows what the
+    Values are returned as the file's own text - the inspector shows what the
     CSV says, not a chart's parsed approximation. Unknown ids are reported
     rather than silently dropped, so a stale selection cannot look complete.
     """
@@ -361,7 +361,7 @@ def explore_similarity(dataset_id: str, request: SimilarityRequestModel) -> dict
     record = context.studies.get(dataset_id)
     if record is None:
         # Seed from the demo manifest exactly like the Study stage does, so the
-        # explorer reads the split a user has confirmed (or a demo declares) —
+        # explorer reads the split a user has confirmed (or a demo declares) -
         # never one it inferred.
         from app.api.routes_research import _record as _seeded_record
 

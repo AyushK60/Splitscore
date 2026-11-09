@@ -1,10 +1,10 @@
 /**
- * S9C-C — What-If Explorer.
+ * what-if - What-If Explorer.
  *
  * Model-based conditional outcome predictions from the verified
  * g-computation outcome model: one profile scenario (treatment = 1 vs 0)
  * beside the cohort-standardised scenario. Every prediction is labelled as a
- * model expectation under explicit assumptions — never an observed
+ * model expectation under explicit assumptions - never an observed
  * counterfactual, and never interval-bearing. Unset profile fields fall back
  * to disclosed cohort medians/modes, and out-of-support values are answered
  * with the backend's extrapolation warnings.
@@ -137,8 +137,8 @@ export function WhatIfView({
       ) : (
         <section className="card rsempty" aria-label="No scenario yet">
           <p>
-            Set a baseline covariate profile — or leave fields at their disclosed cohort defaults
-            — and predict. The treatment state is the only interventional variable; adjusting a
+            Set a baseline covariate profile - or leave fields at their disclosed cohort defaults
+            - and predict. The treatment state is the only interventional variable; adjusting a
             baseline covariate describes a conditional-model scenario, not an intervention on
             that covariate.
           </p>
@@ -209,7 +209,7 @@ export function WhatIfResult({ payload }: { payload: WhatIfRunPayload }) {
           <>
             The fitted g-computation outcome model&apos;s expectation for the stated baseline
             profile under treatment = 1 and treatment = 0, in {units}. These are model-based
-            conditional predictions under explicit assumptions — not observed outcomes and not
+            conditional predictions under explicit assumptions - not observed outcomes and not
             individual counterfactuals.
           </>
         }
@@ -296,7 +296,7 @@ export function WhatIfResult({ payload }: { payload: WhatIfRunPayload }) {
             </p>
             <p className="estsum__detailmeta">
               Cohort-standardised contrast on the same model:{' '}
-              {formatNumber(cohort.contrast)} {units} — the g-computation ATE the estimation
+              {formatNumber(cohort.contrast)} {units} - the g-computation ATE the estimation
               studio reports.
             </p>
           </div>

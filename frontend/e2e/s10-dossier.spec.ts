@@ -1,15 +1,15 @@
 /**
- * S10 — the complete research workflow journey against the real backend.
+ * history - the complete research workflow journey against the real backend.
  *
- * Journey A — dataset → generated-split audit → causal identification gate →
+ * Journey A - dataset → generated-split audit → causal identification gate →
  *   effect comparison → subgroup/robustness/what-if → Report Studio composes
  *   the integrated dossier (causal graph, identification, estimation,
  *   subgroup, robustness, what-if, methodology) → JSON download verifies
  *   schema 1.1.0 and the stored estimate.
- * Journey B — History stage honesty + portable reproducibility manifest +
+ * Journey B - History stage honesty + portable reproducibility manifest +
  *   the deterministic causal-graph publication figure.
  *
- * No mocks: every number comes from the S9A/S9C/S10 services computing on the
+ * No mocks: every number comes from the estimation/estimation/history services computing on the
  * bundled `causal_effect` demo.
  */
 import { mkdirSync, readFileSync } from 'node:fs'
@@ -22,7 +22,7 @@ import type { Page } from '@playwright/test'
 import { expect, loadDemoFromEntry, test } from './fixtures'
 
 const DEMO = 'Confounded treatment-effect study'
-const SHOTS = fileURLToPath(new URL('../../docs/screenshots/s10', import.meta.url))
+const SHOTS = fileURLToPath(new URL('../test-results/shots/s10', import.meta.url))
 const TMP = join(tmpdir(), 'splitscope-s10-e2e')
 
 test.use({ viewport: { width: 1440, height: 900 } })
@@ -96,7 +96,7 @@ async function runResearchExperiments(page: Page): Promise<void> {
   await expect(page.getByTestId('whatif-contrast')).toBeVisible()
 }
 
-test('S10 journey A — audit, causal analysis and the integrated dossier', async ({ page }) => {
+test('history journey A - audit, causal analysis and the integrated dossier', async ({ page }) => {
   // --- dataset with its declared split, then the leakage audit -------------- //
   await loadDemoFromEntry(page, DEMO)
   // The demo's manifest seeds the split and roles; the readiness rail is
@@ -171,7 +171,7 @@ test('S10 journey A — audit, causal analysis and the integrated dossier', asyn
   expect(estimationRuns[0].estimators.some((estimator) => estimator.status === 'estimated')).toBe(true)
 })
 
-test('S10 journey B — history, manifest and the causal-graph publication figure', async ({ page }) => {
+test('history journey B - history, manifest and the causal-graph publication figure', async ({ page }) => {
   const datasetId = await openReadyStudio(page)
   await runComparison(page)
 

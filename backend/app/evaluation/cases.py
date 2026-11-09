@@ -2,11 +2,11 @@
 
 Two kinds of cases:
 
-* **Hand-built fixtures** — a handful of rows written out below, with every
+* **Hand-built fixtures** - a handful of rows written out below, with every
   expectation (statuses, counts, severities, evidence row ids) written by hand
   from the documented rule definitions. Nothing here is derived by running a
   detector.
-* **Committed demo datasets** — the six bundled CSVs, audited with their
+* **Committed demo datasets** - the six bundled CSVs, audited with their
   recommended roles/config. The *complete* expected outcome for each evaluated
   check is computed by the independent oracles in :mod:`app.evaluation.oracles`
   (never by the detectors), because generated data can contain additional

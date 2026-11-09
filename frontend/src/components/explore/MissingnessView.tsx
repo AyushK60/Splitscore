@@ -68,7 +68,7 @@ export function MissingnessView({ datasetId, predicates, selectionActive, groupC
         </span>
         <FigureExport
           figureId="missingness"
-          title={`Missingness — ${data ? data.columns.length : '?'} columns`}
+          title={`Missingness - ${data ? data.columns.length : '?'} columns`}
           settings={data ? `empty-cell policy · ${data.matrix.method} matrix` : ''}
           counts={
             data
@@ -187,7 +187,7 @@ export function MissingnessView({ datasetId, predicates, selectionActive, groupC
             </svg>
             <span className="xmiss__note">
               Each row is one observation (immutable row id on hover); copper marks a missing cell.
-              The matrix is a rendering aid — the percentages above are exact for the whole
+              The matrix is a rendering aid - the percentages above are exact for the whole
               population.
             </span>
           </div>
@@ -199,7 +199,7 @@ export function MissingnessView({ datasetId, predicates, selectionActive, groupC
                 return (
                   <div key={group.group} className="xdist__group">
                     <span className="xdist__groupname">
-                      {group.group} — {group.rows.toLocaleString('en-US')} rows
+                      {group.group} - {group.rows.toLocaleString('en-US')} rows
                     </span>
                     <span className="xdist__groupstats">
                       {worst

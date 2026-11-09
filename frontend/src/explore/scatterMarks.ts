@@ -82,7 +82,7 @@ export function pearsonR(
 }
 
 export function formatCorrelation(value: number | null): string {
-  if (value === null) return 'r —'
+  if (value === null) return 'r -'
   return `r ${value >= 0 ? '+' : '−'}${Math.abs(value).toFixed(2)}`
 }
 

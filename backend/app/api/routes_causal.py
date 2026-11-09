@@ -1,12 +1,12 @@
-"""Causal graph routes (S8A foundation).
+"""Causal graph routes.
 
 Every route is scoped to a dataset that still exists in the store, so a graph
 can never be created against, read from, or attached to data the process no
-longer holds — the same rule the study routes apply.
+longer holds - the same rule the study routes apply.
 
 The routes expose only graph *authoring*: create, read, update, delete, list,
 validate and export/import. No identification, adjustment-set or effect-estimation
-endpoint exists at this stage; those belong to S8C and are deliberately absent.
+endpoint exists at this stage; those belong to identification and are deliberately absent.
 """
 
 from __future__ import annotations
@@ -160,9 +160,9 @@ def export_causal_graph(dataset_id: str, graph_id: str) -> JSONResponse:
 
 @router.get("/datasets/{dataset_id}/causal-graphs/{graph_id}/figure.svg")
 def causal_graph_figure(dataset_id: str, graph_id: str) -> Response:
-    """Publication-grade SVG of the stored graph (S10-C).
+    """Publication-grade SVG of the stored graph.
 
-    Rendered deterministically from the stored spec — never a screenshot of
+    Rendered deterministically from the stored spec - never a screenshot of
     the interactive canvas. Display-only layout coordinates position the
     nodes; they are excluded from the scientific fingerprint and carry no
     analytical meaning.

@@ -1,10 +1,10 @@
 /**
- * S3 journey: Study Card → dictionary conflict → profile → provenance round trip.
+ * study journey: Study Card → dictionary conflict → profile → provenance round trip.
  *
  * Runs against the real backend with the committed synthetic demo. Every check is
  * made on rendered output or on the API the UI itself calls; nothing is mocked.
  * The manifest is exported through the API, written to disk and imported back
- * through the file input — the same path a user takes.
+ * through the file input - the same path a user takes.
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -27,7 +27,7 @@ test('study card, role conflicts and a manifest round trip', async ({ page }) =>
   expect(datasetId).toMatch(/^ds-/)
 
   // --- Study card ---------------------------------------------------------
-  await page.getByLabel(/Study title/i).fill('S3 browser study')
+  await page.getByLabel(/Study title/i).fill('study browser study')
   await page.getByLabel(/Research question/i).fill('Does the split leak customer identity?')
   await page.getByLabel(/Study design/i).selectOption('observational')
   await page.getByLabel(/Unit of analysis/i).fill('customer')
@@ -77,7 +77,7 @@ test('study card, role conflicts and a manifest round trip', async ({ page }) =>
   await expect(page.locator('.rs-check-result__status')).toHaveText(/Match/i)
   await page.getByRole('button', { name: /Apply study metadata/i }).click()
   await expect(page.getByRole('heading', { name: 'What this study is asking' })).toBeVisible()
-  await expect(page.getByLabel(/Study title/i)).toHaveValue('S3 browser study')
+  await expect(page.getByLabel(/Study title/i)).toHaveValue('study browser study')
 
   // --- The original audit still works with the saved roles ----------------
   await page.getByRole('navigation', { name: 'Primary' }).getByRole('button', { name: /Results|Audit/ }).click()

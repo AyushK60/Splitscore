@@ -1,6 +1,8 @@
 {
   "name": "splitscope-frontend",
   "private": true,
+  "author": "Ayush Khanal <ayush.khanal2060@gmail.com>",
+  "license": "MIT",
   "version": "1.0.0",
   "type": "module",
   "description": "SplitScope: explainable ML data leakage auditor (frontend)",

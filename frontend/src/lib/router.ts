@@ -43,7 +43,7 @@ export function isViewId(value: string): value is ViewId {
  *
  * Only hashes of the form `#/view` change the route. Anything else (`#main`
  * from the skip link, `#method` from an in-page anchor) is a plain fragment
- * link and deliberately returns `null` so the current view is kept — otherwise
+ * link and deliberately returns `null` so the current view is kept - otherwise
  * skipping to content would bounce the user back to the landing page.
  *
  * An empty hash is the product front door: the landing page.

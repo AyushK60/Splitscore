@@ -1,8 +1,8 @@
 """SS-ENT-002: identifier-like feature reuse across the split.
 
 Label: this is a *memorisation-vector check*. It inspects feature columns whose
-observed values are all distinct — an identifier-like column by observation,
-not by inference about roles — and reports cross-split value overlap, which is
+observed values are all distinct - an identifier-like column by observation,
+not by inference about roles - and reports cross-split value overlap, which is
 the raw material of row memorisation.
 
 The check is deliberately narrow about what it claims:
@@ -13,7 +13,7 @@ The check is deliberately narrow about what it claims:
 * it runs only on columns the user assigned as features; the declared entity
   column is audited by SS-ENT-001, which has its own definitions;
 * counts, denominators and the split are real. Cardinality alone, without
-  cross-split overlap, produces no finding — an all-distinct column that never
+  cross-split overlap, produces no finding - an all-distinct column that never
   repeats is still recorded in the metrics as a memorisation *vector* to be
   aware of, because the model can memorise training rows even when the exact
   values do not recur.
@@ -78,7 +78,7 @@ def run(ctx: RuleContext) -> RuleOutput:
     ]
 
     # A column qualifies as identifier-like when its distinct-value ratio is at
-    # or above this threshold — an observed property, not an inference that the
+    # or above this threshold - an observed property, not an inference that the
     # column is an entity identifier. Shared values are exactly the case the
     # check screens for, so demanding *all* values distinct would skip them.
     IDENTIFIER_LIKE_RATIO = 0.9

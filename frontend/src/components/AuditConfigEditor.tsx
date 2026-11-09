@@ -226,7 +226,7 @@ export function AuditConfigEditor({
                 }
               >
                 <option value="robust">Robust (median / IQR)</option>
-                <option value="none">None — raw units</option>
+                <option value="none">None - raw units</option>
               </select>
               <span className="hint">
                 Robust scaling divides by the interquartile range, so one outlier cannot dominate.
@@ -299,7 +299,7 @@ export function AuditConfigEditor({
       ) : null}
 
       <fieldset>
-        <legend>Integrity declarations (S5)</legend>
+        <legend>Integrity declarations</legend>
         <p className="hint" style={{ marginTop: 0 }}>
           These are <strong>your declarations</strong> about the modelling process. SplitScope never
           infers them from the file: anything left undeclared is reported as NOT EVALUATED rather

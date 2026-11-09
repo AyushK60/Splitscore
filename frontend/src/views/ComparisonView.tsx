@@ -460,7 +460,7 @@ export function ComparisonView({ onNavigate }: { onNavigate: (view: ViewId) => v
         <Card title="Results">
           <EmptyState title="No comparison has been run yet">
             SplitScope will build each candidate, re-run every enabled check on it under the current
-            settings, and report the differences — including the checks that could not run at all.
+            settings, and report the differences - including the checks that could not run at all.
           </EmptyState>
         </Card>
       ) : (
@@ -602,7 +602,7 @@ export function ComparisonView({ onNavigate }: { onNavigate: (view: ViewId) => v
                     <ul className="list-tight small">
                       {row.not_evaluated.map((check) => (
                         <li key={check.rule_id}>
-                          <span className="mono tiny">{check.rule_id}</span> — {check.reason}
+                          <span className="mono tiny">{check.rule_id}</span> - {check.reason}
                         </li>
                       ))}
                     </ul>
@@ -658,7 +658,7 @@ export function ComparisonView({ onNavigate }: { onNavigate: (view: ViewId) => v
           <Card title="What a split assignment does and does not fix">
             <Callout tone="warn" title="Splitting is not a repair">
               Producing a group or chronological assignment removes the specific overlap it is
-              designed to remove — entity sharing, or future information in train. It does not fix
+              designed to remove - entity sharing, or future information in train. It does not fix
               duplicate rows, target proxies, or preprocessing that was fitted before the split.
               Re-run the audit on the new assignment and read the remaining findings.
             </Callout>

@@ -1,5 +1,5 @@
 /**
- * S9C-B — Robustness & Sensitivity.
+ * robustness - Robustness & Sensitivity.
  *
  * Three reproducible refutation experiments on the selected study: data
  * subsampling, placebo treatment, and a hypothetical unmeasured-confounder
@@ -29,7 +29,7 @@ const EXPERIMENT_LABELS: Record<Experiment, string> = {
 
 const EXPERIMENT_DESCRIPTIONS: Record<Experiment, string> = {
   subsampling:
-    'Re-estimate on reproducibly drawn subsets of the same cohort. Variation across subsamples describes sampling variability — never evidence that the estimate is unbiased.',
+    'Re-estimate on reproducibly drawn subsets of the same cohort. Variation across subsamples describes sampling variability - never evidence that the estimate is unbiased.',
   placebo:
     'Permute the observed treatment (treated count preserved) and refit. The placebo distribution shows what the estimator produces when assignment carries no structure.',
   unmeasured_confounder:
@@ -208,7 +208,7 @@ export function RobustnessResult({ payload }: { payload: RobustnessRunPayload })
 
   const exportMeta: FigureExportMeta = {
     figureId: `s9c_robustness_${result.experiment}`,
-    title: `${EXPERIMENT_LABELS[result.experiment === 'placebo_treatment' ? 'placebo' : result.experiment === 'unmeasured_confounder_simulation' ? 'unmeasured_confounder' : 'subsampling']} — estimate distribution`,
+    title: `${EXPERIMENT_LABELS[result.experiment === 'placebo_treatment' ? 'placebo' : result.experiment === 'unmeasured_confounder_simulation' ? 'unmeasured_confounder' : 'subsampling']} - estimate distribution`,
     settings: `${result.parameters.estimator ?? ''} · ${formatInteger(payload.analysis.rows_final)} cohort rows`,
     note: result.warnings.join(' '),
     provenance: [
@@ -243,7 +243,7 @@ export function RobustnessResult({ payload }: { payload: RobustnessRunPayload })
           {original !== null ? (
             <strong data-testid="robustness-original">{formatNumber(original)} {unitLabel}</strong>
           ) : (
-            <strong className="esttable__failed">failed — {payload.original.failure}</strong>
+            <strong className="esttable__failed">failed - {payload.original.failure}</strong>
           )}
         </p>
       </section>
@@ -336,7 +336,7 @@ export function RobustnessResult({ payload }: { payload: RobustnessRunPayload })
       {result.failures.length > 0 ? (
         <section className="card" aria-label="Repetition failures" data-testid="robustness-failures">
           <p className="estsum__detailtitle">
-            {result.failures.length} repetition(s) failed — recorded, not averaged away
+            {result.failures.length} repetition(s) failed - recorded, not averaged away
           </p>
           <ul className="esttable__warnings">
             {result.failures.slice(0, 8).map((failure) => (
@@ -519,7 +519,7 @@ function SensitivityFigure({
         </table>
         <p className="estfig__note estfig__note--quiet">
           Original estimate {formatNumber(original, 2)}. Deeper copper marks larger movement away
-          from it within this grid — a descriptive shading of the scenario table, not a statistic.
+          from it within this grid - a descriptive shading of the scenario table, not a statistic.
         </p>
       </div>
     </FigureFrame>

@@ -1,6 +1,0 @@
-
-Running 1 test using 1 worker
-
-  ok 1 [chromium] › e2e\s6-ui-repairs.spec.ts:209:1 › workflow: the audit is the third stage and Data runs it directly (1.9s)
-
-  1 passed (8.9s)

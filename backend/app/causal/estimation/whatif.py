@@ -1,6 +1,6 @@
-"""Model-based counterfactual what-if scenarios (S9C-C).
+"""Model-based counterfactual what-if scenarios.
 
-A bounded, versioned scenario service on top of the verified S9A
+A bounded, versioned scenario service on top of the verified estimation
 regression-adjustment machinery. The scenario model is the g-computation
 outcome model m(t, x) refitted on the analysis cohort; a scenario fixes a
 baseline covariate profile (explicit values, with numeric medians and
@@ -9,7 +9,7 @@ outcome under treatment = 1 and treatment = 0 for that profile, plus the
 cohort-standardised contrast on the same model.
 
 These are **model-based conditional outcome predictions under explicit
-assumptions** — never observed individual counterfactual outcomes, and never
+assumptions** - never observed individual counterfactual outcomes, and never
 interval-bearing results: no uncertainty is invented for a scenario. The
 treatment itself is the only interventional variable; changing a baseline
 covariate in the profile is a conditional-model scenario, not an intervention

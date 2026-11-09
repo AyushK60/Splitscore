@@ -1,19 +1,19 @@
 /**
- * S8C — identification journeys against the real backend (no mocks).
+ * identification - identification journeys against the real backend (no mocks).
  *
- * Journey A: valid confounder adjustment — build a confounded graph, identify,
+ * Journey A: valid confounder adjustment - build a confounded graph, identify,
  * inspect the verified minimal set, verify on-graph highlights and the
  * d-separation probe.
  *
- * Journey B: collider conditioning and unobserved confounding — the empty set
+ * Journey B: collider conditioning and unobserved confounding - the empty set
  * is correct under an M-structure; conditioning on the collider is refused
  * with a structured violation; a hypothetical unobserved confounder is never
  * offered as a covariate and the honesty caveat is shown.
  *
- * Journey C: scientific invalidation — an identification run goes stale when
+ * Journey C: scientific invalidation - an identification run goes stale when
  * the graph's structure changes; rerunning yields the updated, verified answer.
  *
- * Screenshots land in docs/screenshots/s8c/ for the visual verification pass.
+ * Screenshots land in test-results/shots/s8c/ for the visual verification pass.
  */
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
@@ -24,7 +24,7 @@ import type { Page } from '@playwright/test'
 import { expect, loadDemoFromEntry, test } from './fixtures'
 
 const DEMO = 'Repeated-entity subscription panel'
-const SHOTS = fileURLToPath(new URL('../../docs/screenshots/s8c', import.meta.url))
+const SHOTS = fileURLToPath(new URL('../test-results/shots/s8c', import.meta.url))
 
 test.use({ viewport: { width: 1440, height: 900 } })
 test.setTimeout(180_000)
@@ -101,7 +101,7 @@ async function buildColliderGraph(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Set as outcome' }).click()
 }
 
-test('S8C-A: confounder identification, verified set, highlights and probe', async ({ page }) => {
+test('confounder identification, verified set, highlights and probe', async ({ page }) => {
   page.on('dialog', (dialog) => void dialog.accept())
   await loadDemoFromEntry(page, DEMO)
   await goTo(page, 'Causal Lab')
@@ -163,7 +163,7 @@ test('S8C-A: confounder identification, verified set, highlights and probe', asy
   await expect(page.getByText(/d-separated given nothing/)).toBeVisible()
 })
 
-test('S8C-B: collider conditioning is refused and unobserved confounding is honest', async ({
+test('collider conditioning is refused and unobserved confounding is honest', async ({
   page,
 }) => {
   page.on('dialog', (dialog) => void dialog.accept())
@@ -175,7 +175,7 @@ test('S8C-B: collider conditioning is refused and unobserved confounding is hone
   await expect(page.getByText(/Backdoor adjustment available/)).toBeVisible()
   // The empty set is the one verified minimal set: the collider blocks the
   // only backdoor path.
-  await expect(page.getByText('Empty set — adjust for nothing.')).toBeVisible()
+  await expect(page.getByText('Empty set - adjust for nothing.')).toBeVisible()
   await screenshot(page, 's8c_collider_empty_set.png')
 
   // Conditioning on the collider opens the path: the backend refuses the set.
@@ -211,7 +211,7 @@ test('S8C-B: collider conditioning is refused and unobserved confounding is hone
   await screenshot(page, 's8c_unobserved_confounder_warning.png')
 })
 
-test('S8C-C: identification results go stale on scientific edits and rerun cleanly', async ({
+test('identification results go stale on scientific edits and rerun cleanly', async ({
   page,
 }) => {
   page.on('dialog', (dialog) => void dialog.accept())
@@ -224,7 +224,7 @@ test('S8C-C: identification results go stale on scientific edits and rerun clean
   await expect(page.getByTestId('identification-stale')).toHaveCount(0)
 
   // A layout drag is not a scientific edit: no staleness. (Move a node, then
-  // come straight back — the draft is dirty, so the run button is gated, but
+  // come straight back - the draft is dirty, so the run button is gated, but
   // the displayed result is not marked stale.)
   await page.getByTestId('mode-authoring').click()
   const node = page.locator('.cnode[data-node-id="month_index"]')
@@ -237,7 +237,7 @@ test('S8C-C: identification results go stale on scientific edits and rerun clean
   await expect(page.getByTestId('identification-save-gate')).toBeVisible()
   await expect(page.getByTestId('identification-stale')).toHaveCount(0)
 
-  // A scientific edit — a new directed edge into the outcome — invalidates.
+  // A scientific edit - a new directed edge into the outcome - invalidates.
   await page.getByTestId('mode-authoring').click()
   await connect(page, 'month_index', 'churned')
   await expect(page.locator('.react-flow__edge')).toHaveCount(6)
@@ -253,12 +253,12 @@ test('S8C-C: identification results go stale on scientific edits and rerun clean
   await expect(page.getByText(/Backdoor adjustment available/)).toBeVisible()
   await expect(page.getByTestId('identification-stale')).toHaveCount(0)
   // The empty set no longer suffices; a real set is reported.
-  await expect(page.getByText('Empty set — adjust for nothing.')).toHaveCount(0)
+  await expect(page.getByText('Empty set - adjust for nothing.')).toHaveCount(0)
   await expect(page.getByTestId('suggested-set').first()).toBeVisible()
   await screenshot(page, 's8c_identification_rerun.png')
 })
 
-test('S8C: tablet and mobile layouts keep identification usable', async ({ page }) => {
+test('identification: tablet and mobile layouts keep identification usable', async ({ page }) => {
   page.on('dialog', (dialog) => void dialog.accept())
   await loadDemoFromEntry(page, DEMO)
   await goTo(page, 'Causal Lab')

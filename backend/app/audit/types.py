@@ -209,7 +209,7 @@ class SplitAssignment(_Model):
 class RunHistoryEntry(_Model):
     """Minimal identity of one prior audit run in this session.
 
-    The validation-reuse check uses these records — and only these records —
+    The validation-reuse check uses these records - and only these records -
     because reuse is a property of the session's evaluation history, not of the
     dataset bytes. No entry, no reuse claim in either direction.
     """
@@ -232,7 +232,7 @@ class RunHistoryEntry(_Model):
 
 
 # --------------------------------------------------------------------------- #
-# S5 integrity declarations (user-declared, never inferred)
+# integrity declarations (user-declared, never inferred)
 # --------------------------------------------------------------------------- #
 
 
@@ -344,7 +344,7 @@ class AuditConfig(_Model):
     #: Chronology is only a violation for an intended future-prediction evaluation.
     chronology_intent: Literal["future_prediction", "not_applicable"] = "future_prediction"
 
-    # -- S5 integrity declarations ------------------------------------------- #
+    # -- integrity declarations ------------------------------------------- #
     #: Declared prediction-time availability per feature column. Absent columns
     #: are simply undeclared; nothing is inferred from column names.
     feature_availability: dict[str, AvailabilityLevel] = Field(
@@ -561,7 +561,7 @@ class EvaluationSummary(_Model):
 
 
 # --------------------------------------------------------------------------- #
-# S5 category risk scorecard
+# category risk scorecard
 # --------------------------------------------------------------------------- #
 
 

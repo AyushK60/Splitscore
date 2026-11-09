@@ -40,9 +40,9 @@ def _upload(client, payload: bytes, filename: str = "data.csv"):
 def _wine_like_rows(count: int = 120) -> list[dict[str, str]]:
     """A miniature of the accepted wine-quality file: id, chemistry, quality.
 
-    Same shape as the real file — a unique ``Id`` column, several numeric
+    Same shape as the real file - a unique ``Id`` column, several numeric
     feature columns, an integer ``quality`` target, and no split, timestamp or
-    entity column — at a size that keeps the suite fast.
+    entity column - at a size that keeps the suite fast.
     """
     rows = []
     for index in range(count):

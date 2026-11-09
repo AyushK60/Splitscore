@@ -1,5 +1,5 @@
 /**
- * S6 Model Lab — statistical workbench (F09).
+ * Model Lab - statistical workbench (F09).
  *
  * The lab fits OLS or binary logistic regression on the dataset currently in
  * memory and shows exactly what was fitted: the formula, the coding, the
@@ -228,7 +228,7 @@ function StatisticalLab({ onNavigate }: Props) {
     <div className="rs xw mlab">
       <header className="xw__header">
         <div>
-          <p className="rs-eyebrow">Model Lab — statistical workbench</p>
+          <p className="rs-eyebrow">Model Lab - statistical workbench</p>
           <h1 className="rs-h1">Fit a model on an explicit specification</h1>
         </div>
         <div className="xw__identity" aria-label="Dataset identity">
@@ -248,7 +248,7 @@ function StatisticalLab({ onNavigate }: Props) {
           <p className="callout__title">No audit in this session</p>
           <p style={{ margin: 0 }}>
             The Model Lab does not audit the split for you. Run the audit first if this dataset has a
-            train/test split and you intend to use these results predictively — a statistical fit
+            train/test split and you intend to use these results predictively - a statistical fit
             alone does not detect leakage.
           </p>
         </div>
@@ -270,8 +270,8 @@ function StatisticalLab({ onNavigate }: Props) {
                   setPositiveLevel(null)
                 }}
               >
-                <option value="ols">Ordinary least squares — numeric outcome</option>
-                <option value="logistic">Binary logistic regression — two-level outcome</option>
+                <option value="ols">Ordinary least squares - numeric outcome</option>
+                <option value="logistic">Binary logistic regression - two-level outcome</option>
               </select>
             </label>
 
@@ -320,7 +320,7 @@ function StatisticalLab({ onNavigate }: Props) {
 
             <div className="mlab__field">
               <span>
-                Predictors — {predictors.length} of {columns.length - 1} available
+                Predictors - {predictors.length} of {columns.length - 1} available
               </span>
               <div className="xw__chips">
                 {columns
@@ -365,7 +365,7 @@ function StatisticalLab({ onNavigate }: Props) {
                 value={missingPolicy}
                 onChange={(event) => setMissingPolicy(event.target.value as 'complete_case' | 'fail')}
               >
-                <option value="complete_case">Complete case — exclude and count rows</option>
+                <option value="complete_case">Complete case - exclude and count rows</option>
                 <option value="fail">Refuse if any modelled cell is missing</option>
               </select>
             </label>
@@ -589,7 +589,7 @@ function StatisticalLab({ onNavigate }: Props) {
               <ul className="mlab__coding">
                 {result.specification.coding.map((entry) => (
                   <li key={entry.column}>
-                    <strong className="mono">{entry.column}</strong> — {entry.kind}
+                    <strong className="mono">{entry.column}</strong> - {entry.kind}
                     {entry.kind === 'categorical'
                       ? `, reference ${entry.reference} (levels: ${entry.levels?.join(', ')})`
                       : ''}
@@ -632,7 +632,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   )
 }
 
-/** Real coefficient intervals — one row per fitted term. */
+/** Real coefficient intervals - one row per fitted term. */
 function buildCoefficientPlot(
   coefficients: StatisticalModelResult['coefficients'],
 ): JSX.Element | null {
@@ -688,12 +688,12 @@ function Diagnostics({ result }: { result: StatisticalModelResult }) {
         <h2 className="mlab__h2">Diagnostics</h2>
         <p className="mlab__hint">
           {result.diagnostics.sample.description}. Predicted probabilities are shown in the sample
-          table below; calibration and ROC/PR curves belong to the S6 diagnostics workspace and are
+          table below; calibration and ROC/PR curves belong to the Model Lab diagnostics workspace and are
           not shown here.
         </p>
         <div className="mlab__tablewrap">
           <table className="mlab__table mlab__table--compact">
-            <caption>Evaluated rows — observed class and fitted probability.</caption>
+            <caption>Evaluated rows - observed class and fitted probability.</caption>
             <thead>
               <tr>
                 <th scope="col">Row</th>

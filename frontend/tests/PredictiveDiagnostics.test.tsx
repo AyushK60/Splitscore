@@ -193,7 +193,7 @@ describe('predictive diagnostic components', () => {
         }}
       />,
     )
-    expect(screen.getByText('Permutation importance — test partition')).toBeInTheDocument()
+    expect(screen.getByText('Permutation importance - test partition')).toBeInTheDocument()
     expect(screen.getByText('x1')).toBeInTheDocument()
     expect(screen.getByText(/correlated predictors can share or mask importance/i)).toBeInTheDocument()
     expect(screen.getByText(/Not a causal effect/i)).toBeInTheDocument()

@@ -1,8 +1,8 @@
 """SS-CHR-002: declared prediction-horizon (lookahead gap) check.
 
 Label: this is a *horizon check*. Where the user has declared a prediction
-horizon — how long after the training cutoff the evaluation is meant to
-predict — it verifies that the split's time gap actually covers the horizon.
+horizon - how long after the training cutoff the evaluation is meant to
+predict - it verifies that the split's time gap actually covers the horizon.
 Without a declared horizon the check reports NOT EVALUATED: the horizon is
 metadata about intent that a CSV cannot supply.
 
@@ -10,7 +10,7 @@ Definition (documented, deterministic):
 
 * ``gap`` = earliest valid test timestamp − latest valid train timestamp.
 * ``affected test rows`` = test rows whose timestamp is earlier than
-  ``latest train timestamp + horizon`` — predictions that would be made within
+  ``latest train timestamp + horizon`` - predictions that would be made within
   the declared horizon of training data, so the training set contains events
   from inside their horizon window.
 
@@ -132,7 +132,7 @@ def run(ctx: RuleContext) -> RuleOutput:
     severity = "high" if share >= HIGH_SHARE else "medium"
     rationale = (
         f"{len(affected)} of {len(test_positions)} ordered test row(s) ({share:.1%}) carry "
-        f"timestamps earlier than {horizon_end.isoformat()} — the declared "
+        f"timestamps earlier than {horizon_end.isoformat()} - the declared "
         f"{horizon_days}-day horizon after the last training observation. Those predictions "
         "are made about a period whose events are already present in the training data."
     ) if share < 1 else (
@@ -153,7 +153,7 @@ def run(ctx: RuleContext) -> RuleOutput:
             f"({latest_train.isoformat()}) and the earliest test observation "
             f"({earliest_test.isoformat()}) is {_human_delta(gap)}. Test rows timestamped "
             "before the horizon end are predictions whose period is already represented in "
-            "the training data — the lookahead the horizon is meant to prevent."
+            "the training data - the lookahead the horizon is meant to prevent."
         ),
         evidence_summary=(
             f"{len(affected)} of {len(test_positions)} ordered test row(s) fall inside the "

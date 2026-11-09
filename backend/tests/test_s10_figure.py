@@ -1,9 +1,9 @@
-"""S10-C — publication figure of the causal graph (SVG).
+"""figure - publication figure of the causal graph (SVG).
 
 The figure must be valid XML, drawn from the stored spec, deterministic, and
 honest: unobserved nodes dashed, roles labelled, the assumption caveat in the
 caption, user-authored text escaped. Layout coordinates position nodes but
-never appear in the scientific fingerprint — the figure is display output.
+never appear in the scientific fingerprint - the figure is display output.
 """
 
 from __future__ import annotations
@@ -110,7 +110,7 @@ def test_figure_is_deterministic_and_ignores_layout_for_fingerprint(demo_with_gr
     second = client.get(f"/api/datasets/{dataset_id}/causal-graphs/{graph_id}/figure.svg").text
     assert first == second
     # Moving a node (layout-only edit) must not change the scientific
-    # fingerprint — the figure carries the fingerprint, so it must be stable.
+    # fingerprint - the figure carries the fingerprint, so it must be stable.
     graphs = client.get(f"/api/datasets/{dataset_id}/causal-graphs/{graph_id}").json()
     graph = graphs.get("graph") or graphs
     spec = _bare_spec(graph, dataset_id)

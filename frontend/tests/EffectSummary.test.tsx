@@ -1,7 +1,7 @@
 /**
- * View A — Effect Summary.
+ * View A - Effect Summary.
  *
- * Pins the mapping from the S9A result payload to the figure: the exact
+ * Pins the mapping from the estimation result payload to the figure: the exact
  * estimates and interval bounds, the zero reference, positive/negative
  * directions, the unavailable-interval state and the failed-estimator state.
  */

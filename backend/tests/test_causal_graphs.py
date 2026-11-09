@@ -1,7 +1,7 @@
-"""S8A causal graph foundation: HTTP-level and service-level tests.
+"""graph causal graph foundation: HTTP-level and service-level tests.
 
-Expected outcomes are written by hand in each test — including which issue
-codes are blocking errors and which are scientific warnings — so a test cannot
+Expected outcomes are written by hand in each test - including which issue
+codes are blocking errors and which are scientific warnings - so a test cannot
 pass merely because the implementation agrees with itself.
 
 Everything goes through the real upload path and the real API, mirroring the

@@ -1,8 +1,8 @@
 /**
- * Causal Lab view integration, against the S8A API contract shape.
+ * Causal Lab view integration, against the graph API contract shape.
  *
  * The API boundary is mocked with payloads that mirror the real backend's
- * documented shapes (see docs/S8A_API_CONTRACT.md and the S8A tests); the view,
+ * documented shapes (see the backend graph tests); the view,
  * reducer, adapters and inspectors are real. The live-backend behaviour is
  * exercised by the Playwright journey `e2e/s8-causal-lab.spec.ts`.
  *
@@ -262,7 +262,7 @@ describe('loading and restoring', () => {
     expect(causalApi.list).toHaveBeenCalledWith(DATASET_ID)
     expect(causalApi.get).toHaveBeenCalledWith(DATASET_ID, 'cgraph-view01')
     expect(screen.getByText(/revision 1/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Saved — no unsaved changes' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Saved - no unsaved changes' })).toBeDisabled()
     // The graph list in the rail shows the saved graph; the canvas node card is
     // rendered by React Flow (stubbed in jsdom, exercised in the E2E journey).
     expect(screen.getByRole('button', { name: /Saved graph/ })).toBeInTheDocument()
@@ -276,7 +276,7 @@ describe('authoring against the API contract', () => {
     await screen.findByText('No saved graphs yet.')
 
     await addColumn(COLUMN_A)
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes — unsaved changes' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes - unsaved changes' }))
     await waitFor(() => expect(causalApi.create).toHaveBeenCalled())
 
     const spec = vi.mocked(causalApi.create).mock.calls[0][1]
@@ -290,7 +290,7 @@ describe('authoring against the API contract', () => {
     })
     // After a successful save the button reads Saved and is disabled.
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Saved — no unsaved changes' })).toBeDisabled(),
+      expect(screen.getByRole('button', { name: 'Saved - no unsaved changes' })).toBeDisabled(),
     )
   })
 
@@ -315,7 +315,7 @@ describe('authoring against the API contract', () => {
     const connect = screen.getByRole('combobox', { name: 'Connect this variable to a target' })
     fireEvent.change(connect, { target: { value: COLUMN_A } })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes — unsaved changes' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes - unsaved changes' }))
     await waitFor(() => expect(causalApi.create).toHaveBeenCalled())
     const spec = vi.mocked(causalApi.create).mock.calls[0][1]
     expect(spec.edges).toEqual([{ source: COLUMN_B, target: COLUMN_A, rationale: null, reference: null }])
@@ -328,7 +328,7 @@ describe('authoring against the API contract', () => {
     await addColumn(COLUMN_A)
     const connect = screen.getByRole('combobox', { name: 'Connect this variable to a target' })
     // The connect select only offers *other* variables, so a self-loop cannot be
-    // drawn at all — the first graph-level defense. Simulate the reducer-level
+    // drawn at all - the first graph-level defense. Simulate the reducer-level
     // refusal by attempting the same node through the select fallback: no other
     // variable exists yet, so the select is empty.
     expect(connect.querySelectorAll('option')).toHaveLength(1)
@@ -345,7 +345,7 @@ describe('authoring against the API contract', () => {
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Set as treatment' })).toBeDisabled(),
     )
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes — unsaved changes' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes - unsaved changes' }))
     await waitFor(() => expect(causalApi.create).toHaveBeenCalled())
     expect(vi.mocked(causalApi.create).mock.calls[0][1].analysis.treatment).toBe(COLUMN_A)
   })
@@ -366,9 +366,9 @@ describe('authoring against the API contract', () => {
     // The status vocabulary is the backend's; there is no "verified" option.
     const statusOptions = screen.getAllByRole('combobox', { name: 'Assumption status' })[0]
     const labels = Array.from(statusOptions.querySelectorAll('option')).map((option) => option.textContent)
-    expect(labels).toEqual(['Declared — not verified', 'Not assessed', 'Flagged for review', 'Unsupported by available information'])
+    expect(labels).toEqual(['Declared - not verified', 'Not assessed', 'Flagged for review', 'Unsupported by available information'])
 
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes — unsaved changes' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes - unsaved changes' }))
     await waitFor(() => expect(causalApi.create).toHaveBeenCalled())
     const spec = vi.mocked(causalApi.create).mock.calls[0][1]
     expect(spec.assumptions[0]).toMatchObject({
@@ -412,7 +412,7 @@ describe('save failure keeps the draft', () => {
     await renderLab()
     await screen.findByText('No saved graphs yet.')
     await addColumn(COLUMN_A)
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes — unsaved changes' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes - unsaved changes' }))
 
     await screen.findByRole('alert')
     expect(screen.getAllByText(/directed cycle/).length).toBeGreaterThan(0)
@@ -421,7 +421,7 @@ describe('save failure keeps the draft', () => {
     // save button is enabled again for a corrected attempt.
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
     expect(screen.getAllByText(COLUMN_A).length).toBeGreaterThan(0)
-    expect(screen.getByRole('button', { name: 'Save changes — unsaved changes' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Save changes - unsaved changes' })).toBeEnabled()
   })
 })
 
@@ -505,8 +505,8 @@ describe('failure and lifecycle handling', () => {
     )
   })
 
-  it('an uncommitted draft survives unmounting and remounting the lab (S11-B)', async () => {
-    // No saved graphs: the pre-S11 bug discarded a drawn node on every
+  it('an uncommitted draft survives unmounting and remounting the lab', async () => {
+    // No saved graphs: an earlier bug discarded a drawn node on every
     // navigation because the draft lived inside the unmounted view. Here the
     // provider sits above a simulated route switch, exactly as it does in the
     // app shell, so leaving the lab and returning is what the test exercises.
@@ -548,7 +548,7 @@ describe('failure and lifecycle handling', () => {
     await screen.findByText('elsewhere')
     fireEvent.click(screen.getByRole('button', { name: 'toggle stage' }))
     await waitFor(() => expect(screen.getByRole('region', { name: 'Causal Lab' })).toBeInTheDocument())
-    // The drawn node is still there — and the auto-load did not clobber it.
+    // The drawn node is still there - and the auto-load did not clobber it.
     await waitFor(() =>
       expect(screen.getByText('1 of 60 variables · 0 of 240 edges')).toBeInTheDocument(),
     )

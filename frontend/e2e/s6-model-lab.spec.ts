@@ -1,5 +1,5 @@
 /**
- * S6-B — Model Lab end-to-end journey.
+ * Model Lab end-to-end journey.
  *
  * Runs against the real backend and the bundled clean-control dataset. The
  * assertions are about actual fitted output: a coefficient table from the

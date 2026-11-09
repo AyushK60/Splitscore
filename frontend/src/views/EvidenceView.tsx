@@ -129,7 +129,7 @@ export function EvidenceView({ onNavigate }: { onNavigate: (view: ViewId) => voi
 
         <Callout tone="info" title="How to read these numbers">
           Each count names the unit it counts and the denominator it is measured against. Percentages
-          are only ever relative to those denominators — never to the dataset as a whole unless the
+          are only ever relative to those denominators - never to the dataset as a whole unless the
           scope says so.
         </Callout>
 
@@ -184,7 +184,7 @@ export function EvidenceView({ onNavigate }: { onNavigate: (view: ViewId) => voi
 
         {!finding.examples.length ? (
           <EmptyState title="This finding reports counts only">
-            The rule did not attach example rows. That is a property of the check, not missing data —
+            The rule did not attach example rows. That is a property of the check, not missing data -
             the counts above are still authoritative for the scope they name.
           </EmptyState>
         ) : (

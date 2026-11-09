@@ -1,7 +1,7 @@
 /**
- * S6-A — user-reported defect regressions.
+ * User-reported defect regressions.
  *
- * These tests exist because the four S5 defects were only found by hand:
+ * These tests exist because the four integrity defects were only found by hand:
  *
  *  1. Explore → Scatter grew the document without bound (a ResizeObserver fed
  *     the container's height back into the SVG it sized, and the inline SVG's
@@ -224,10 +224,10 @@ test('workflow: the audit is the third stage and Data runs it directly', async (
     { step: '6', label: 'Model Lab' },
     { step: '7', label: 'Causal Lab' },
     { step: '8', label: 'Effect estimation' },
-    // S9C added the Causal research stage between estimation and comparison.
+    // estimation added the Causal research stage between estimation and comparison.
     { step: '9', label: 'Causal research' },
     { step: '10', label: 'Compare' },
-    // S10 added the research-history stage after Compare.
+    // history added the research-history stage after Compare.
     { step: '11', label: 'History' },
   ])
 

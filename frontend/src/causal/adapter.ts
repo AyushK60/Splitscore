@@ -4,7 +4,7 @@
  *
  * Direction of authority: the draft is the single source of truth. React Flow
  * receives derived arrays and reports interactions back through the reducer.
- * Positions live in `node.layout` and are display state — the S8A scientific
+ * Positions live in `node.layout` and are display state - the graph scientific
  * fingerprint intentionally excludes them.
  */
 
@@ -31,7 +31,7 @@ export interface VariableNodeData extends Record<string, unknown> {
   isTreatment: boolean
   isOutcome: boolean
   isSelected: boolean
-  /** In the currently tested adjustment set (S8C identification highlight). */
+  /** In the currently tested adjustment set (identification identification highlight). */
   isAdjustment: boolean
   hasIssue: boolean
   issueCount: number
@@ -107,8 +107,8 @@ export function issueIndex(issues: CausalIssue[]): {
 
 /**
  * A synthetic teaching example. Every structure is built through the same
- * reducer helpers the UI uses, satisfies the S8A schema exactly, and is
- * labelled a teaching example wherever it is offered — its edges are assumed
+ * reducer helpers the UI uses, satisfies the graph schema exactly, and is
+ * labelled a teaching example wherever it is offered - its edges are assumed
  * relationships for instruction, never relationships learned from data.
  */
 export function teachingExample(
@@ -130,7 +130,7 @@ export function teachingExample(
 
   if (kind === 'chain') {
     return {
-      name: 'Teaching example — chain',
+      name: 'Teaching example - chain',
       description:
         'Synthetic teaching example: A → M → B assumes the influence of A on B runs entirely through the mediator M. Edge directions are assumptions for instruction, not relationships learned from data.',
       nodes: [
@@ -156,9 +156,9 @@ export function teachingExample(
   }
   if (kind === 'fork') {
     return {
-      name: 'Teaching example — fork',
+      name: 'Teaching example - fork',
       description:
-        'Synthetic teaching example: B ← A → C is the classic confounding fork. Conditioning on A is what would block the backdoor path — identification itself belongs to a later stage.',
+        'Synthetic teaching example: B ← A → C is the classic confounding fork. Conditioning on A is what would block the backdoor path - identification itself belongs to a later stage.',
       nodes: [
         { ...observedNode('a', 'Common cause A') },
         { ...observedNode('b', 'Variable B', 'treatment') },
@@ -181,9 +181,9 @@ export function teachingExample(
     }
   }
   return {
-    name: 'Teaching example — collider',
+    name: 'Teaching example - collider',
     description:
-      'Synthetic teaching example: A → C ← B makes C a collider. Conditioning on a collider can induce association where none existed — the structure, not the data, is the lesson here.',
+      'Synthetic teaching example: A → C ← B makes C a collider. Conditioning on a collider can induce association where none existed - the structure, not the data, is the lesson here.',
     nodes: [
       { ...observedNode('a', 'Variable A', 'treatment') },
       { ...observedNode('b', 'Variable B') },

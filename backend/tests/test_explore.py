@@ -1,4 +1,4 @@
-"""S4 Visual Explorer — numerical and API tests.
+"""explorer Visual Explorer - numerical and API tests.
 
 Independent oracles: scipy for correlation coefficients, hand-calculated
 fixtures for histograms, quartiles, ranks and selection id sets. Expected
@@ -607,7 +607,7 @@ def test_distribution_with_selection_overlay_is_exact(client):
 def test_missingness_with_selection_reports_both_populations(client):
     rows, columns = _numeric_rows(30)
     for i, row in enumerate(rows):
-        if i % 5 == 0:  # rows 0,5,10,15,20,25 — three even, three odd
+        if i % 5 == 0:  # rows 0,5,10,15,20,25 - three even, three odd
             row["a"] = ""
     loaded = _upload(client, rows, columns)
     dataset_id = loaded["dataset"]["dataset_id"]

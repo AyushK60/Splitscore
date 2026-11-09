@@ -4,7 +4,7 @@ The schema describes what can be plotted: every column with its detected type
 (the profiler's advisory detection, same thresholds), the numeric range that
 axes will use, the categorical levels a colour legend needs, and the role
 information the Study Card contributes (split labels, target, entity). The
-explorer treats roles as *suggestions for defaults* — it never edits them and
+explorer treats roles as *suggestions for defaults* - it never edits them and
 never blocks a chart because a role is missing.
 """
 

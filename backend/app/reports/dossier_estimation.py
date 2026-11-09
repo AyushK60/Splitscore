@@ -1,8 +1,8 @@
-"""S10-B — estimation-run summarisers for the research dossier.
+"""dossier - estimation-run summarisers for the research dossier.
 
 Six dossier sections (causal graph, identification, causal effect
 estimation, subgroup heterogeneity, robustness, what-if scenarios) are
-composed from **stored estimation runs** — the same bounded, stale-refusing
+composed from **stored estimation runs** - the same bounded, stale-refusing
 payloads the Causal Research stage renders. Nothing here re-fits, re-derives
 or invents: every number is copied from the recorded payload, every caveat is
 carried through verbatim, and a run whose analysis kind does not match the
@@ -39,8 +39,8 @@ def require_estimation_run(payload: dict[str, Any], *, expected: set[str], secti
     """Refuse a run whose analysis kind does not match the section.
 
     Raising (rather than degrading) keeps dossier composition explicit: a
-    mismatched run is a caller error — e.g. naming a what-if run for the
-    subgroup section — and must never be silently re-labelled.
+    mismatched run is a caller error - e.g. naming a what-if run for the
+    subgroup section - and must never be silently re-labelled.
     """
     kind = _estimation_run_kind(payload)
     if kind not in expected:
@@ -134,7 +134,7 @@ def _overlap_digest(overlap: dict[str, Any] | None) -> dict[str, Any] | None:
 
 
 def causal_estimation_section(payloads: list[dict[str, Any]]) -> dict[str, Any]:
-    """Section G — the stored effect-estimation runs (one cohort each)."""
+    """Section G - the stored effect-estimation runs (one cohort each)."""
     runs = []
     for payload in payloads:
         require_estimation_run(payload, expected={"estimation", "estimation_comparison"}, section="causal effect estimation")
@@ -182,13 +182,13 @@ def causal_estimation_section(payloads: list[dict[str, Any]]) -> dict[str, Any]:
         "interpretation_note": (
             "Estimates are average treatment effects on one explicitly prepared cohort under the "
             "assumed graph and verified adjustment set. They are conditional on exchangeability, "
-            "positivity, consistency and correct specification — assumptions the gate cannot prove."
+            "positivity, consistency and correct specification - assumptions the gate cannot prove."
         ),
     }
 
 
 def subgroups_section(payload: dict[str, Any]) -> dict[str, Any]:
-    """Section H — subgroup heterogeneity from one stored subgroup run."""
+    """Section H - subgroup heterogeneity from one stored subgroup run."""
     require_estimation_run(payload, expected={"subgroups"}, section="subgroup heterogeneity")
     return {
         **_estimation_run_header(payload),
@@ -203,7 +203,7 @@ def subgroups_section(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def robustness_section(payload: dict[str, Any]) -> dict[str, Any]:
-    """Section I — one stored robustness/sensitivity experiment."""
+    """Section I - one stored robustness/sensitivity experiment."""
     require_estimation_run(payload, expected={"robustness"}, section="robustness and sensitivity")
     result = payload.get("result", {})
     # Bounded disclosure: the full repetition series stays in the stored run;
@@ -226,7 +226,7 @@ def robustness_section(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def what_if_section(payload: dict[str, Any]) -> dict[str, Any]:
-    """Section J — one stored model-based what-if scenario."""
+    """Section J - one stored model-based what-if scenario."""
     require_estimation_run(payload, expected={"what_if"}, section="what-if scenario")
     return {
         **_estimation_run_header(payload),
@@ -240,7 +240,7 @@ def what_if_section(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def causal_graph_section(spec: dict[str, Any], record: dict[str, Any]) -> dict[str, Any]:
-    """Section E — the assumed causal structure behind the estimation runs.
+    """Section E - the assumed causal structure behind the estimation runs.
 
     ``spec`` is the stored graph's writable spec (nodes, edges, analysis,
     assumptions); ``record`` carries the registry identity and fingerprints.
@@ -280,7 +280,7 @@ def causal_graph_section(spec: dict[str, Any], record: dict[str, Any]) -> dict[s
 
 
 def identification_section(payloads: list[dict[str, Any]]) -> dict[str, Any]:
-    """Section F — the verification verdicts recorded by the estimation gate.
+    """Section F - the verification verdicts recorded by the estimation gate.
 
     The gate re-verified the backdoor criterion server-side at run time; the
     dossier reports those recorded verdicts. It does not re-run search.

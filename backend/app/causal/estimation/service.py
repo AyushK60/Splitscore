@@ -1,4 +1,4 @@
-"""Estimation service: the S8C identification gate plus orchestration (S9A).
+"""Estimation service: the identification identification gate plus orchestration.
 
 The gate is mandatory and never advisory. Before any number is computed the
 service verifies, in order:
@@ -9,8 +9,8 @@ service verifies, in order:
 2. the stored graph still validates against the dataset in memory;
 3. the treatment/outcome/adjustment nodes exist, are declared observed, and
    are anchored to real dataset columns;
-4. the requested adjustment set satisfies the classical backdoor criterion —
-   verified by S8C's own exact engine, never trusted from the client;
+4. the requested adjustment set satisfies the classical backdoor criterion -
+   verified by identification's own exact engine, never trusted from the client;
 5. the treatment column admits exactly the two requested values and the
    outcome column parses numerically (enforced during preparation).
 
@@ -160,7 +160,7 @@ def run_identification_gate(
         adjustment_nodes.append(node_id)
         adjustment_columns.append(column)
 
-    # The S8C verdict itself: the requested set must satisfy the classical
+    # The identification verdict itself: the requested set must satisfy the classical
     # backdoor criterion on the stored graph. The client's claim is never used.
     dag = build_dag(record.spec)
     observed = observed_node_ids(record.spec)
@@ -291,7 +291,7 @@ def _diagnostic_frame(prepared: PreparedData) -> pd.DataFrame:
     """The frame balance diagnostics are computed on.
 
     Under ``median_mode`` the fitted pipelines impute inside their folds, but
-    the prepared frame still carries raw NaNs — balance SMDs on raw NaNs would
+    the prepared frame still carries raw NaNs - balance SMDs on raw NaNs would
     all report null even though the estimators used imputed values. This
     mirror-imputation (column medians for numeric, the explicit missing level
     for categorical) reproduces what the models saw, and the payload records
@@ -552,7 +552,7 @@ def mark_staleness(payload: dict[str, Any], dataset: Dataset, record: CausalGrap
 
     A run is stale when either fingerprint changed. Node layout, labels and
     prose never change the scientific fingerprint, so rearranging the canvas
-    does not invalidate a causal estimate — exactly the S8A rule.
+    does not invalidate a causal estimate - exactly the graph rule.
     """
     repro = payload.get("reproducibility", {})
     stale = (

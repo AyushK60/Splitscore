@@ -6,13 +6,13 @@ import { useExplore } from '../../explore/ExploreState'
 import { integer } from '../../lib/format'
 
 /**
- * F07 — Train/Test Similarity Explorer.
+ * F07 - Train/Test Similarity Explorer.
  *
  * The backend computes the K nearest cross-split pairs under the same
  * documented method as SS-NEAR-001 (normalised Chebyshev after pooled median
  * imputation and robust scaling). This panel never invents pairs: it renders
  * the computed list, a nearest-neighbour distance histogram over the test
- * population, and — for the selected pair — a Pair Inspector that resolves the
+ * population, and - for the selected pair - a Pair Inspector that resolves the
  * two immutable row ids to the file's own values via the rows endpoint.
  *
  * Selecting a pair highlights its train and test rows in every linked chart
@@ -191,7 +191,7 @@ export function SimilarityExplorer({ schema }: { schema: ExploreSchema }) {
           {result.pairs_truncated ? (
             <p className="xfig__note">
               Showing the {result.pairs.length} nearest of {result.pairs_total_available.toLocaleString('en-US')} computed
-              cross-split pairs. Similarity is a screening signal, not leakage — inspect before
+              cross-split pairs. Similarity is a screening signal, not leakage - inspect before
               concluding anything.
             </p>
           ) : null}
@@ -248,7 +248,7 @@ export function SimilarityExplorer({ schema }: { schema: ExploreSchema }) {
                 <p className="xrow__note">Resolving row values…</p>
               )}
               <p className="xrow__footnote">
-                A close pair is a candidate for human inspection — the highlightedId highlight works
+                A close pair is a candidate for human inspection - the highlightedId highlight works
                 in every chart, and the underlying rows are the same immutable ids the audit cites.
                 {highlightedId ? ` Highlighted: ${highlightedId}.` : ''}
               </p>

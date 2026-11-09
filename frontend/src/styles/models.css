@@ -1,5 +1,5 @@
-/* S6 Model Lab — statistical workbench.
-   Uses the S5 workspace tokens; the layout is a three-region instrument at
+/* Model Lab - statistical workbench.
+   Uses the integrity workspace tokens; the layout is a three-region instrument at
    desktop width and a single column below 1200px. No new palette. */
 
 .mlab {
@@ -317,7 +317,7 @@
   }
 }
 
-/* S6-C predictive tab and shared Model Lab chrome. */
+/* predictive tab and shared Model Lab chrome. */
 .mlab-shell {
   display: flex;
   flex-direction: column;

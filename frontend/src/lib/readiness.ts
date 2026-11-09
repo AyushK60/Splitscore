@@ -3,7 +3,7 @@
  *
  * "Can I run the audit?" has one answer, computed in one place, so no view can
  * offer a run button whose prerequisites are missing. The backend stays the
- * authority — this derivation only reflects what the file and the roles say —
+ * authority - this derivation only reflects what the file and the roles say -
  * and every reason names the action that removes it.
  *
  * Two different questions are reported separately, because conflating them was
@@ -115,7 +115,7 @@ export function readiness(input: ReadinessInput): Readiness {
   let columnState: ColumnState = 'checking'
   const serverUnconfirmed = validationPending || !validation
   if (serverUnconfirmed) {
-    // Not an error in the columns — the server simply has not answered yet.
+    // Not an error in the columns - the server simply has not answered yet.
   } else if (!validation.ok) {
     const errors = validation.issues.filter((issue) => issue.severity === 'error')
     for (const issue of errors) {
@@ -159,7 +159,7 @@ export function readiness(input: ReadinessInput): Readiness {
   }
   if (!suggestionsConfirmed) {
     workflowBlockers.push(
-      'Confirm the suggested column roles — accept them or adjust them — before running the audit.',
+      'Confirm the suggested column roles - accept them or adjust them - before running the audit.',
     )
   }
 
@@ -180,12 +180,12 @@ export function readiness(input: ReadinessInput): Readiness {
     } else if (!roles.split_train_value || !roles.split_test_value) {
       splitState = 'incomplete'
       workflowBlockers.push(
-        `Map the values of ${roles.split} to train and test — both labels are required.`,
+        `Map the values of ${roles.split} to train and test - both labels are required.`,
       )
     } else if (roles.split_train_value === roles.split_test_value) {
       splitState = 'incomplete'
       workflowBlockers.push(
-        `Choose different values for train and test — both currently say “${roles.split_train_value}”.`,
+        `Choose different values for train and test - both currently say “${roles.split_train_value}”.`,
       )
     } else {
       splitState = 'ready'
@@ -205,7 +205,7 @@ export function readiness(input: ReadinessInput): Readiness {
     splitState = 'ready'
     if (!generate) {
       splitState = 'incomplete'
-      workflowBlockers.push('Choose how to split the rows — no strategy is selected yet.')
+      workflowBlockers.push('Choose how to split the rows - no strategy is selected yet.')
     } else if (generate.kind === 'stratified' && !roles.target) {
       splitState = 'incomplete'
       workflowBlockers.push('A stratified holdout needs a target column to stratify by.')

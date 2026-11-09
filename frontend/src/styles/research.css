@@ -1,5 +1,5 @@
 /* ============================================================================
-   Study & Data workspace (S3)
+   Study & Data workspace
    ----------------------------------------------------------------------------
    The analytical half of SplitScope: same forensic-archive palette, but quieter.
    The landing page is allowed to be editorial; a workspace where someone checks
@@ -10,7 +10,7 @@
 .rs {
   color: var(--rs-ink);
   /* The workspace shell (.app-main) already carries the full-width gutter and
-     max-width since S5; the stage itself spans it. */
+     max-width since integrity; the stage itself spans it. */
   max-width: none;
   padding: 30px 0 72px;
 }
@@ -869,10 +869,10 @@
 }
 
 /* ============================================================================
-   Workspace entry (S5) — the .we scope
+   Workspace entry - the .we scope
    ----------------------------------------------------------------------------
    The instrument's entry panel, not a second landing page. One ivory sheet,
-   two real ways in, and — once a dataset is active — an honest map of the
+   two real ways in, and - once a dataset is active - an honest map of the
    session. Reuses the .rs tokens; adds nothing decorative.
    ========================================================================== */
 
@@ -1103,7 +1103,7 @@
 }
 
 /* ==========================================================================
-   S10-A — research run history
+   history - research run history
    One read-only projection of the bounded in-memory run store. Grouped by
    analysis kind, staleness rendered loudly, nothing re-computed here.
    ========================================================================== */

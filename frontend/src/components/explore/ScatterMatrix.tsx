@@ -18,7 +18,7 @@ import { FigureExport } from './FigureExport'
  *
  * Panels render the same render sample the backend draws for the focus view,
  * so a point is the same observation everywhere. The subset is capped at four
- * variables (six pairwise panels) with the cap stated in the interface — a
+ * variables (six pairwise panels) with the cap stated in the interface - a
  * 50-variable matrix would be unreadable and heavy. Clicking a panel opens
  * that pair in the focus scatter.
  */
@@ -114,7 +114,7 @@ export function ScatterMatrix({ schema, selectedIds, colorColumn, colorLevels, o
         </span>
         <FigureExport
           figureId="scatter-matrix"
-          title={`Scatter matrix — ${columns.join(', ')}`}
+          title={`Scatter matrix - ${columns.join(', ')}`}
           settings={`pairwise panels · up to 4 variables`}
           counts={
             series
@@ -143,7 +143,7 @@ export function ScatterMatrix({ schema, selectedIds, colorColumn, colorLevels, o
             </button>
           ))}
         </div>
-        <span className="xw__controlmeta">up to {MAX_MATRIX_COLUMNS} variables — the cap keeps panels readable</span>
+        <span className="xw__controlmeta">up to {MAX_MATRIX_COLUMNS} variables - the cap keeps panels readable</span>
       </div>
 
       {error && (
@@ -284,7 +284,7 @@ function MatrixPanel({
         aria-label={`Scatter of ${x} against ${y}`}
       >
         <title>
-          {x} × {y} — click to open full size
+          {x} × {y} - click to open full size
         </title>
         <rect x={38} y={10} width={inner} height={inner} fill="none" stroke="var(--rs-line)" />
         {[...groups.entries()].map(([level, dots]) => (

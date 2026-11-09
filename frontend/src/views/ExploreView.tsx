@@ -15,13 +15,13 @@ import type { ViewId } from '../lib/router'
 import { useApp } from '../state/AppState'
 
 /**
- * The Scientific Visual Explorer (S4).
+ * The Scientific Visual Explorer.
  *
  * One dataset, one shared selection, several coordinated views. The layout is
  * deliberately a workbench, not a dashboard: research controls in one band, a
  * large plot canvas that gets the space serious analysis needs, and a
  * permanent row-evidence inspector that keeps every mark traceable to
- * immutable row ids. Plot modes are tabs over the same canvas — every mode
+ * immutable row ids. Plot modes are tabs over the same canvas - every mode
  * reads and writes the same selection.
  */
 
@@ -182,7 +182,7 @@ export function ExploreView(_props: Props) {
       <section className="xw__controls" aria-label="Research controls">
         <div className="xw__controlgroup xw__controlgroup--axes">
           <div className="xw__controlhead">
-            <span className="xw__controllabel">Axes — numeric variables</span>
+            <span className="xw__controllabel">Axes - numeric variables</span>
             <span className="xw__controlmeta">
               {axes.length} of {numericColumns.length} selected · max {MAX_AXES}
             </span>
@@ -214,7 +214,7 @@ export function ExploreView(_props: Props) {
             onChange={(event) => setColorColumn(event.target.value || null)}
             aria-label="Colour grouping variable"
           >
-            <option value="">(none — all rows one colour)</option>
+            <option value="">(none - all rows one colour)</option>
             {(schema?.color_candidates ?? []).map((column) => (
               <option key={column} value={column}>
                 {column}

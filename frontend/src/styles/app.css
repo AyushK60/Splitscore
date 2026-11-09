@@ -1,7 +1,7 @@
 /* SplitScope styles.
    Plain CSS with custom properties: no component library, no CSS-in-JS, no
-   external fonts. The S5 workspace identity: the landing page's forensic
-   archive carried into the instrument — warm ivory paper, deep ink-green
+   external fonts. The integrity workspace identity: the landing page's forensic
+   archive carried into the instrument - warm ivory paper, deep ink-green
    structure, teal for the workbench's own actions, copper reserved for what
    the audit finds and what the user selects. */
 
@@ -466,8 +466,8 @@ a {
   padding: var(--space-5) var(--ws-gutter) var(--space-7);
 }
 
-/* Workspace stage transition (S11): a quiet fade-and-rise anchors the eye as
-   the stage changes. Opacity/transform only — nothing reflows, input is never
+/* Workspace stage transition: a quiet fade-and-rise anchors the eye as
+   the stage changes. Opacity/transform only - nothing reflows, input is never
    blocked, and the global reduced-motion block collapses it to an instant
    swap. The keyed wrapper in Shell re-triggers the animation per stage. */
 .stack > * + * {
@@ -2131,7 +2131,7 @@ details.disclosure[open] > summary {
   }
 }
 
-/* ---------- S5 risk scorecard (F06) ---------- */
+/* ---------- risk scorecard (F06) ---------- */
 
 .scorecard {
   display: flex;
@@ -2242,7 +2242,7 @@ details.disclosure[open] > summary {
   flex: 0 0 auto;
 }
 
-/* ---------- S5 split comparison visuals (F05) ---------- */
+/* ---------- split comparison visuals (F05) ---------- */
 
 .splitviz {
   border: 1px solid var(--line);

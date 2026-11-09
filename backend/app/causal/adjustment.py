@@ -1,13 +1,13 @@
-"""Classical backdoor adjustment: evaluation, explanation and bounded search (S8C).
+"""Classical backdoor adjustment: evaluation, explanation and bounded search.
 
 The criterion implemented (Pearl, *Causality*, 2009, §3.3.1): an adjustment
 set Z qualifies for the *total* causal effect of treatment X on outcome Y in
 DAG G when
 
 1. Z contains neither X nor Y;
-2. no member of Z is a descendant of X in G (the classical, stricter form —
+2. no member of Z is a descendant of X in G (the classical, stricter form -
    this forbids mediators and post-treatment colliders alike);
-3. Z d-separates X from Y in the *backdoor graph* G_X̲ — the graph with every
+3. Z d-separates X from Y in the *backdoor graph* G_X̲ - the graph with every
    edge directed **out of** X removed. Removing edges *into* X would model an
    intervention do(X) and is a different graph with a different meaning; the
    confusion is a classic identification bug and this module's docstrings name
@@ -18,9 +18,9 @@ DAG only**. It is not empirical proof: the edges are assumptions, and no data
 is consulted anywhere in this module.
 
 Search bounds are explicit and disclosed. Whenever a bound truncates the
-search the result is flagged ``search_status="incomplete"`` — a truncated
+search the result is flagged ``search_status="incomplete"`` - a truncated
 search is never reported as exhaustive, and "no set found" is never claimed
-from an incomplete search (S8C contract).
+from an incomplete search.
 """
 
 from __future__ import annotations
@@ -166,7 +166,7 @@ class AdjustmentSearchResult:
                 "satisfying the classical backdoor criterion. This is a statement about "
                 "the backdoor criterion on this assumed graph only: it does not prove the "
                 "effect is unidentifiable by every method (front-door, instrumental "
-                "variables and generalised adjustment are outside S8C)."
+                "variables and generalised adjustment are outside identification)."
             )
         return payload
 
@@ -211,7 +211,7 @@ def _backdoor_paths(
 
     A backdoor path begins with an edge *into* the treatment, so the walk runs
     over the undirected skeleton of the backdoor graph (the graph with X's
-    outgoing edges removed) — walking only directed children would miss every
+    outgoing edges removed) - walking only directed children would miss every
     path that starts X ← …. The blocking verdict itself never comes from this
     listing; it is the exact d-separation test. Reaching the bound sets the
     disclosure flag.
@@ -360,7 +360,7 @@ def _path_is_open(
     Collider status: both neighbouring path edges point into the node.
     A collider blocks unless conditioned on or descended-from-conditioned; a
     chain/fork node blocks when conditioned on. This is the per-path restatement
-    of d-separation, used to name which enumerated backdoor paths stay open —
+    of d-separation, used to name which enumerated backdoor paths stay open -
     the blocking verdict itself always comes from the exact reachability test.
     """
     edges = set(dag.edges)
@@ -415,7 +415,7 @@ def search_adjustment_sets(
     """Deterministic search for inclusion-minimal backdoor adjustment sets.
 
     *Inclusion-minimal* is precise: no *proper subset* of a reported set also
-    satisfies the criterion. Minimal sets are not minimum-cardinality sets —
+    satisfies the criterion. Minimal sets are not minimum-cardinality sets -
     several minimal sets of different sizes can exist, and all are reported.
 
     Determinism: candidates are enumerated by (cardinality, lexicographic
@@ -466,7 +466,7 @@ def search_adjustment_sets(
 
     if exhaustive:
         # Enumerate by (size, lex). A candidate is kept only when no
-        # already-accepted smaller set is its subset — this guarantees every
+        # already-accepted smaller set is its subset - this guarantees every
         # reported set is inclusion-minimal, and every minimal set appears.
         for size in range(1, len(candidates) + 1):
             for combo in combinations(candidates, size):

@@ -74,7 +74,7 @@ def test_health_reports_versions_limits_and_storage_note(client):
 def test_checks_endpoint_serves_the_real_catalogue(client):
     body = client.get("/api/checks").json()
     ids = [check["rule_id"] for check in body["checks"]]
-    # The five original checks keep their ids and order; the S5 integrity
+    # The five original checks keep their ids and order; the integrity integrity
     # capabilities follow as separate typed rules.
     assert ids == [
         "SS-DUP-001",
@@ -193,7 +193,7 @@ def test_audit_endpoint_returns_engine_findings_and_a_run_id(client, loaded_demo
     assert result["findings"][0]["severity"] == "high"
     assert result["findings"][0]["examples"]
     # The planted entity-overlap finding leads; the total always equals the
-    # finding list length (S5 screens may add info-level candidates).
+    # finding list length (integrity screens may add info-level candidates).
     assert result["findings"][0]["rule_id"] == "SS-ENT-001"
     assert result["evaluation"]["findings_total"] == len(result["findings"])
     # SS-VRU-001 evaluates against the (empty) session history the API supplies;

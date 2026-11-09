@@ -1,13 +1,13 @@
-"""S8C d-separation engine: known-answer fixtures and an independent oracle.
+"""identification d-separation engine: known-answer fixtures and an independent oracle.
 
 Two correctness strategies, deliberately independent of each other:
 
-1. **Known-answer fixtures** — hand-written DAGs (chain, fork, collider,
+1. **Known-answer fixtures** - hand-written DAGs (chain, fork, collider,
    confounded effect, M-bias, butterfly bias, disconnected pairs) whose
    d-separation answers are written into the test by hand from the graphical
    definition, not derived from the implementation.
 
-2. **Independent oracle cross-check** — a *moralization-based* oracle
+2. **Independent oracle cross-check** - a *moralization-based* oracle
    (ancestral graph → moralization → undirected separation), implemented
    inside this test file with its own graph code sharing nothing with
    ``app.causal.d_separation``. Both engines are compared exhaustively over
@@ -118,7 +118,7 @@ def _all_dags_on(nodes: list[str]) -> list[OracleGraph]:
     """Every DAG over the given ordered node list (exhaustive on ≤4 nodes)."""
     pairs = [(a, b) for a, b in itertools.combinations(nodes, 2)]
     graphs = []
-    # Three options per unordered pair: no edge, forward, backward — 3^6 = 729
+    # Three options per unordered pair: no edge, forward, backward - 3^6 = 729
     # candidates on 4 nodes, of which the 546 acyclic ones are the labelled DAGs.
     for choice in itertools.product((None, "fwd", "bwd"), repeat=len(pairs)):
         edges: set[tuple[str, str]] = set()
@@ -247,11 +247,11 @@ def test_butterfly_bias():
     assert d_separated(dag, "a", "b", []).d_separated is False
     assert d_separated(dag, "a", "b", ["u"]).d_separated is True
     # D and A are separated unconditionally (X is an unconditioned collider),
-    # but conditioning on Y — a descendant of X — activates X and connects them.
+    # but conditioning on Y - a descendant of X - activates X and connects them.
     assert d_separated(dag, "d", "a", []).d_separated is True
     assert d_separated(dag, "d", "a", ["y"]).d_separated is False
     # D and B are separated unconditionally (Y blocks), but conditioning on X
-    # — a *descendant of the collider C* on D → C ← U → B — activates C and
+    # - a *descendant of the collider C* on D → C ← U → B - activates C and
     # opens that path even though X itself is not on it.
     assert d_separated(dag, "d", "b", []).d_separated is True
     assert d_separated(dag, "d", "b", ["x"]).d_separated is False
@@ -330,8 +330,8 @@ def test_backdoor_graph_keeps_incoming_and_drops_outgoing_edges():
     assert ("x", "y") not in backdoor.edges
     assert ("x", "m") not in backdoor.edges
     assert ("m", "y") in backdoor.edges
-    # In the backdoor graph, X and Y are separated given {z} — the basis of
-    # the backdoor criterion — but not unconditionally (path X ← Z → ? …).
+    # In the backdoor graph, X and Y are separated given {z} - the basis of
+    # the backdoor criterion - but not unconditionally (path X ← Z → ? …).
     assert d_separated(backdoor, "x", "y", ["z"]).d_separated is True
 
 

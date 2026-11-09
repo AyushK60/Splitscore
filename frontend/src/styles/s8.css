@@ -1,8 +1,8 @@
 /* ==========================================================================
-   S8 Causal Lab
+   Causal Lab
    --------------------------------------------------------------------------
    The graph is the centerpiece: a spacious paper-toned canvas with a subtle
-   dot grid, precise node cards, and copper reserved for selection — the S7
+   dot grid, precise node cards, and copper reserved for selection - the dossier
    interaction language. No neon, no glow, no decorative gradients.
    Rails are compact and collapsible; the inspector only exists when it has
    something to inspect.
@@ -236,7 +236,7 @@
   max-height: 180px;
   overflow-y: auto;
   /* Keep the vertical scrollbar off the ADD chips: without this the native
-     scrollbar overlays the trailing edge of the last row (S11 audit, LOW). */
+     scrollbar overlays the trailing edge of the last row. */
   scrollbar-gutter: stable;
   padding-right: 2px;
 }
@@ -924,7 +924,7 @@
   }
 }
 
-/* -- S8C identification mode ------------------------------------------------- */
+/* -- identification mode ------------------------------------------------- */
 
 .clab__mode-switch {
   display: inline-flex;

@@ -4,7 +4,7 @@ Order here is the order findings appear in results, reports and the UI. It is
 fixed rather than discovered by scanning, so the engine's behaviour cannot change
 because a module was imported in a different order.
 
-S5 additions (F04) are separate typed capabilities after the five original
+The integrity checks (F04) are separate typed capabilities after the five original
 checks, whose definitions, severities and denominators are unchanged.
 """
 
@@ -31,7 +31,7 @@ RULES: tuple[Rule, ...] = (
     chronology,
     target_copy,
     near_duplicates,
-    # -- S5 integrity capabilities (F04) -- #
+    # -- integrity capabilities (F04) -- #
     feature_availability,
     target_proxy,
     entity_memorization,

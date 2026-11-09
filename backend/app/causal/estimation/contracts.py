@@ -1,15 +1,15 @@
-"""Versioned contracts and hard bounds for causal effect estimation (S9A).
+"""Versioned contracts and hard bounds for causal effect estimation.
 
 The estimation request is deliberately explicit about everything that defines
 the estimand: the graph and its expected fingerprint, the treatment and
 outcome nodes with their two observed treatment values, the adjustment set
-(S9A never picks one silently), the analysis cohort, the missing-data policy,
+(estimation never picks one silently), the analysis cohort, the missing-data policy,
 the cross-fitting design and the uncertainty construction. Anything the client
-leaves unset is reported back as a default that was applied, mirroring the S6
+leaves unset is reported back as a default that was applied, mirroring the Model Lab
 Model Lab conventions.
 
 Bounds are enforced before any model is fitted, with a typed, actionable
-error — never a silent subsample. The bounds exist because nuisance fitting,
+error - never a silent subsample. The bounds exist because nuisance fitting,
 bootstrap resampling and categorical one-hot expansion are the places an
 unbounded request could exhaust the bounded in-memory design.
 """
@@ -27,7 +27,7 @@ ESTIMATOR_NAMES = ("regression_adjustment", "ipw", "aipw")
 
 ESTIMAND_NAMES = ("ate",)
 
-#: Hard bounds (mirroring the S6 Model Lab style: enforced up front, reported
+#: Hard bounds (mirroring the Model Lab style: enforced up front, reported
 #: in the payload, never silently worked around).
 class EstimationLimits:
     """Hard computational bounds for one estimation run."""
@@ -97,7 +97,7 @@ class CohortSelection(_StrictModel):
 
     The default (no fields set) is every dataset row that survives data
     preparation, reported as such. When a train/test assignment is named, the
-    causal estimand is computed on exactly one partition — a predictive
+    causal estimand is computed on exactly one partition - a predictive
     holdout is never silently combined with its fit partition, because model
     evaluation and causal estimation answer different questions.
     """
@@ -167,7 +167,7 @@ def estimation_scope_note() -> str:
         "The estimate is an average treatment effect computed from this dataset under the "
         "assumed graph and the named adjustment set. Graphical identification, exchangeability "
         "(no unmeasured confounding), consistency, positivity and correct model specification "
-        "are assumptions this computation relies on — none of them is proven by it. Diagnostics "
+        "are assumptions this computation relies on - none of them is proven by it. Diagnostics "
         "describe the data; they do not verify the causal assumptions."
     )
 

@@ -1,11 +1,11 @@
 /**
- * The Causal Lab (S8B).
+ * The Causal Lab.
  *
  * One dominant graph canvas; a compact, collapsible control rail on the left;
  * a contextual inspector on the right only when something is selected. All
- * scientific authority lives in the S8A backend: the canvas edits a local
+ * scientific authority lives in the graph backend: the canvas edits a local
  * draft, Save/Validate send it to the real endpoints, and structured
- * validation results are rendered from the server's response — never from a
+ * validation results are rendered from the server's response - never from a
  * frontend reimplementation.
  *
  * State distinctions that are load-bearing here:
@@ -79,7 +79,7 @@ export function CausalLabView({ onNavigate }: Props) {
   const [confirmDeleteGraph, setConfirmDeleteGraph] = useState(false)
   const [connectError, setConnectError] = useState<string | null>(null)
   const [validationViewOpen, setValidationViewOpen] = useState(false)
-  // S8C identification mode: results are tied to an exact scientific signature
+  // identification mode: results are tied to an exact scientific signature
   // of the draft at run time; any scientific edit (edges, scope, observed
   // status) marks them visibly stale. Layout drags never do.
   const [mode, setMode] = useState<LabMode>('authoring')
@@ -179,7 +179,7 @@ export function CausalLabView({ onNavigate }: Props) {
           dispatch({
             type: 'validationRejected',
             issues: validation.errors,
-            message: 'The backend refused this graph. Your draft is unchanged — fix the errors below.',
+            message: 'The backend refused this graph. Your draft is unchanged - fix the errors below.',
           })
           setValidationViewOpen(true)
         } else {
@@ -391,7 +391,7 @@ export function CausalLabView({ onNavigate }: Props) {
     [dispatch],
   )
 
-  // -- S8C identification ------------------------------------------------------ //
+  // -- identification identification ------------------------------------------------------ //
 
   const runIdentification = useCallback(async () => {
     if (!datasetId || !state.graphId || dirty) return
@@ -448,7 +448,7 @@ export function CausalLabView({ onNavigate }: Props) {
   }, [])
 
   // Loading (or creating) a different graph invalidates any identification
-  // results outright — they belonged to another structure.
+  // results outright - they belonged to another structure.
   useEffect(() => {
     if (identification && identification.graphId !== state.graphId) {
       setIdentification(null)
@@ -458,7 +458,7 @@ export function CausalLabView({ onNavigate }: Props) {
 
   const loadExample = useCallback((kind: 'chain' | 'fork' | 'collider') => {
     const example = teachingExample(kind)
-    // The example lands in the draft as regular editable content — it is not a
+    // The example lands in the draft as regular editable content - it is not a
     // second storage system and never bypasses validation.
     dispatch({ type: 'reset', datasetId: datasetId ?? '' })
     for (const node of example.nodes) dispatch({ type: 'addNode', node })
@@ -608,14 +608,14 @@ export function CausalLabView({ onNavigate }: Props) {
           >
             {dirty ? 'Save changes' : 'Saved'}
             {dirty ? <span className="clab-dirty-dot" aria-hidden="true" /> : null}
-            <span className="visually-hidden">{dirty ? ' — unsaved changes' : ' — no unsaved changes'}</span>
+            <span className="visually-hidden">{dirty ? ' - unsaved changes' : ' - no unsaved changes'}</span>
           </button>
           <button
             type="button"
             className="btn btn--small"
             onClick={() => void validate()}
             disabled={Boolean(busy) || (!dirty && !state.graphId)}
-            title="Runs the backend validation engine. Unsaved changes are saved first — the backend is the only validator."
+            title="Runs the backend validation engine. Unsaved changes are saved first - the backend is the only validator."
           >
             Validate
           </button>
@@ -701,7 +701,7 @@ export function CausalLabView({ onNavigate }: Props) {
               }
             }}
             disabled={!state.graphId}
-            title="Download the publication figure (SVG) of the saved graph — deterministic, drawn from the spec, not a canvas screenshot"
+            title="Download the publication figure (SVG) of the saved graph - deterministic, drawn from the spec, not a canvas screenshot"
           >
             Export figure
           </button>
@@ -789,7 +789,7 @@ export function CausalLabView({ onNavigate }: Props) {
           <CausalCanvas
             draft={state.draft}
             /* Only blocking errors mark the canvas; warnings are listed in the
-               validation panel — an amber on-canvas paint would overstate
+               validation panel - an amber on-canvas paint would overstate
                them. */
             issues={state.validation?.errors ?? []}
             selected={state.selected}

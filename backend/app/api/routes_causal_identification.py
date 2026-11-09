@@ -1,16 +1,16 @@
-"""Causal identification routes (S8C).
+"""Causal identification routes.
 
 Read-only analytical queries over a *stored, validated* graph. No route in
 this module mutates the graph or the dataset: identification runs on the
 stored specification exactly as saved, and results are addressed by the
 graph's scientific fingerprint so the client can detect staleness.
 
-Every route follows the S8A rules: the dataset must be live (typed 410 when
+Every route follows the graph rules: the dataset must be live (typed 410 when
 expired/evicted), a valid graph id under a different dataset is a 404, and
 unanswerable queries return the single structured error envelope with a
-machine-readable code — never a prose-only failure.
+machine-readable code - never a prose-only failure.
 
-S8C deliberately stops at graphical identification: there is no endpoint that
+identification deliberately stops at graphical identification: there is no endpoint that
 returns an estimated effect, a propensity score, a bootstrap interval, or any
 other causal number.
 """
@@ -77,7 +77,7 @@ class IdentificationRequest(ScopeBody):
 
 
 def _query_error(code: str, message: str) -> ValidationFailure:
-    """One structured, per-issue error list, matching the S8A envelope shape."""
+    """One structured, per-issue error list, matching the graph envelope shape."""
     return ValidationFailure(
         message,
         details={

@@ -1,24 +1,24 @@
 /**
- * S9B — Effect Estimation Studio journeys against the real backend.
+ * estimation UI - Effect Estimation Studio journeys against the real backend.
  *
  * No mocks and no seeded results: every number asserted here is computed by the
- * S9A engine from the bundled `causal_effect` demo, whose data-generating
+ * estimation engine from the bundled `causal_effect` demo, whose data-generating
  * average effect (1.5) is documented metadata rather than an input to the
  * estimator.
  *
- * Journey A — complete estimation: demo → demonstration DAG → readiness →
+ * Journey A - complete estimation: demo → demonstration DAG → readiness →
  *   three-estimator comparison → balance → overlap → weights → methodology →
  *   SVG/JSON export.
- * Journey B — scientific honesty: influence-function intervals leave
+ * Journey B - scientific honesty: influence-function intervals leave
  *   regression adjustment without an interval, and an empty adjustment set is
  *   refused by the backend instead of estimated.
- * Journey C — staleness and navigation: changing the interval level marks the
+ * Journey C - staleness and navigation: changing the interval level marks the
  *   displayed result stale; returning to a stored run restores its numbers and
  *   its stale state.
- * Journey D — responsive QA at 1440 / 1024 / 768 / 390 with no page-level
+ * Journey D - responsive QA at 1440 / 1024 / 768 / 390 with no page-level
  *   horizontal overflow.
  *
- * Screenshots are written to docs/screenshots/s9b/.
+ * Screenshots are written to test-results/shots/s9b/.
  */
 import { mkdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -29,7 +29,7 @@ import type { Page } from '@playwright/test'
 import { expect, loadDemoFromEntry, test } from './fixtures'
 
 const DEMO = 'Confounded treatment-effect study'
-const SHOTS = fileURLToPath(new URL('../../docs/screenshots/s9b', import.meta.url))
+const SHOTS = fileURLToPath(new URL('../test-results/shots/s9b', import.meta.url))
 
 test.use({ viewport: { width: 1440, height: 900 } })
 test.setTimeout(240_000)
@@ -80,7 +80,7 @@ async function runComparison(page: Page): Promise<void> {
   await expect(page.getByTestId('readiness-chip')).toContainText('Ready')
 }
 
-test('S9B journey A — full estimation, diagnostics and figure export', async ({ page }) => {
+test('estimation UI journey A - full estimation, diagnostics and figure export', async ({ page }) => {
   await openReadyStudio(page)
   await expect(page.getByTestId('demo-banner')).toContainText('1.500 outcome units')
   await expect(page.getByTestId('readiness-ok')).toContainText('1,200 rows would be analysed')
@@ -171,7 +171,7 @@ test('S9B journey A — full estimation, diagnostics and figure export', async (
   expect(envelope.run.results.every((result) => result.status === 'estimated')).toBe(true)
 })
 
-test('S9B journey B — unavailable intervals and refused configurations', async ({
+test('estimation UI journey B - unavailable intervals and refused configurations', async ({
   page,
   allowFailure,
 }) => {
@@ -210,7 +210,7 @@ test('S9B journey B — unavailable intervals and refused configurations', async
   await screenshot(page, 'refused-configuration.png')
 })
 
-test('S9B journey C — staleness, navigation and stored results', async ({ page }) => {
+test('estimation UI journey C - staleness, navigation and stored results', async ({ page }) => {
   await openReadyStudio(page)
   await runComparison(page)
   await expect(page.getByTestId('result-meta')).toContainText('Run ')
@@ -244,7 +244,7 @@ test('S9B journey C — staleness, navigation and stored results', async ({ page
   await expect(page.getByTestId('stale-banner')).toBeVisible()
 })
 
-test('S9B journey D — responsive QA at four widths', async ({ page }) => {
+test('estimation UI journey D - responsive QA at four widths', async ({ page }) => {
   await openReadyStudio(page)
   await runComparison(page)
 

@@ -196,7 +196,7 @@ class ReportRequest(_Model):
 
 
 class DossierRequest(_Model):
-    """Explicit sources for a composite S7 dossier.
+    """Explicit sources for a composite dossier dossier.
 
     Nothing is inferred from "latest" state: the client names the run IDs it has
     in scope. Sections are ordered server-side regardless of request order.

@@ -15,7 +15,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from './fixtures'
 
 // --------------------------------------------------------------------------- //
-// Fixtures (generated, tiny, synthetic — never anyone's real data)
+// Fixtures (generated, tiny, synthetic - never anyone's real data)
 // --------------------------------------------------------------------------- //
 
 /**
@@ -59,7 +59,7 @@ function noSplitCsv(): string {
 }
 
 // --------------------------------------------------------------------------- //
-// Helpers (upload and download only — no audit logic)
+// Helpers (upload and download only - no audit logic)
 // --------------------------------------------------------------------------- //
 
 async function uploadCsv(page: Page, name: string, csv: string): Promise<void> {
@@ -96,7 +96,7 @@ test('upload with its own split column: map the labels, confirm, audit, evidence
   // -- 1. The entry question comes first; the run gate names what is missing -- //
   await expect(
     page.getByRole('heading', {
-      name: /^Step 1 — Does your file already say which rows are training and testing\?/,
+      name: /^Step 1 - Does your file already say which rows are training and testing\?/,
     }),
   ).toBeVisible()
   await expect(
@@ -105,7 +105,7 @@ test('upload with its own split column: map the labels, confirm, audit, evidence
   ).toBeDisabled()
   await expect(page.getByText(/does the file already say which rows are training and testing/)).toBeVisible()
 
-  await page.getByRole('button', { name: 'Yes — check my existing split.' }).click()
+  await page.getByRole('button', { name: 'Yes - check my existing split.' }).click()
 
   // -- 2. The file's split column, its observed values and the label mapping -- //
   await expect(page.getByRole('combobox', { name: 'Split column' })).toHaveValue('split')
@@ -127,7 +127,7 @@ test('upload with its own split column: map the labels, confirm, audit, evidence
     'an unmapped split must not enable the audit',
   ).toBeDisabled()
 
-  // Recovering is just mapping the second label — no reload, no reset.
+  // Recovering is just mapping the second label - no reload, no reset.
   await page.getByLabel('Test value').selectOption('test')
   await expect(page.getByRole('button', { name: /Run audit/ })).toBeEnabled()
   await page.getByRole('button', { name: /Run audit/ }).click()
@@ -179,17 +179,17 @@ test('upload without a split column: create a split, audit it, download its assi
   await uploadCsv(page, 'wine_like.csv', noSplitCsv())
 
   // -- 1. Entry question → create a split ------------------------------------ //
-  await expect(page.getByRole('heading', { name: /^Step 1 — Does your file already say/ })).toBeVisible()
-  await page.getByRole('button', { name: 'No — help me create a split.' }).click()
+  await expect(page.getByRole('heading', { name: /^Step 1 - Does your file already say/ })).toBeVisible()
+  await page.getByRole('button', { name: 'No - help me create a split.' }).click()
 
   // -- 2. Strategy eligibility is spelled out, not silently dropped ---------- //
-  await expect(page.getByRole('heading', { name: /^Step 2 — Choose how to split the rows/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /^Step 2 - Choose how to split the rows/ })).toBeVisible()
   await expect(page.getByRole('radio', { name: /Random holdout/ })).toBeEnabled()
   await expect(page.getByRole('radio', { name: /Stratified holdout/ })).toBeEnabled()
   await expect(page.getByRole('radio', { name: /Group holdout/ })).toBeDisabled()
-  await expect(page.getByText('Unavailable — this strategy needs the entity column')).toBeVisible()
+  await expect(page.getByText('Unavailable - this strategy needs the entity column')).toBeVisible()
   await expect(page.getByRole('radio', { name: /Chronological holdout/ })).toBeDisabled()
-  await expect(page.getByText('Unavailable — this strategy needs the timestamp column')).toBeVisible()
+  await expect(page.getByText('Unavailable - this strategy needs the timestamp column')).toBeVisible()
 
   // -- 3. A stratified holdout with a recorded seed --------------------------- //
   await page.getByRole('radio', { name: /Stratified holdout/ }).click()

@@ -1,7 +1,7 @@
 """Numerical core of the Visual Explorer.
 
-Every function here works on the *full* population the caller selected — never
-on a render sample — and returns typed results that separate a value from its
+Every function here works on the *full* population the caller selected - never
+on a render sample - and returns typed results that separate a value from its
 denominator. The conventions are the profiler's (``app.research.profiling``):
 
 * an **empty cell** is missing; no other string is silently treated as missing;

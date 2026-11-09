@@ -82,7 +82,7 @@ describe('figure manifest', () => {
     const manifest = figureManifest(
       {
         figureId: 'parallel-coordinates',
-        title: 'Parallel coordinates — a, b',
+        title: 'Parallel coordinates - a, b',
         settings: '2 numeric axes',
         counts: '80 of 240 rows drawn',
         sampling: 'All rows are drawn.',

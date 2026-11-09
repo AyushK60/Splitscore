@@ -1,5 +1,5 @@
 /* ============================================================================
-   Scientific Visual Explorer (S4)
+   Scientific Visual Explorer
    ----------------------------------------------------------------------------
    The exploration workbench. Extends the Study workspace's tokens (.rs scope)
    rather than inventing a second palette, so Start → Study → Explore reads as
@@ -726,7 +726,7 @@
 
 /* Scatter owns a definite plot height. The chart's ResizeObserver reads this
    height; it must never be derived from the SVG inside, or the observer would
-   size the SVG from a container that the SVG itself sizes (S6-A regression). */
+   size the SVG from a container that the SVG itself sizes. */
 .xfig__plot--sized {
   height: clamp(340px, 46vh, 520px);
 }
@@ -1097,7 +1097,7 @@
   }
 }
 
-/* ---- S7 scatter legibility ------------------------------------------------ */
+/* ---- scatter legibility ------------------------------------------------ */
 
 /* Panels are real grid cells now: the matrix no longer collapses into one
    narrow strip, and hover/focus makes the panel's affordance explicit. */

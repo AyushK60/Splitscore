@@ -1,5 +1,5 @@
 /**
- * One focused failure-path test — **real backend rejection, no interception**.
+ * One focused failure-path test - **real backend rejection, no interception**.
  *
  * A CSV below the documented minimum row count is rejected by the real API
  * (HTTP 422 with a structured message) and the UI must show an understandable

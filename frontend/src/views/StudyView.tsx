@@ -192,7 +192,7 @@ export function StudyView({ onNavigate }: Props) {
                   <p className="rs-callout__title">No research roles yet</p>
                   <p>
                     The workbench has its own role selection for the audit. Copying it here makes the
-                    study mapping the single source of truth — nothing is copied silently.
+                    study mapping the single source of truth - nothing is copied silently.
                   </p>
                 </div>
                 <button

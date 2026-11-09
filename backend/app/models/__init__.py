@@ -1,4 +1,4 @@
-"""S6 Model Lab engines.
+"""Model Lab engines.
 
 ``contracts`` holds the typed specification and bounds; ``statistics`` holds the
 statsmodels-backed OLS/logistic implementation. The predictive ML engine (F10)

@@ -1,8 +1,8 @@
 /**
- * S8C identification panel, against the S8C API contract shape.
+ * identification identification panel, against the identification API contract shape.
  *
  * The API boundary is mocked with payloads mirroring the real backend's
- * documented shapes (see docs/S8C_API_CONTRACT.md and the backend tests); the
+ * documented shapes (see the backend tests); the
  * panel, mode switching, highlighting and staleness logic are real. The
  * live-backend behaviour is exercised by the Playwright journeys
  * `e2e/s8c-identification.spec.ts`.
@@ -297,7 +297,7 @@ function listFixture() {
   }
 }
 
-describe('Causal Lab identification mode (S8C)', () => {
+describe('Causal Lab identification mode', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(causalApi.list).mockResolvedValue(listFixture())
@@ -361,7 +361,7 @@ describe('Causal Lab identification mode (S8C)', () => {
     // Inspecting the set loads it into the custom tester and highlights Age.
     // Under full-suite load the click can land while the identification result
     // hydration is still settling, so the checked state is awaited rather than
-    // read synchronously (same failure class as the S9C AUDIT-2 soak fix).
+    // read synchronously (same failure class as the estimation AUDIT-2 soak fix).
     fireEvent.click(screen.getByRole('button', { name: 'Inspect this set' }))
     await waitFor(() => {
       const checkbox = within(screen.getByTestId('adjustment-candidates')).getByRole('checkbox', { name: 'Adjust for Age' }) as HTMLInputElement

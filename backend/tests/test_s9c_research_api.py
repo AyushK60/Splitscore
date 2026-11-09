@@ -1,8 +1,8 @@
-"""S9C API integration: routes, ownership, refusal, storage, staleness.
+"""estimation API integration: routes, ownership, refusal, storage, staleness.
 
 Drives the real FastAPI routes with the TestClient against the bundled
-``causal_effect`` demo dataset, so the S9C endpoints are exercised exactly as
-the frontend calls them — including ownership (a graph under another dataset
+``causal_effect`` demo dataset, so the estimation endpoints are exercised exactly as
+the frontend calls them - including ownership (a graph under another dataset
 is 404), typed refusals, stored-run retrieval and staleness annotation.
 """
 
@@ -43,7 +43,7 @@ def _load_demo() -> tuple[str, str]:
     graph_spec = {
         "schema_version": "1.0.0",
         "dataset_id": dataset_id,
-        "name": "S9C API demonstration",
+        "name": "estimation API demonstration",
         "description": "Demonstration DAG for the confounded treatment-effect study.",
         "nodes": [
             {
@@ -261,7 +261,7 @@ def test_estimation_runs_belong_to_their_dataset():
 
 
 # --------------------------------------------------------------------------- #
-# S9C independent audit additions: fingerprint gating on every S9C route
+# estimation independent audit additions: fingerprint gating on every estimation route
 # --------------------------------------------------------------------------- #
 
 

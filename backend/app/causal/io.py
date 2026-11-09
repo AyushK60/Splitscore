@@ -3,7 +3,7 @@
 The contract is deliberately narrow, in both directions:
 
 * **Export** writes a schema-versioned envelope with a marker ``export_kind``.
-  It carries graph metadata, assumptions and display layout only — never
+  It carries graph metadata, assumptions and display layout only - never
   dataset rows, never the dataset itself.
 * **Import** accepts only JSON that declares the marker and the exact schema
   version this build reads, and parses it through the same Pydantic models the
@@ -14,7 +14,7 @@ The contract is deliberately narrow, in both directions:
 Import always creates a *new* graph in the receiving registry. The file's
 original graph id, revision history and dataset identity are not carried over,
 so an import can never overwrite another graph or quietly bind a graph to a
-dataset it was not written for — column references are validated against the
+dataset it was not written for - column references are validated against the
 receiving dataset and fail with ``unknown_column`` when they do not resolve.
 """
 

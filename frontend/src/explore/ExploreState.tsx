@@ -25,10 +25,10 @@ import { useApp } from '../state/AppState'
  * disagree about which observations are active.
  *
  * The engine distinguishes (mirroring the backend payload):
- *  - `population` — every row of the dataset;
- *  - `predicates` — the active brushes (a filter definition, not an id list);
- *  - `selection.totalSelected` — the exact number of rows passing them;
- *  - `selection.ids` — those rows' immutable ids (capped for highlighting).
+ *  - `population` - every row of the dataset;
+ *  - `predicates` - the active brushes (a filter definition, not an id list);
+ *  - `selection.totalSelected` - the exact number of rows passing them;
+ *  - `selection.ids` - those rows' immutable ids (capped for highlighting).
  */
 
 export interface SelectionState {
@@ -81,7 +81,7 @@ export function ExploreProvider({ children }: { children: ReactNode }) {
   const pendingPredicates = useRef<BrushPredicate[]>([])
 
   // A new dataset invalidates everything the explorer holds: schema, colour
-  // choice and above all the selection — a brush computed for one dataset must
+  // choice and above all the selection - a brush computed for one dataset must
   // never highlight rows of another.
   useEffect(() => {
     selectionSeq.current += 1

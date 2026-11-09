@@ -139,7 +139,7 @@ describe('conflicting and invalid selections', () => {
     expect(screen.getByText('1 blocking configuration problem')).toBeInTheDocument()
     expect(screen.getByText(/looks unique per row/)).toBeInTheDocument()
     expect(screen.getByText('Set it as the row identifier or exclude it.')).toBeInTheDocument()
-    expect(screen.getByText(/1 warning — the audit can still run/)).toBeInTheDocument()
+    expect(screen.getByText(/1 warning - the audit can still run/)).toBeInTheDocument()
     expect(screen.getByText(/supervised leakage checks cannot run/)).toBeInTheDocument()
   })
 
@@ -179,7 +179,7 @@ describe('observed split values', () => {
     expect(screen.getByLabelText('Train value')).toHaveValue('train')
     expect(screen.getByLabelText('Test value')).toHaveValue('test')
     expect(
-      within(screen.getByLabelText('Train value')).getByRole('option', { name: /train — 24 rows/ }),
+      within(screen.getByLabelText('Train value')).getByRole('option', { name: /train - 24 rows/ }),
     ).toBeInTheDocument()
     expect(screen.getByText('24 train + 14 test rows', { exact: false })).toBeInTheDocument()
 

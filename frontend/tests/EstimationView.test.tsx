@@ -1,5 +1,5 @@
 /**
- * Effect Estimation Studio integration, against the S9A API contract.
+ * Effect Estimation Studio integration, against the estimation API contract.
  *
  * The API boundary is mocked with the hand-written payloads in
  * `estimationFixtures.ts`; the studio, its request construction, sequencing and
@@ -220,7 +220,7 @@ async function renderStudio({ graphs }: { graphs?: CausalGraphSummary[] } = {}) 
   }
   // The probe runs after a 420 ms debounce and the adjustment set arrives from
   // identification, so wait for the run to become *enabled* rather than for the
-  // first "Ready" render — that proves the readiness answer matches the current
+  // first "Ready" render - that proves the readiness answer matches the current
   // signature.
   await waitFor(() => expect(runButton().disabled).toBe(false), { timeout: 5000 })
 }
@@ -234,7 +234,7 @@ describe('EstimationView', () => {
     vi.clearAllMocks()
   })
 
-  it('probes readiness with the exact S9A request and only then enables the run', async () => {
+  it('probes readiness with the exact estimation request and only then enables the run', async () => {
     await renderStudio()
 
     const calls = vi.mocked(estimationApi.validate).mock.calls

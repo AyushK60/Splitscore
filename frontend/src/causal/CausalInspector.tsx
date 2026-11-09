@@ -32,7 +32,7 @@ export interface InspectorProps {
   draft: CausalDraft
   issues: CausalIssue[]
   payloadRevision: number | null
-  /** Node ids → structural facts derived by the S8A backend from the drawn edges. */
+  /** Node ids → structural facts derived by the graph backend from the drawn edges. */
   structure: Record<string, CausalStructureNode> | null
   onPatchNode: (nodeId: string, patch: Record<string, unknown>) => void
   onPatchEdge: (source: string, target: string, patch: Record<string, unknown>) => void
@@ -70,7 +70,7 @@ function DerivedFacts({ nodeId, structure }: { nodeId: string; structure: Record
   return (
     <div className="clab-derived">
       <p className="clab-derived__note">
-        Derived from the drawn edges only — these describe the assumed structure, not the data.
+        Derived from the drawn edges only - these describe the assumed structure, not the data.
       </p>
       <ul className="clab-derived__list">
         <li><span>Parents</span><code>{facts.parents.join(', ') || '—'}</code></li>
@@ -79,7 +79,7 @@ function DerivedFacts({ nodeId, structure }: { nodeId: string; structure: Record
         <li><span>Descendants</span><code>{facts.descendants.join(', ') || '—'}</code></li>
         <li>
           <span>Collider</span>
-          <code>{facts.is_collider ? 'yes — two or more parents' : 'no'}</code>
+          <code>{facts.is_collider ? 'yes - two or more parents' : 'no'}</code>
         </li>
         <li>
           <span>On a treatment→outcome path</span>
@@ -151,7 +151,7 @@ function NodeInspector(props: InspectorProps & { nodeId: string }) {
         ) : node.observed ? (
           'Not anchored to a dataset column.'
         ) : (
-          'Hypothetical unobserved variable — no measured column exists for it, so its role cannot be checked against data.'
+          'Hypothetical unobserved variable - no measured column exists for it, so its role cannot be checked against data.'
         )}
       </p>
 
@@ -367,7 +367,7 @@ function GraphInspector(props: InspectorProps) {
       {props.draft.analysis.treatment && props.draft.analysis.treatment === props.draft.analysis.outcome ? (
         <p className="clab-inline-error" role="alert">
           The treatment and the outcome are the same variable. A causal effect needs two distinct
-          variables — the backend will reject this.
+          variables - the backend will reject this.
         </p>
       ) : null}
 
@@ -419,7 +419,7 @@ function GraphInspector(props: InspectorProps) {
                 rows={2}
                 maxLength={1000}
                 value={assumption.rationale ?? ''}
-                placeholder="Rationale — why you believe this holds for this study."
+                placeholder="Rationale - why you believe this holds for this study."
                 aria-label="Assumption rationale"
                 onChange={(event) =>
                   props.onPatchAssumption(assumption.assumption_id, { rationale: event.target.value })
@@ -464,7 +464,7 @@ function ValidationInspector(props: InspectorProps & { issues: CausalIssue[] }) 
       </h3>
       <p className="clab-note">
         {errors.length === 0
-          ? 'The graph is well-formed. That means its structure passes the rules — it does not mean the assumed relationships are true, and no causal effect has been estimated.'
+          ? 'The graph is well-formed. That means its structure passes the rules - it does not mean the assumed relationships are true, and no causal effect has been estimated.'
           : 'The backend refused these structural problems. Your draft is preserved; fix the errors and save again.'}
       </p>
 

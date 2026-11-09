@@ -170,7 +170,7 @@ CHECKS: tuple[dict[str, Any], ...] = (
         "requires": ["features"],
         "summary": (
             "Inspects feature columns whose observed values are all distinct (identifier-like by "
-            "observation) and reports cross-split value overlap — the raw material of row "
+            "observation) and reports cross-split value overlap - the raw material of row "
             "memorisation."
         ),
         "detects": [
@@ -180,7 +180,7 @@ CHECKS: tuple[dict[str, Any], ...] = (
         "does_not_detect": [
             "Whether the column is truly an identifier; identifier-like is an observed "
             "property, stated with its evidence.",
-            "Memorisation itself — no model is trained, so this is exposure, not behaviour.",
+            "Memorisation itself - no model is trained, so this is exposure, not behaviour.",
         ],
     },
     {
@@ -212,7 +212,7 @@ CHECKS: tuple[dict[str, Any], ...] = (
         "requires": ["preprocessing_declaration"],
         "summary": (
             "Judges the fit context you declare for each preprocessing step. Without a "
-            "declaration the check is NOT EVALUATED — a raw CSV cannot establish where a scaler "
+            "declaration the check is NOT EVALUATED - a raw CSV cannot establish where a scaler "
             "or encoder was fitted, and this tool does not instrument pipelines."
         ),
         "detects": [
@@ -232,7 +232,7 @@ CHECKS: tuple[dict[str, Any], ...] = (
         "requires": ["run_history"],
         "summary": (
             "Reads this session's in-memory run history and flags when the same split has been "
-            "audited many times — the workflow mechanism behind validation overfitting."
+            "audited many times - the workflow mechanism behind validation overfitting."
         ),
         "detects": [
             "Repeated audits of one exact split within the current session.",

@@ -1,8 +1,8 @@
 /**
- * F06 — category-based leakage risk scorecard.
+ * F06 - category-based leakage risk scorecard.
  *
  * A category is either carrying findings, clean under the checks that ran, in
- * error, not applicable, or not checked — never a number. Every rule row keeps
+ * error, not applicable, or not checked - never a number. Every rule row keeps
  * its own state and reason, because "not checked" with a reason is evidence
  * while "green" would be a claim. Affected-row figures link to the findings
  * that carry the exact counts and denominators.
@@ -13,7 +13,7 @@ import { Card } from './ui'
 
 const STATUS_LABEL: Record<ScorecardStatus, string> = {
   finding_present: 'Finding present',
-  evaluated_no_finding: 'Evaluated — no finding',
+  evaluated_no_finding: 'Evaluated - no finding',
   error: 'Error',
   not_applicable: 'Not applicable',
   not_checked: 'Not checked',
@@ -41,7 +41,7 @@ function statusTone(status: ScorecardStatus): string {
 
 function affectedLabel(category: ScorecardCategory): string | null {
   if (category.status !== 'finding_present' || category.affected_rows === null) return null
-  return `${category.affected_rows.toLocaleString('en-US')} row(s) — exact counts and denominators in the linked findings`
+  return `${category.affected_rows.toLocaleString('en-US')} row(s) - exact counts and denominators in the linked findings`
 }
 
 export function RiskScorecard({

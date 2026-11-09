@@ -156,7 +156,7 @@ export function VariableRail(props: VariableRailProps) {
       <section className="clab-rail__section">
         <p className="clab-rail__eyebrow">Hypothetical variable</p>
         <p className="clab-note clab-note--quiet">
-          A variable you believe matters but that has no measured column — for example a suspected
+          A variable you believe matters but that has no measured column - for example a suspected
           unmeasured confounder.
         </p>
         <button type="button" className="btn btn--small" onClick={props.onAddHypothetical}>

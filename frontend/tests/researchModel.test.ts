@@ -1,5 +1,5 @@
 /**
- * S9C research model layer: pure arithmetic and request reconstruction.
+ * estimation research model layer: pure arithmetic and request reconstruction.
  * Expectations are hand-computed, never derived from the implementation.
  */
 import { describe, expect, it } from 'vitest'

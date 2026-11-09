@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 /**
- * Stage 4a E2E configuration.
+ * E2E configuration.
  *
  * Target under test: **the production build served by the FastAPI backend**
  * (`python -m app.main` serves `frontend/dist` at `/` when it exists). That is the

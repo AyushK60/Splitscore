@@ -1,5 +1,5 @@
 /**
- * View C — Overlap & Propensity.
+ * View C - Overlap & Propensity.
  *
  * Pins the histogram mapping (per-arm counts and within-arm shares), the
  * quantile strip, truncation disclosure, warnings and the regression-adjustment

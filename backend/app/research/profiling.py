@@ -5,7 +5,7 @@ column's name. Two conventions are fixed and documented because they change the
 numbers a reader sees:
 
 * **Missing means an empty cell.** SplitScope never decides on its own that the
-  string ``"NA"`` is missing — V1 made that choice deliberately and the profile
+  string ``"NA"`` is missing - V1 made that choice deliberately and the profile
   inherits it. Any other missing convention is a *declared* study field, not an
   inferred one.
 * **Numeric summaries ignore unparsable cells** and report how many were

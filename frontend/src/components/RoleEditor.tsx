@@ -3,7 +3,7 @@
  *
  * Each role is asked as a question a beginner can answer: what should the
  * model predict, do rows repeat per person/device, does the file record time,
- * and which columns are features. The role state is a single source of truth —
+ * and which columns are features. The role state is a single source of truth -
  * the "advanced" affordances below the questions edit exactly the same state,
  * and the backend's own validation issues are rendered verbatim next to the
  * controls.
@@ -15,7 +15,7 @@
  * The split mapping deliberately uses the values observed in the column, with
  * their row counts, rather than free text: a label that does not exist in the
  * file can never be submitted by a typo. Values other than the two mapped
- * labels are named, counted and explained — never folded into either side.
+ * labels are named, counted and explained - never folded into either side.
  */
 
 import type {
@@ -50,7 +50,7 @@ const ENABLES: Record<'target' | 'entity' | 'timestamp', string> = {
   timestamp: 'Enables the chronology check (SS-CHR-001) and the chronological holdout strategy.',
 }
 
-const NOT_SURE = '— not applicable / I don’t know —'
+const NOT_SURE = '- not applicable / I don’t know -'
 
 /** Codes about the split mapping; rendered next to the mapping controls. */
 function isSplitIssue(issue: RoleIssue): boolean {
@@ -92,7 +92,7 @@ export function RoleEditor({
 
   // Prefer the live validation; the upload-time payload is only a fallback for
   // the instant before the first debounced re-check lands. While a re-check is
-  // pending nothing stale is shown — the previous issues describe roles the
+  // pending nothing stale is shown - the previous issues describe roles the
   // user has since edited.
   const effective = validationPending
     ? null
@@ -200,7 +200,7 @@ export function RoleEditor({
     return (
       <p className="suggestion small" style={{ margin: '6px 0 0' }}>
         Suggestion: <span className="mono">{column}</span>
-        {reason ? ` — ${reason}` : ''}{' '}
+        {reason ? ` - ${reason}` : ''}{' '}
         <button
           type="button"
           className="btn btn--small"
@@ -247,14 +247,14 @@ export function RoleEditor({
           })
         }
       >
-        <option value={NONE}>— choose a value —</option>
+        <option value={NONE}>- choose a value -</option>
         {values.map((item) => (
           <option key={item.value} value={item.value} disabled={item.value === other}>
-            {item.value} — {integer(item.count)} {pluralise(item.count, 'row')}
+            {item.value} - {integer(item.count)} {pluralise(item.count, 'row')}
           </option>
         ))}
         {!valueIsListed ? (
-          <option value={value}>{value} — not found in this column</option>
+          <option value={value}>{value} - not found in this column</option>
         ) : null}
       </select>
     )
@@ -271,8 +271,8 @@ export function RoleEditor({
         <fieldset className="role-question role-question--split">
           <legend>Which column says whether each row is training or testing?</legend>
           <p className="small muted" style={{ marginTop: 0 }}>
-            Pick the column that holds the labels — for example <span className="mono">split</span>{' '}
-            with values <span className="mono">train</span> / <span className="mono">test</span> —
+            Pick the column that holds the labels - for example <span className="mono">split</span>{' '}
+            with values <span className="mono">train</span> / <span className="mono">test</span> -
             then map two of its observed values to the two sides. SplitScope audits exactly that
             split; the file itself is never modified.
           </p>
@@ -289,7 +289,7 @@ export function RoleEditor({
               })
             }
           >
-            <option value={NONE}>— not selected —</option>
+            <option value={NONE}>- not selected -</option>
             {columns.map((column) => (
               <option key={column} value={column}>
                 {column}
@@ -332,7 +332,7 @@ export function RoleEditor({
                         return (
                           <li key={item.value}>
                             <span className="mono">{item.value}</span>
-                            <span className="muted"> — {integer(item.count)} rows</span>{' '}
+                            <span className="muted"> - {integer(item.count)} rows</span>{' '}
                             {isTrain ? <span className="badge badge--info">train</span> : null}
                             {isTest ? <span className="badge badge--info">test</span> : null}
                             {isUnmapped ? (
@@ -403,7 +403,7 @@ export function RoleEditor({
                             .map((item) => `“${item.value}”: ${integer(item.count)}`)
                             .join(', ')}
                           {labelCounts.unmappedValues.length > 5 ? ', …' : ''}). Those rows are
-                          excluded from the audited split and reported — never folded into train or
+                          excluded from the audited split and reported - never folded into train or
                           test.
                         </p>
                       ) : null}
@@ -456,7 +456,7 @@ export function RoleEditor({
           ) : (
             <span className="hint">
               Choose the column that marks train and test. If your file has no such column, answer
-              the first question with “No — help me create a split” instead.
+              the first question with “No - help me create a split” instead.
             </span>
           )}
         </fieldset>
@@ -545,7 +545,7 @@ export function RoleEditor({
         <legend>Which columns should the checks compare? ({roles.features.length} selected)</legend>
         <p className="small muted" style={{ marginTop: 0 }}>
           These are the columns compared between train and test. Feature order is preserved and
-          recorded in the report. Identifier columns (row numbers, UUIDs) should stay unselected —
+          recorded in the report. Identifier columns (row numbers, UUIDs) should stay unselected -
           they identify rows, they do not describe them.
         </p>
         <div className="feature-actions">
@@ -581,7 +581,7 @@ export function RoleEditor({
           })}
         </div>
         <span className="hint">
-          Columns held by another role are not offered here — the audit never compares the target,
+          Columns held by another role are not offered here - the audit never compares the target,
           split, entity or timestamp column as features.
         </span>
         {!roles.features.length ? (
@@ -673,7 +673,7 @@ export function RoleEditor({
       {warnings.length ? (
         <Callout
           tone="warn"
-          title={`${warnings.length} ${pluralise(warnings.length, 'warning')} — the audit can still run`}
+          title={`${warnings.length} ${pluralise(warnings.length, 'warning')} - the audit can still run`}
         >
           <ul className="list-tight">
             {warnings.map((issue) => (
@@ -698,7 +698,7 @@ export function RoleEditor({
                 'column',
               )} ${effective.resolved.metadata_excluded.length === 1 ? 'is' : 'are'} excluded as metadata. `
             : ''}
-          This checks only that no column holds two roles. It is not audit readiness — answer the
+          This checks only that no column holds two roles. It is not audit readiness - answer the
           split question and confirm the roles above before running.
         </Callout>
       ) : null}

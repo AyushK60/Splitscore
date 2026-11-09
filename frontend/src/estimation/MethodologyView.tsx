@@ -1,5 +1,5 @@
 /**
- * View E — Methodology & Interpretation.
+ * View E - Methodology & Interpretation.
  *
  * Everything needed to reproduce or criticise the estimate: the estimand, the
  * cohort and every exclusion, the adjustment set, the exact nuisance models,
@@ -50,7 +50,7 @@ export function MethodologyView({
           treatment effect of <strong>{treatedLabel}</strong> ({payload.reproducibility.treatment_mapping.treated} vs{' '}
           {payload.reproducibility.treatment_mapping.control}) on <strong>{outcomeLabel}</strong> is{' '}
           <strong>{estimatesSentence}</strong>, expressed in {unitLabel}, on {formatInteger(payload.analysis.rows_final)}{' '}
-          analysed rows. This is a finite-sample estimate from this dataset under those assumptions —
+          analysed rows. This is a finite-sample estimate from this dataset under those assumptions -
           not a proof that the effect is causal, and not a prediction for any individual unit.
         </p>
         {knownEffect ? (
@@ -67,7 +67,7 @@ export function MethodologyView({
             {failures
               .map(
                 (result) =>
-                  `${ESTIMATOR_LABELS[result.estimator] ?? result.estimator} — ${result.failure?.reason ?? 'no reason reported'}`,
+                  `${ESTIMATOR_LABELS[result.estimator] ?? result.estimator} - ${result.failure?.reason ?? 'no reason reported'}`,
               )
               .join('; ')}
             . A failed estimator contributes no estimate and is never treated as a zero effect.
@@ -136,7 +136,7 @@ export function MethodologyView({
               <dt>Variables</dt>
               <dd>
                 {payload.analysis.adjustment_columns.length === 0
-                  ? 'Empty set — nothing adjusted for'
+                  ? 'Empty set - nothing adjusted for'
                   : payload.analysis.adjustment_columns.join(', ')}
               </dd>
             </div>
@@ -252,7 +252,7 @@ export function MethodologyView({
             <ul className="estlist">
               {payload.defaults_applied.map((entry) => (
                 <li key={`${entry.field}-${String(entry.value)}`}>
-                  <code>{entry.field}</code> = {String(entry.value)} — {entry.meaning}
+                  <code>{entry.field}</code> = {String(entry.value)} - {entry.meaning}
                 </li>
               ))}
             </ul>

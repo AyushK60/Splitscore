@@ -1,4 +1,4 @@
-"""HTTP routes for the S6 Model Lab (F09 statistics; F10 added later).
+"""HTTP routes for the Model Lab (F09 statistics; F10 added later).
 
 A fit is scoped to a dataset already in the store, reuses no inferred roles, and
 records its run in the same bounded store as audits. The response carries the

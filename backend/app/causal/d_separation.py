@@ -1,21 +1,21 @@
-"""Exact d-separation for directed acyclic graphs (S8C).
+"""Exact d-separation for directed acyclic graphs.
 
 The algorithm is the linear-time *reachability* formulation of the Bayes-ball
 walk (Koller & Friedman, *Probabilistic Graphical Models*, 2009, Algorithm 3.1,
 "Reachable"). It is exact for every DAG: a node Y is reported reachable from X
 given Z if and only if there exists an active trail from X to Y given Z, i.e.
 X and Y are d-connected given Z. There is no path enumeration and no
-undirected-connectivity shortcut — the walk tracks travel direction (arriving
+undirected-connectivity shortcut - the walk tracks travel direction (arriving
 at a node "from a child" vs "from a parent") and consults the set of Z's
 ancestors, which is precisely what makes colliders and collider-descendants
 behave correctly.
 
-Complexity: O(|V| + |E|) time and space per query. With the S8A schema limits
+Complexity: O(|V| + |E|) time and space per query. With the graph schema limits
 (60 nodes, 240 edges) every query is effectively instantaneous, so no further
-search bounds are needed here; the bounded-enumeration concerns of S8A apply
+search bounds are needed here; the bounded-enumeration concerns of graph apply
 to *listing* paths, which this engine never does.
 
-Honesty contract (mirrors S8A): a d-separation result is a statement about
+Honesty contract (mirrors graph): a d-separation result is a statement about
 *the assumed graph*. It is never a statement about the data, and the response
 payloads carry that scope note verbatim.
 
@@ -130,7 +130,7 @@ class DAG:
 
         This is the backdoor graph: removing edges entering the node would
         instead represent intervening on it, which is a different operation
-        with a different scientific meaning (see S8C methodology doc §3).
+        with a different scientific meaning (see identification methodology doc §3).
         """
         kept = [(s, t) for s, t in self.edges if s != node]
         return DAG(self.nodes, kept)
@@ -214,7 +214,7 @@ def reachable_from(dag: DAG, x: str, z: set[str]) -> set[str]:
     not contain ``x`` (enforced by the public query entry point).
     """
     # Step 1: Z and all ancestors of Z. A collider is "activated" by
-    # conditioning on it or on any of its descendants — equivalently, when the
+    # conditioning on it or on any of its descendants - equivalently, when the
     # walk arrives downward at a node in Z or in An(Z), the trail may continue
     # upward through it.
     activated = set(z) | dag.ancestors_of_set(z)  # Z plus An(Z): collider activation set

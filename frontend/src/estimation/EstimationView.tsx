@@ -1,10 +1,10 @@
 /**
- * Effect Estimation Studio (S9B).
+ * Effect Estimation Studio.
  *
  * The workspace between identification and reporting. It reads the dataset from
- * the app context and a *saved* causal graph from the S8A API, so entering the
+ * the app context and a *saved* causal graph from the graph API, so entering the
  * studio never asks a researcher to rebuild a DAG. Every number on screen comes
- * from the S9A estimation endpoints; this component only configures requests,
+ * from the estimation estimation endpoints; this component only configures requests,
  * orders responses and renders results.
  *
  * Load-bearing state distinctions:
@@ -204,7 +204,7 @@ export function EstimationView({ onNavigate }: { onNavigate: (view: ViewId) => v
     if (typeof trueAte !== 'number') return null
     return {
       value: trueAte,
-      note: 'The bundled demonstration dataset was generated with a constant treatment effect of exactly this size, plus measured confounding that biases the raw difference in means. The estimate above is computed from the data through the real S9A engine; the true effect is documented metadata and is never used in the computation.',
+      note: 'The bundled demonstration dataset was generated with a constant treatment effect of exactly this size, plus measured confounding that biases the raw difference in means. The estimate above is computed from the data through the real estimation engine; the true effect is documented metadata and is never used in the computation.',
     }
   }, [dataset])
 
@@ -653,7 +653,7 @@ export function EstimationView({ onNavigate }: { onNavigate: (view: ViewId) => v
             <p className="estdemo__known">
               Known data-generating average effect:{' '}
               <strong>{knownEffect ? `${formatNumber(knownEffect.value)} ${outcomeUnits}` : 'documented in the manifest'}</strong>{' '}
-              — a property of the simulation, never an input to the estimator.
+              - a property of the simulation, never an input to the estimator.
             </p>
           </div>
           {graphs.length === 0 ? (
@@ -681,7 +681,7 @@ export function EstimationView({ onNavigate }: { onNavigate: (view: ViewId) => v
             </ul>
             <p className="eststale__note">
               The numbers below are the real outputs of the earlier run. They have not been
-              recomputed and are not current — rerun estimation to obtain results for the present
+              recomputed and are not current - rerun estimation to obtain results for the present
               configuration.
             </p>
           </div>
@@ -746,7 +746,7 @@ export function EstimationView({ onNavigate }: { onNavigate: (view: ViewId) => v
                 <button type="button" className="estlink" onClick={() => onNavigate('causal')}>
                   Draw one in the Causal Lab
                 </button>
-                {demoDataset ? ' — or create the demonstration DAG above.' : '.'}
+                {demoDataset ? ' - or create the demonstration DAG above.' : '.'}
               </p>
             ) : (
               <select
@@ -978,7 +978,7 @@ export function EstimationView({ onNavigate }: { onNavigate: (view: ViewId) => v
                 className={`estsetverdict${setVerdict.valid ? ' estsetverdict--ok' : ' estsetverdict--bad'}`}
                 data-testid="set-verdict"
               >
-                {setVerdict.valid ? 'Admissible (graphically)' : 'Not admissible'} — {setVerdict.message}
+                {setVerdict.valid ? 'Admissible (graphically)' : 'Not admissible'} - {setVerdict.message}
               </p>
             ) : null}
           </fieldset>
@@ -1181,7 +1181,7 @@ export function EstimationView({ onNavigate }: { onNavigate: (view: ViewId) => v
             ) : null}
             <p className="estfield__hint">
               Split assignments are created by a split comparison in this session and expire with
-              it. Leaving the field empty analyses every prepared row — the default this studio
+              it. Leaving the field empty analyses every prepared row - the default this studio
               recommends.
             </p>
             <label className="estcheck estcheck--inline">

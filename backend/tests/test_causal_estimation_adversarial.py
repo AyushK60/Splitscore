@@ -1,8 +1,8 @@
-"""S9A adversarial tests: inputs designed to break the estimators or the API.
+"""estimation adversarial tests: inputs designed to break the estimators or the API.
 
 Every test here corresponds to an adversarial-audit scenario. The central
 invariant: the application returns correct results, explicit warnings, or
-meaningful structured errors — never a NaN/Infinity estimate and never an
+meaningful structured errors - never a NaN/Infinity estimate and never an
 unhandled 500 for data-driven degeneracy.
 """
 
@@ -259,7 +259,7 @@ def test_adversarial_high_cardinality_categorical_refused_structured(client=None
 
 def test_adversarial_mixed_type_covariate_is_refused_not_coerced():
     """A column that is neither numeric nor categorical (<80% numeric) must be
-    refused instead of silently coerced — the Model Lab convention."""
+    refused instead of silently coerced - the Model Lab convention."""
     frame = _base_frame()
     mixed = [str(float(i)) for i in range(250)] + [f"row{i}" for i in range(50)]
     frame["mixed"] = mixed  # 83% numeric: parsed numeric with unparsable tail
@@ -366,7 +366,7 @@ def test_api_adversarial_no_500_on_any_degenerate_input(client):
 
 
 def test_api_incomplete_search_does_not_block_verified_named_set(client):
-    """With 15 eligible candidates the S8C search is truncated — but a named
+    """With 15 eligible candidates the identification search is truncated - but a named
     set verified by exact evaluation must still be estimable, and a graph
     whose search completed with no sets must not be estimable."""
     rng = np.random.default_rng(13)
@@ -402,7 +402,7 @@ def test_api_incomplete_search_does_not_block_verified_named_set(client):
     assert graph.status_code == 201, graph.text
     gid = graph.json()["graph_id"]
 
-    # The S8C search is honestly truncated at 15 candidates.
+    # The identification search is honestly truncated at 15 candidates.
     search = client.post(
         f"/api/datasets/{dataset_id}/causal-graphs/{gid}/adjustment-search", json={}
     )
@@ -426,7 +426,7 @@ def test_api_incomplete_search_does_not_block_verified_named_set(client):
 
 
 def test_api_cyclic_graph_cannot_reach_estimation(client):
-    """A cyclic graph is refused at creation (S8A validation), so no estimator
+    """A cyclic graph is refused at creation, so no estimator
     can ever see one."""
     rows = _base_frame(60).to_dict("records")
     payload = rows_to_csv(rows, ["x1", "t", "y"])

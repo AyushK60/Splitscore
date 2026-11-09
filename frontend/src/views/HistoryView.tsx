@@ -1,10 +1,10 @@
 /**
- * Research history (S10-A).
+ * Research history.
  *
  * One read-only view over every analysis run this session has stored for the
  * loaded dataset: leakage audits, split comparisons, model runs, estimation
- * runs and the S9C subgroup/robustness/what-if analyses. The view is a
- * projection of the server's bounded in-memory run store — it stores nothing
+ * runs and the estimation subgroup/robustness/what-if analyses. The view is a
+ * projection of the server's bounded in-memory run store - it stores nothing
  * itself, never re-runs an analysis, and states plainly when a run is stale,
  * when its data was never recorded, and that expired runs are simply gone.
  *
@@ -211,8 +211,8 @@ export function HistoryView({
         <div className="card rsempty" aria-label="No runs recorded yet">
           <p className="rs-eyebrow">No runs in this filter</p>
           <p className="rs-sub">
-            Run an analysis first — an audit, a model, an estimation or a Causal-research
-            experiment — and it will appear here with its identity, parameters and staleness
+            Run an analysis first - an audit, a model, an estimation or a Causal-research
+            experiment - and it will appear here with its identity, parameters and staleness
             state. Runs that expire or are evicted are removed from this history entirely.
           </p>
         </div>

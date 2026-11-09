@@ -1,9 +1,9 @@
-"""S9C-C what-if scenarios: model-based predictions under explicit assumptions.
+"""what-if what-if scenarios: model-based predictions under explicit assumptions.
 
 The scenario service reuses the verified g-computation outcome model, so its
 cohort-level contrast must equal the estimation engine's regression-adjustment
-ATE exactly, and — because a linear outcome model without interactions gives a
-constant treatment contrast — every fully numeric profile scenario must agree
+ATE exactly, and - because a linear outcome model without interactions gives a
+constant treatment contrast - every fully numeric profile scenario must agree
 with that same number. No interval is ever attached to a scenario.
 """
 

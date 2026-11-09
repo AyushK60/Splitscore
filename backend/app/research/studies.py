@@ -116,7 +116,7 @@ def roles_from_column_roles(roles: ColumnRoles) -> dict[str, list[str]]:
 
     Used once, when a study is created: the V1 roles are the user's existing
     answer, so starting from them avoids asking the same question twice. It is a
-    copy, not a live link — the research map becomes the single source of truth.
+    copy, not a live link - the research map becomes the single source of truth.
     """
     assignments: dict[str, list[str]] = {}
     for name in roles.features:

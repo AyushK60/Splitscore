@@ -7,14 +7,14 @@ import { FigureExport } from './FigureExport'
 type BrushRangePredicate = Extract<BrushPredicate, { kind: 'range' }>
 
 /**
- * Parallel coordinates — the Visual Explorer's flagship instrument.
+ * Parallel coordinates - the Visual Explorer's flagship instrument.
  *
  * Scientific rules this rendering obeys:
  *  - Only genuinely numeric columns become axes; the header names the column
  *    and the axis range in data units (min–max of the *filtered population*,
  *    not of the drawn sample).
  *  - Lines are the render sample the backend chose (systematic grid). The
- *    caption states how many of how many rows are drawn — sampled density is
+ *    caption states how many of how many rows are drawn - sampled density is
  *    never passed off as the whole dataset.
  *  - A missing or unparsable cell breaks the polyline at that axis instead of
  *    dropping the row or inventing a position.
@@ -254,7 +254,7 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
       if (!isTrivial) {
         onPredicates([...others, ...sameAxis, predicate])
       } else {
-        // Dragging exactly over an existing brush removes it — a deliberate
+        // Dragging exactly over an existing brush removes it - a deliberate
         // second gesture over the same range reads as "clear this brush".
         onPredicates(others)
       }
@@ -292,7 +292,7 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
       <div ref={containerRef} className="xpc xpc--empty">
         <p className="xpc__note">
           No numeric columns are selected. Parallel coordinates needs at least one numeric
-          variable — categorical columns are available as colour groupings, not as axes.
+          variable - categorical columns are available as colour groupings, not as axes.
         </p>
       </div>
     )
@@ -311,7 +311,7 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
             {series.sampling.stride > 1
               ? ` (every ${series.sampling.stride}th row in file order)`
               : ' (all rows)'}
-            {series.filters_active ? ' — filters active' : ''}
+            {series.filters_active ? ' - filters active' : ''}
           </span>
         </figcaption>
         <div className="xpc__actions">
@@ -337,7 +337,7 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
           )}
           <FigureExport
             figureId="parallel-coordinates"
-            title={`Parallel coordinates — ${axes.map((a) => a.column).join(', ')}`}
+            title={`Parallel coordinates - ${axes.map((a) => a.column).join(', ')}`}
             settings={`${axes.length} numeric axes${colorColumn ? ` · coloured by ${colorColumn}` : ''}`}
             counts={`${series.drawn_rows.toLocaleString('en-US')} of ${series.filtered_population.toLocaleString('en-US')} rows drawn${
               selectedIds.size > 0 ? ` · ${selectedIds.size.toLocaleString('en-US')} selected` : ''
@@ -615,7 +615,7 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
             ))}
           </>
         ) : (
-          <span className="xpc__legendtitle">All rows — choose a colour variable to group</span>
+          <span className="xpc__legendtitle">All rows - choose a colour variable to group</span>
         )}
         {selectedIds.size > 0 && (
           <span className="xpc__legenditem xpc__legenditem--selected">
@@ -626,7 +626,7 @@ export const ParallelCoordinates = memo(function ParallelCoordinates({
       </div>
       {selectedIds.size === 0 && (
         <p className="xpc__emptyhint">
-          Nothing is selected yet. Drag vertically on any rail to brush a value range — selected rows
+          Nothing is selected yet. Drag vertically on any rail to brush a value range - selected rows
           turn copper, appear in Row evidence, and stay highlighted in the other linked plots.
         </p>
       )}

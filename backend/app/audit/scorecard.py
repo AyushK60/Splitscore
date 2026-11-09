@@ -1,18 +1,18 @@
-"""F06 — category-based leakage risk scorecard.
+"""F06 - category-based leakage risk scorecard.
 
 A real overview derived from one audit's rule outcomes. There is deliberately
 no numeric score: each category is either carrying findings, clean under the
 checks that ran, not applicable, or not checked. Absence of findings is never
-presented as proof of safety — that sentence is on the scorecard itself.
+presented as proof of safety - that sentence is on the scorecard itself.
 
 Category status derivation (documented, deterministic):
 
-* ``finding_present`` — any rule in the category reported a finding.
-* ``error`` — no findings, but a rule raised.
-* ``evaluated_no_finding`` — at least one rule ran to completion and none
+* ``finding_present`` - any rule in the category reported a finding.
+* ``error`` - no findings, but a rule raised.
+* ``evaluated_no_finding`` - at least one rule ran to completion and none
   reported findings (remaining not-checked rules are visible per rule).
-* ``not_applicable`` — every rule in the category was disabled by the user.
-* ``not_checked`` — nothing ran: rules were skipped for missing inputs,
+* ``not_applicable`` - every rule in the category was disabled by the user.
+* ``not_checked`` - nothing ran: rules were skipped for missing inputs,
   unsupported data, or unavailable metadata.
 
 ``affected_rows`` is a best-effort display figure: the largest rows-unit count
@@ -34,7 +34,7 @@ from app.audit.types import (
 
 SCORECARD_NOTE = (
     "Derived only from this audit's outcomes. A category marked 'evaluated, no "
-    "finding' is clean under the checks that ran — not proven safe. 'Not "
+    "finding' is clean under the checks that ran - not proven safe. 'Not "
     "checked' means the checks could not run; read the reasons, not a green "
     "tick. There is deliberately no combined score."
 )

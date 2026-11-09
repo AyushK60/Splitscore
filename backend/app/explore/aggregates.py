@@ -106,7 +106,7 @@ def distribution_payload(
     With ``group_by``, each group's statistics are computed over that group's
     own rows; group sizes are reported so a small group is never visually
     mistaken for a large one. With ``mask`` (the active selection), every
-    number describes the *selected* population instead — returned alongside
+    number describes the *selected* population instead - returned alongside
     the full-population histogram so the UI can overlay both honestly.
     """
     is_numeric = detected_type in {"numeric", "integer"}
@@ -259,7 +259,7 @@ def missingness_payload(
 
     The matrix is a *rendering* aid: it shows a systematic grid sample in file
     order, while every count and percentage is computed over the requested
-    population — the whole dataset, or the active selection when ``mask`` is
+    population - the whole dataset, or the active selection when ``mask`` is
     given (in which case the full-population counts travel in
     ``population_counts`` so the UI can show both).
     """

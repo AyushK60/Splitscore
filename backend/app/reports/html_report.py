@@ -4,8 +4,8 @@ Constraints this file is written against:
 
 * **Self-contained.** No external CSS, fonts, scripts or images. The file can be
   opened offline and printed to PDF.
-* **Escaped.** Every piece of user-supplied text — dataset name, column names,
-  cell values inside evidence, filename — passes through :func:`_esc`. A column
+* **Escaped.** Every piece of user-supplied text - dataset name, column names,
+  cell values inside evidence, filename - passes through :func:`_esc`. A column
   header containing markup is rendered as text, never as markup. Values are only
   ever placed in element text or in escaped attribute values.
 * **No dataset dump.** Only the bounded evidence samples already present in the
@@ -319,11 +319,11 @@ def _footer_html(result: Any, run_id: str | None) -> str:
 
 
 def render_audit_html(result: AuditResult, *, run_id: str | None = None) -> str:
-    title = f"{APP_NAME} audit report — {result.dataset.name}"
+    title = f"{APP_NAME} audit report - {result.dataset.name}"
     parts = [
         _HEAD.format(title=_esc(title)),
         _header_html(
-            title=f"SplitScope audit — {result.dataset.name}",
+            title=f"SplitScope audit - {result.dataset.name}",
             subtitle=result.evaluation.headline,
             synthetic=result.dataset.is_synthetic,
             app_version=result.app_version,
@@ -452,7 +452,7 @@ def render_audit_html(result: AuditResult, *, run_id: str | None = None) -> str:
 
 
 def render_comparison_html(result: ComparisonResult, *, run_id: str | None = None) -> str:
-    title = f"{APP_NAME} split comparison — {result.dataset.name}"
+    title = f"{APP_NAME} split comparison - {result.dataset.name}"
     rows = []
     for row in result.rows:
         rows.append(
@@ -506,7 +506,7 @@ def render_comparison_html(result: ComparisonResult, *, run_id: str | None = Non
     parts = [
         _HEAD.format(title=_esc(title)),
         _header_html(
-            title=f"SplitScope split comparison — {result.dataset.name}",
+            title=f"SplitScope split comparison - {result.dataset.name}",
             subtitle="Candidate splits audited with the same checks and settings.",
             synthetic=result.dataset.is_synthetic,
             app_version=result.app_version,

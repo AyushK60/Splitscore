@@ -1,9 +1,8 @@
 /**
  * TypeScript mirrors of the backend response contracts.
  *
- * These are hand-maintained. `docs/openapi.json` (regenerated with
- * `python scripts/export_openapi.py`) is the authoritative contract, and
- * `npm run typecheck` catches a mismatch in any field the UI reads.
+ * These are hand-maintained. The backend's `/api/openapi.json` is the
+ * authoritative contract, and `npm run typecheck` catches a mismatch in any field the UI reads.
  * Only fields the UI uses are declared; the API returns more.
  */
 
@@ -148,7 +147,7 @@ export interface NearDuplicateSettings {
   sample_seed: number
 }
 
-/** S5: user-declared prediction-time availability of one feature column. */
+/** integrity: user-declared prediction-time availability of one feature column. */
 export type AvailabilityLevel =
   | 'before_prediction'
   | 'at_prediction'
@@ -177,7 +176,7 @@ export interface AuditConfig {
   normalize_numeric_strings: boolean
   missing_tokens: string[]
   chronology_intent: 'future_prediction' | 'not_applicable'
-  /** S5 declarations: never inferred, never fabricated by the UI. */
+  /** integrity declarations: never inferred, never fabricated by the UI. */
   feature_availability: Record<string, AvailabilityLevel>
   derived_feature_dependencies: Record<string, string[]>
   temporal_horizon_days: number | null
@@ -286,7 +285,7 @@ export interface AuditResult {
   risk_scorecard: RiskScorecard | null
 }
 
-/** F06 — category-based risk scorecard derived from one audit's outcomes. */
+/** F06 - category-based risk scorecard derived from one audit's outcomes. */
 export type ScorecardStatus =
   | 'finding_present'
   | 'evaluated_no_finding'
@@ -586,7 +585,7 @@ export interface ApiErrorBody {
 
 
 // --------------------------------------------------------------------------
-// S3 research workspace
+// research workspace
 // --------------------------------------------------------------------------
 
 export type ResearchRole =
@@ -808,7 +807,7 @@ export interface ManifestResponse {
 }
 
 // --------------------------------------------------------------------------
-// S4 Scientific Visual Explorer
+// Scientific Visual Explorer
 // --------------------------------------------------------------------------
 
 export interface ExploreDatasetIdentity {
@@ -1007,7 +1006,7 @@ export interface SelectionOverlay {
 }
 
 // --------------------------------------------------------------------------
-// S6 Model Lab — statistical workbench (F09)
+// Model Lab - statistical workbench (F09)
 // --------------------------------------------------------------------------
 
 export type StatisticsTask = 'ols' | 'logistic'
@@ -1151,7 +1150,7 @@ export interface ModelRunListResponse {
 }
 
 // --------------------------------------------------------------------------
-// S6 Model Lab — predictive evaluation (F10)
+// Model Lab - predictive evaluation (F10)
 // --------------------------------------------------------------------------
 
 export type PredictionTask = 'classification' | 'regression'
@@ -1484,7 +1483,7 @@ export interface PredictionResult {
 }
 
 // --------------------------------------------------------------------------
-// S7 evidence dossier
+// evidence dossier
 // --------------------------------------------------------------------------
 
 export interface DossierRequest {
@@ -1492,7 +1491,7 @@ export interface DossierRequest {
   audit_run_id: string | null
   comparison_run_id: string | null
   model_run_ids: string[]
-  /** S10-B: stored estimation-run sources (S9A/S9C). */
+  /** dossier: stored estimation-run sources. */
   estimation_run_ids?: string[]
   presentation?: 'concise' | 'technical'
 }
@@ -1719,7 +1718,7 @@ export type DossierSectionData =
   | DossierWhatIf
   | DossierMethodology
 
-/** S10-B — causal sections, mirrored from the server contract (dossier.py v1.1.0). */
+/** dossier - causal sections, mirrored from the server contract (dossier.py v1.1.0). */
 export interface DossierCausalGraph {
   graph_id: string | null
   graph_revision: number | null
@@ -1832,7 +1831,7 @@ export interface DossierReport {
 }
 
 // --------------------------------------------------------------------------
-// S8 Causal Lab — causal graph authoring (S8A backend contract, schema 1.0.0)
+// Causal Lab - causal graph authoring (graph backend contract, schema 1.0.0)
 // --------------------------------------------------------------------------
 
 export type CausalNodeKind =
@@ -2025,7 +2024,7 @@ export interface CausalExportEnvelope {
   note: string
 }
 
-// S8C Causal Lab — graphical identification (d-separation, backdoor criterion)
+// Causal Lab - graphical identification (d-separation, backdoor criterion)
 // ----------------------------------------------------------------------------
 
 export interface CausalAlgorithmMeta {
@@ -2127,7 +2126,7 @@ export interface CausalIdentificationResponse {
 }
 
 // ----------------------------------------------------------------------------
-// S9A causal effect estimation — consumed by the S9B studio
+// causal effect estimation - consumed by the estimation UI studio
 // ----------------------------------------------------------------------------
 
 export type EstimatorName = 'regression_adjustment' | 'ipw' | 'aipw'
@@ -2389,7 +2388,7 @@ export interface EstimationRunListResponse {
 }
 
 // --------------------------------------------------------------------------
-// S9C — subgroup effects, robustness experiments, what-if scenarios
+// estimation - subgroup effects, robustness experiments, what-if scenarios
 // --------------------------------------------------------------------------
 
 export interface SubgroupRunPayload {
@@ -2559,7 +2558,7 @@ export interface WhatIfRunPayload {
 }
 
 // --------------------------------------------------------------------------
-// S10 — research run history and reproducibility manifests
+// history - research run history and reproducibility manifests
 // --------------------------------------------------------------------------
 
 export interface HistoryDataset {

@@ -1,4 +1,4 @@
-"""Statistical uncertainty for the S9A estimators.
+"""Statistical uncertainty for the estimation estimators.
 
 Two honest constructions, and nothing else:
 
@@ -6,7 +6,7 @@ Two honest constructions, and nothing else:
   pseudo-outcomes are the estimator's influence function, so
   SE = std(ψ)/√n is valid once the nuisances are cross-fitted. For the Hájek
   IPW estimator the ratio-estimator influence function is used with the
-  propensity treated as fixed — a documented, typically conservative choice
+  propensity treated as fixed - a documented, typically conservative choice
   when the propensity model is correctly specified.
 * **Refitting bootstrap.** Every bootstrap replicate *refits the nuisance
   models* on the resampled rows (and re-runs cross-fitting for AIPW). A
@@ -124,7 +124,7 @@ def bootstrap_interval(
     """Percentile interval from a fully refitting bootstrap.
 
     ``resample_fn`` receives a bootstrap index array and must re-run the whole
-    estimation procedure — nuisance fitting included — returning one finite
+    estimation procedure - nuisance fitting included - returning one finite
     estimate or raising.
     """
     rng = np.random.default_rng(seed)

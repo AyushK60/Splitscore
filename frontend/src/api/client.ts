@@ -191,7 +191,7 @@ export async function downloadExport(path: string, body?: unknown): Promise<void
 
 
 // --------------------------------------------------------------------------
-// S3 research workspace
+// research workspace
 // --------------------------------------------------------------------------
 
 export const researchApi = {
@@ -221,7 +221,7 @@ export const researchApi = {
     }),
   studyExportPath: (dataset_id: string) => `/api/datasets/${dataset_id}/study/export`,
   manifestExportPath: (dataset_id: string) => `/api/datasets/${dataset_id}/manifest/export`,
-  // S10-A research run history and reproducibility manifests.
+  // research run history and reproducibility manifests.
   runHistory: (dataset_id: string) => request<HistoryResponse>(`/api/datasets/${dataset_id}/history`),
   runManifest: (dataset_id: string, run_id: string) =>
     request<RunReproducibilityManifest>(
@@ -230,7 +230,7 @@ export const researchApi = {
 }
 
 // --------------------------------------------------------------------------
-// S4 Scientific Visual Explorer
+// Scientific Visual Explorer
 // --------------------------------------------------------------------------
 
 import type {
@@ -281,7 +281,7 @@ export const exploreApi = {
 }
 
 // --------------------------------------------------------------------------
-// S6 Model Lab — statistical workbench
+// Model Lab - statistical workbench
 // --------------------------------------------------------------------------
 
 import type {
@@ -312,7 +312,7 @@ export const modelsApi = {
 }
 
 // --------------------------------------------------------------------------
-// S7 evidence dossier
+// evidence dossier
 // --------------------------------------------------------------------------
 
 import type { DossierReport, DossierRequest } from './types'
@@ -328,7 +328,7 @@ export const reportsApi = {
 }
 
 // --------------------------------------------------------------------------
-// S8 Causal Lab — causal graph authoring against the S8A backend
+// Causal Lab - causal graph authoring against the graph backend
 // --------------------------------------------------------------------------
 
 import type {
@@ -394,7 +394,7 @@ export const causalApi = {
   exportPath: (datasetId: string, graphId: string) =>
     `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}/export`,
 
-  /** S10-C: the deterministic publication figure of the stored graph. */
+  /** figure: the deterministic publication figure of the stored graph. */
   figurePath: (datasetId: string, graphId: string) =>
     `/api/datasets/${encodeURIComponent(datasetId)}/causal-graphs/${encodeURIComponent(graphId)}/figure.svg`,
 
@@ -416,7 +416,7 @@ export const causalApi = {
       },
     ),
 
-  // S8C — read-only identification queries. None of these mutate the graph;
+  // identification - read-only identification queries. None of these mutate the graph;
   // every response carries the graph's scientific fingerprint.
   dSeparation: (datasetId: string, graphId: string, x: string, y: string, conditioning: string[]) =>
     request<CausalDSeparationResponse>(
@@ -483,7 +483,7 @@ export const causalApi = {
 }
 
 // --------------------------------------------------------------------------
-// S9A causal effect estimation — the S9B studio's only numerical source
+// causal effect estimation - the estimation UI studio's only numerical source
 // --------------------------------------------------------------------------
 
 import type {
@@ -542,7 +542,7 @@ export const estimationApi = {
   runDetail: (datasetId: string, runId: string) =>
     request<EstimationRunPayload>(
       `/api/datasets/${encodeURIComponent(datasetId)}/estimation-runs/${encodeURIComponent(runId)}`,
-    ),  // ---- S9C: subgroup effects, robustness experiments, what-if scenarios ----
+    ),  // ---- estimation: subgroup effects, robustness experiments, what-if scenarios ----
 
   subgroups: (
     datasetId: string,

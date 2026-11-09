@@ -1,5 +1,5 @@
 /**
- * S9C-A Subgroup Effects view: forest plot marks, unavailable groups,
+ * subgroup Subgroup Effects view: forest plot marks, unavailable groups,
  * contrasts and table, against hand-written payload fixtures.
  */
 import { render, screen, within } from '@testing-library/react'

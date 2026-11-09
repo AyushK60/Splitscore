@@ -1,8 +1,8 @@
-"""S6 predictive machine learning (F10) with leakage-safe pipelines.
+"""Predictive machine learning (F10) with leakage-safe pipelines.
 
-Contract (see ``docs/S6_ML_EVALUATION_CONTRACT.md``):
+Contract:
 
-* the split is resolved from the study record or an S5 strategy **before** any
+* the split is resolved from the study record or a generated strategy **before** any
   preprocessing is fitted;
 * training rows are carved into fit/validation, and the test partition is never
   read while imputers, encoders or models are fitted or selected;

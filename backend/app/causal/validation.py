@@ -2,11 +2,11 @@
 
 Two kinds of output, never mixed:
 
-* **Errors** (blocking) — the payload is not a well-formed directed acyclic
+* **Errors** (blocking) - the payload is not a well-formed directed acyclic
   graph under this schema, or its references point outside the dataset. The
   registry refuses to store or update a specification that has any of these, so
   an invalid request can never replace a stored, valid graph.
-* **Warnings** (non-blocking, scientific) — the graph is well-formed but the
+* **Warnings** (non-blocking, scientific) - the graph is well-formed but the
   study around it is incomplete or has internal tensions. Warnings are
   information for the researcher, not failures.
 
@@ -14,7 +14,7 @@ This module also derives structural properties *from the graph itself*
 (parents, children, ancestors, descendants, colliders, directed-path status).
 Those are the only properties the application is entitled to claim: they follow
 from the edges the user drew. The user-declared conceptual ``kind`` is reported
-separately and, where it contradicts the drawn structure, a warning says so —
+separately and, where it contradicts the drawn structure, a warning says so -
 the contradiction is reported, never resolved in either direction, and never
 presented as proof that the declaration or the structure is correct.
 

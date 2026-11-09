@@ -1,5 +1,5 @@
 /**
- * S6-C — predictive Model Lab journeys against the real backend.
+ * Model Lab - predictive Model Lab journeys against the real backend.
  *
  * One classification journey and one regression journey, both on the bundled
  * clean-control dataset with its confirmed split. The exported run is checked
@@ -182,7 +182,7 @@ test('signal-bearing regression renders OLS influence and permutation importance
   await expect(page.locator('.plab__qq')).toBeVisible()
   await expect(page.getByText('OLS influence (in-sample)')).toBeVisible()
   await expect(page.locator('.plab__influence')).toBeVisible()
-  await expect(page.getByText('Permutation importance — test partition')).toBeVisible()
+  await expect(page.getByText('Permutation importance - test partition')).toBeVisible()
   await expect(page.locator('.plab__importance')).toBeVisible()
 
   const payload = await exportRun(page)

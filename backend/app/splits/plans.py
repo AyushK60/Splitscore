@@ -1,4 +1,4 @@
-"""F05 — evaluation plans: cross-validation and rolling-origin validation.
+"""F05 - evaluation plans: cross-validation and rolling-origin validation.
 
 A *plan* is a multi-fold validation design. Unlike a holdout it cannot be
 audited as one split, so a plan carries its folds and the comparison
@@ -6,16 +6,16 @@ infrastructure audits each fold and aggregates the outcomes. Every fold keeps
 its exact row ids, so the assignments stay reproducible and exportable.
 
 Supported kinds and their documented feasibility gates (all failures raise the
-typed :class:`InfeasibleOperationError` with a specific reason — a strategy
+typed :class:`InfeasibleOperationError` with a specific reason - a strategy
 that cannot run is never silently swapped for one that can):
 
-* ``repeated_stratified_cv`` — needs a target with at least two classes, each
+* ``repeated_stratified_cv`` - needs a target with at least two classes, each
   with at least ``n_folds`` rows (so every fold's test side can hold one row
   of each class). Deterministic via ``random_state``.
-* ``group_cv`` — needs an entity column and at least ``n_folds`` groups; every
+* ``group_cv`` - needs an entity column and at least ``n_folds`` groups; every
   group must have at least two rows so no fold ends up with an empty side.
   Fold assignment is deterministic (GroupKFold order, no seed).
-* ``rolling_origin`` — needs a timestamp column and at least ``n_folds + 1``
+* ``rolling_origin`` - needs a timestamp column and at least ``n_folds + 1``
   distinct timestamps. Each fold's test is the block of rows after a growing
   origin; ``gap`` rows are purged between the train block and each test block
   when a gap is requested. Deterministic without a seed.

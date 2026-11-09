@@ -1,9 +1,9 @@
 /**
- * View C — Overlap & Propensity.
+ * View C - Overlap & Propensity.
  *
  * A single overlaid propensity distribution per treatment arm, drawn from the
- * bounded per-arm histograms the S9A diagnostics return (20 fixed bins of width
- * 0.05, counts and within-arm shares — never individual scores). Quantiles,
+ * bounded per-arm histograms the estimation diagnostics return (20 fixed bins of width
+ * 0.05, counts and within-arm shares - never individual scores). Quantiles,
  * group sizes and extreme-score counts come from the same payload.
  *
  * The figure shows empirical overlap in this dataset. It cannot and does not

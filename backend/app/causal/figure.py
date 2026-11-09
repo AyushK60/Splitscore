@@ -1,6 +1,6 @@
-"""Publication-grade SVG figure of the stored causal graph (S10-C).
+"""Publication-grade SVG figure of the stored causal graph.
 
-A deterministic, self-contained rendering of the graph **specification** —
+A deterministic, self-contained rendering of the graph **specification** -
 not a screenshot of the interactive canvas. The figure is drawn from the
 same data the dossier reports: node roles, edges, recorded assumptions,
 treatment/outcome highlighting, and a caption that carries the graph

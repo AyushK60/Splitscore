@@ -1,4 +1,4 @@
-"""S6 statistical workbench: ordinary least squares and binary logistic regression.
+"""statistical workbench: ordinary least squares and binary logistic regression.
 
 All inferential quantities come from :mod:`statsmodels`; nothing here invents a
 p-value, a standard error or an interval. The module's job is to turn an
@@ -10,7 +10,7 @@ Design decisions that a reviewer must be able to check:
 
 * **No silent specification changes.** A constant predictor, a duplicate
   predictor, a singular design, a single-class outcome or an unparsable outcome
-  is an error with an explanation — never quietly dropped or re-encoded.
+  is an error with an explanation - never quietly dropped or re-encoded.
 * **Categorical coding is explicit.** Every non-numeric predictor is encoded as
   indicator terms against a named reference level. The reference and the full
   level list are returned with the result.

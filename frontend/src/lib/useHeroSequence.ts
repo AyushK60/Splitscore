@@ -26,7 +26,7 @@ export const HERO_PHASES: HeroPhaseMeta[] = [
     id: 'forming',
     short: 'Registers',
     title: 'Two registers, one source table',
-    body: 'Training and testing records arrive as separate plates. The boundary between them is the only thing that makes an evaluation independent — and nothing has crossed it yet.',
+    body: 'Training and testing records arrive as separate plates. The boundary between them is the only thing that makes an evaluation independent - and nothing has crossed it yet.',
     hint: 'Watch where the plates land: left of the rule is training, right of it is testing.',
   },
   {
@@ -41,7 +41,7 @@ export const HERO_PHASES: HeroPhaseMeta[] = [
     short: 'Discovery',
     title: 'Context crosses the rule',
     body: 'One training plate and one testing plate resolve to the same customer. The model can recognise a record it will be scored on, so the test score stops measuring generalisation.',
-    hint: 'The pair is a relationship between records — not a model result.',
+    hint: 'The pair is a relationship between records - not a model result.',
   },
   {
     id: 'evidence',

@@ -2,7 +2,7 @@
 
 Point-level charts (parallel coordinates, scatters) cannot draw every row of a
 10 000-row dataset legibly, so the renderer draws a bounded sample. The sample
-must be reproducible — the same dataset and the same cap always produce the
+must be reproducible - the same dataset and the same cap always produce the
 same drawn rows, so a caption can honestly say which rows are on screen.
 
 The method is a **systematic grid sample**: rows keep file order, the stride is
@@ -22,7 +22,7 @@ DEFAULT_RENDER_ROWS = 1200
 
 
 def _ordinal(number: int) -> str:
-    """1 → '1st', 3 → '3rd', 9 → '9th' — for the sampling caption."""
+    """1 → '1st', 3 → '3rd', 9 → '9th' - for the sampling caption."""
     if 10 <= number % 100 <= 20:
         suffix = "th"
     else:

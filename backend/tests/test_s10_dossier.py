@@ -1,4 +1,4 @@
-"""S10-B integrated research dossier: causal sections, methodology, honesty.
+"""dossier integrated research dossier: causal sections, methodology, honesty.
 
 Every assertion ties the dossier back to the stored runs it was composed
 from: the estimate in the dossier equals the estimate in the stored run, the
@@ -37,7 +37,7 @@ def loaded_demo(client):
 
 _GRAPH_SPEC = {
     "schema_version": "1.0.0",
-    "name": "S10 dossier demonstration",
+    "name": "history dossier demonstration",
     "description": "Demonstration DAG for dossier integration.",
     "nodes": [
         {

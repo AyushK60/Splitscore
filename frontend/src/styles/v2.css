@@ -1,4 +1,4 @@
-/* SplitScope — foundation layer.
+/* SplitScope - foundation layer.
    Loaded after app.css. Palette, type, radius and motion come from tokens.css;
    this file calibrates the shared primitives (type, buttons, inputs, surfaces,
    tables, badges, callouts, empty states) so every stage inherits one voice:

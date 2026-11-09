@@ -127,7 +127,7 @@ export function DataDictionary({ datasetId, study, columns, onSaved, onUseInAudi
           <h2 className="rs-h2">Type, completeness and meaning</h2>
           <p className="rs-lede">
             Types, missing counts and cardinality are computed from the file. Descriptions, units and
-            roles are yours — a role describes what you claim a column means, never what its name
+            roles are yours - a role describes what you claim a column means, never what its name
             suggests.
           </p>
         </div>

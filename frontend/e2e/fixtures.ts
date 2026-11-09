@@ -59,11 +59,11 @@ const test = base.extend<FailureDiagnostics>({
 export { expect, test }
 
 /**
- * Loads a bundled demo from the S5 workspace entry panel and waits for the
+ * Loads a bundled demo from the integrity workspace entry panel and waits for the
  * Data stage. The old collapsed "Browse other demos" disclosure no longer
  * exists; the entry lists every demo with a real Open action.
  *
- * Since S11 the Data workspace is a lazy route chunk, so arriving at
+ * The Data workspace is a lazy route chunk, so arriving at
  * `#/dataset` shows a labelled loading card first; every caller assumes the
  * workspace content itself, so this waits for the dataset heading to render.
  */

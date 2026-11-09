@@ -1,5 +1,5 @@
 /**
- * Report / Export Studio (S7).
+ * Report / Export Studio.
  *
  * The studio composes one dossier from runs the user actually executed. It
  * keeps two ideas separate: *sources* (named run IDs in the server store) and
@@ -302,7 +302,7 @@ export function ExportView({ onNavigate }: { onNavigate: (view: ViewId) => void 
           <h1>Compose the evidence you actually produced</h1>
           <p className="report-studio__lede">
             One dossier, built from named runs in this session. Sections you did not run are shown
-            as unavailable — never as a clean result. The preview, JSON and printable HTML are all
+            as unavailable - never as a clean result. The preview, JSON and printable HTML are all
             generated from the same server payload.
           </p>
         </div>
@@ -664,7 +664,7 @@ export function ExportView({ onNavigate }: { onNavigate: (view: ViewId) => void 
                       Download split assignment CSV
                     </button>{' '}
                     <span className="muted">
-                      {audit.assignment.label} — every row’s side as the audit used it, keyed by the
+                      {audit.assignment.label} - every row’s side as the audit used it, keyed by the
                       internal row id.
                     </span>
                   </p>

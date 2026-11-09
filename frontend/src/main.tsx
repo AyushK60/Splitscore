@@ -28,7 +28,7 @@ import { EvidenceView } from './views/EvidenceView'
 import { HistoryView } from './views/HistoryView'
 
 /**
- * Code splitting (S11). The main bundle previously carried every workspace and
+ * Code splitting. The main bundle previously carried every workspace and
  * warned above the 500 kB budget. The heavy analytical views now load only when
  * their route is opened: each is its own chunk, the fallback is an honest
  * labelled card (see StageFallback below), and repeat visits are served from
@@ -48,7 +48,7 @@ const ExportView = lazy(() =>
 )
 
 /**
- * The Causal Lab (S8B) is code-split: the graph editor is the largest single
+ * The Causal Lab is code-split: the graph editor is the largest single
  * workspace and is not needed on the other stages, so it is loaded only when
  * its route is opened. The CSS is small and stays eager so the first paint of
  * the route is not unstyled.
@@ -58,7 +58,7 @@ const CausalLabView = lazy(() =>
 )
 
 /**
- * The S9B Effect Estimation Studio is code-split for the same reason: its five
+ * The estimation UI Effect Estimation Studio is code-split for the same reason: its five
  * analytical figures and export machinery are only needed on this route.
  */
 const EstimationView = lazy(() =>
@@ -66,7 +66,7 @@ const EstimationView = lazy(() =>
 )
 
 /**
- * The S9C Causal Research stage is code-split like the other late stages: its
+ * The estimation Causal Research stage is code-split like the other late stages: its
  * forest plot, robustness figures and scenario explorer load only on route.
  */
 const ResearchView = lazy(() =>
@@ -107,7 +107,7 @@ const NEXT_GUIDANCE: Record<ViewId, string> = {
   models: 'Statistical fits describe analysed rows; predictive metrics describe a held-out split. Neither proves causation.',
   causal: 'Draw assumed relationships, document assumptions and validate the structure. A valid DAG is not evidence the assumptions are true.',
   estimation: 'Estimates are conditional on the DAG and the verified adjustment set. Inspect balance, overlap and effective sample size before reading an interval, and export the figure with its provenance.',
-  research: 'Subgroup, robustness and what-if analyses reuse a stored estimation run’s study. They describe this sample under the same assumptions — they do not verify them.',
+  research: 'Subgroup, robustness and what-if analyses reuse a stored estimation run’s study. They describe this sample under the same assumptions - they do not verify them.',
   comparison: 'A comparison shows consequences, not a winner. Assemble the evidence you have actually produced in the Export studio.',
   history: 'History is a projection of this session’s bounded in-memory run store. Expired runs are gone; export a manifest of anything you need to keep.',
   export: 'Compose a dossier from the runs in this session, then download JSON or a printable HTML artifact.',
@@ -241,7 +241,7 @@ function Shell() {
   // The navigation follows the order of the actual work: the audit is the third
   // stage and is reachable directly from Data. Study and Explore are optional
   // research activities shown after it, not gates in front of it. "Evidence" is
-  // deliberately absent — it is reached by opening a finding.
+  // deliberately absent - it is reached by opening a finding.
   const steps: Array<{ id: ViewId; label: string; step: number }> = [
     { id: 'overview', label: 'Start', step: 1 },
     { id: 'dataset', label: 'Data', step: 2 },
@@ -287,7 +287,7 @@ function Shell() {
                 </svg>
               </span>
               <span className="app-header__title">SplitScope</span>
-              <span className="app-header__tagline">— research workbench · audit · study · explore · model · compare</span>
+              <span className="app-header__tagline">- research workbench · audit · study · explore · model · compare</span>
             </button>
             {busyLabel ? (
               <p className="app-header__meta" role="status" aria-live="polite">
@@ -422,7 +422,7 @@ function Shell() {
 
       <footer className="app-main app-footer">
         <p className="muted tiny" style={{ margin: 0 }}>
-          SplitScope audits splits, not models. Findings are evidence about the split you selected —
+          SplitScope audits splits, not models. Findings are evidence about the split you selected -
           never a guarantee that data is safe or that a model will perform well.
         </p>
       </footer>
@@ -434,7 +434,7 @@ const root = createRoot(document.getElementById('root')!)
 root.render(
   <StrictMode>
     <AppProvider>
-      {/* The unsaved causal draft survives ordinary navigation (S11-B): the
+      {/* The unsaved causal draft survives ordinary navigation: the
           provider lives above the route switch, the reducer is unchanged. */}
       <CausalDraftProvider>
         <Shell />

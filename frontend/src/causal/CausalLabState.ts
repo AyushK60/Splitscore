@@ -1,13 +1,13 @@
 /**
  * Causal Lab draft state: a pure reducer over the local, unsaved graph draft.
  *
- * Three layers of state are kept deliberately distinct (see the S8B brief):
+ * Three layers of state are kept deliberately distinct (see the graph editor brief):
  *
- * - `draft` — the user's working copy. Edits are never lost: a failed save or
+ * - `draft` - the user's working copy. Edits are never lost: a failed save or
  *   validation leaves `draft` untouched.
- * - `saved` — the last draft the server confirmed (the successfully saved
+ * - `saved` - the last draft the server confirmed (the successfully saved
  *   revision). `isDirty` compares against this.
- * - `validation` — the backend's structured verdict on either the saved graph
+ * - `validation` - the backend's structured verdict on either the saved graph
  *   or a rejected save attempt.
  *
  * Every draft mutation funnels through `withHistory`, so undo/redo works over
@@ -66,7 +66,7 @@ export const ASSUMPTION_CATEGORIES: Array<{ value: CausalAssumptionSpec['categor
 ]
 
 export const ASSUMPTION_STATUSES: Array<{ value: CausalAssumptionSpec['status']; label: string }> = [
-  { value: 'declared', label: 'Declared — not verified' },
+  { value: 'declared', label: 'Declared - not verified' },
   { value: 'not_assessed', label: 'Not assessed' },
   { value: 'flagged_for_review', label: 'Flagged for review' },
   { value: 'unsupported', label: 'Unsupported by available information' },
@@ -87,11 +87,11 @@ export function edgeKey(source: string, target: string): string {
 }
 
 /**
- * Canonical signature of the *scientific* content of a draft (S8C staleness).
+ * Canonical signature of the *scientific* content of a draft.
  *
  * Identification results are tied to the exact content that produced them.
  * The signature covers edges, the analysis scope and per-node observed status
- * — the things that change what d-separation and the backdoor criterion
+ * - the things that change what d-separation and the backdoor criterion
  * answer. Deliberately excluded: layout positions (dragging is not a
  * scientific edit), labels, names, descriptions and assumption prose, which
  * the identification mathematics never reads.
@@ -153,7 +153,7 @@ export function isDirty(state: CausalLabState): boolean {
   return JSON.stringify(state.draft) !== JSON.stringify(state.saved)
 }
 
-/** The scientific spec exactly as the S8A backend expects it. */
+/** The scientific spec exactly as the graph backend expects it. */
 export function toSpec(
   draft: CausalDraft,
   datasetId: string,
@@ -436,7 +436,7 @@ export function initialLabState(): CausalLabState {
 /**
  * Local, non-blocking pre-checks mirroring the backend schema. They exist only
  * to give instant feedback while drawing; the backend validation remains the
- * sole authority (the reducer refuses the same structures the S8A engine
+ * sole authority (the reducer refuses the same structures the graph engine
  * rejects, so a draft can never drift into something the backend would accept
  * silently).
  */

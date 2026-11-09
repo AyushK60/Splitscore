@@ -1,16 +1,16 @@
-"""Robustness experiments and sensitivity analysis (S9C-B).
+"""Robustness experiments and sensitivity analysis.
 
 Three *reproducible computational refutation experiments* on top of the
-verified S9A estimators, run on the same gated cohort and adjustment set:
+verified estimation estimators, run on the same gated cohort and adjustment set:
 
-1. **Subsampling** — re-estimate on reproducibly drawn subsets of the cohort.
+1. **Subsampling** - re-estimate on reproducibly drawn subsets of the cohort.
    Stability under subsampling describes sampling variability; it is never
    evidence that the estimate is unbiased.
-2. **Placebo treatment** — re-estimate with the observed treatment vector
+2. **Placebo treatment** - re-estimate with the observed treatment vector
    randomly permuted (treated count preserved). The placebo distribution shows
    what the estimator produces when no treatment assignment structure exists.
    A placebo near zero does not prove the original estimate is causal.
-3. **Hypothetical unmeasured confounder** — a binary confounder with stated
+3. **Hypothetical unmeasured confounder** - a binary confounder with stated
    associations to the observed treatment (log-odds shift γ) and outcome
    (shift κ per outcome SD) is *simulated conditional on the observed data*,
    added to the adjustment set, and the estimator is refitted across a γ×κ
@@ -19,8 +19,8 @@ verified S9A estimators, run on the same gated cohort and adjustment set:
    data, and what it shows is how the estimate would move if a confounder of
    exactly that structure existed and were adjusted for.
 
-Every experiment re-runs the production estimator machinery — never a
-frontend calculation — and every plotted value traces to a seeded, recorded
+Every experiment re-runs the production estimator machinery - never a
+frontend calculation - and every plotted value traces to a seeded, recorded
 computation. Failures are reported per repetition, never averaged away.
 """
 
@@ -81,7 +81,7 @@ PLACEBO_CAVEAT = (
     "Permuting the treatment destroys any assignment–outcome structure in the data, so a "
     "placebo estimate near zero shows only that the estimator produces near-zero noise under "
     "this permutation scheme. It does not verify that the original estimate is causal, and the "
-    "permutation assumes exchangeable, independent assignment — it does not respect group "
+    "permutation assumes exchangeable, independent assignment - it does not respect group "
     "structure or temporal ordering."
 )
 

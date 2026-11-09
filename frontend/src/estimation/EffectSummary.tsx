@@ -1,12 +1,12 @@
 /**
- * View A — Effect Summary.
+ * View A - Effect Summary.
  *
  * One large dot-and-interval figure comparing the supported estimators on the
  * shared analysis the backend actually ran, followed by the numeric table and
  * the backend's own comparison note.
  *
  * Honesty rules encoded here:
- *  - a failed estimator is a failed row with its reason — never a zero, never a
+ *  - a failed estimator is a failed row with its reason - never a zero, never a
  *    dot at the origin;
  *  - an unavailable interval is a dot with an explicit "interval unavailable"
  *    label, and the table says why;
@@ -131,7 +131,7 @@ export function EffectSummary({
     title: 'Average treatment effect by estimator',
     settings: `${results.map((result) => ESTIMATOR_SHORT[result.estimator as EstimatorName] ?? result.estimator).join(' · ')} on one shared analysis · ${formatInteger(payload.analysis.rows_final)} analysed rows · ATE in ${unitLabel}`,
     note:
-      'Point estimates and intervals as reported by the S9A estimation engine. Estimator disagreement is a model-specification signal, not a resolved quantity, and agreement between estimators is not evidence that the effect is causal.',
+      'Point estimates and intervals as reported by the estimation estimation engine. Estimator disagreement is a model-specification signal, not a resolved quantity, and agreement between estimators is not evidence that the effect is causal.',
     provenance,
     csv: toCsv(
       ['estimator', 'status', 'estimate', 'units', 'ci_lower', 'ci_upper', 'standard_error', 'uncertainty_method', 'sample_size', 'warnings'],
@@ -282,7 +282,7 @@ export function EffectSummary({
                   typeof uncertainty.ci_upper === 'number'
                 const label =
                   failed
-                    ? `${name}: failed — ${result.failure?.reason ?? 'no reason reported'}`
+                    ? `${name}: failed - ${result.failure?.reason ?? 'no reason reported'}`
                     : `${name}: ${formatNumber(result.estimate)} ${unitLabel}, ${intervalText(result)}`
                 return (
                   <g
@@ -321,7 +321,7 @@ export function EffectSummary({
                         className="estrow__failure"
                         data-testid={`summary-failure-${result.estimator}`}
                       >
-                        Failed — {result.failure?.reason ?? 'no reason reported'}
+                        Failed - {result.failure?.reason ?? 'no reason reported'}
                       </text>
                     ) : null}
 

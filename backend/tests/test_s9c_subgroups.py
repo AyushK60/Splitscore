@@ -1,7 +1,7 @@
-"""S9C-A subgroup effects: known-answer synthetic experiments.
+"""subgroup subgroup effects: known-answer synthetic experiments.
 
 Every expectation comes from the data-generating process written beside the
-test. Recovery tolerances are ~2 sampling standard errors for the given n —
+test. Recovery tolerances are ~2 sampling standard errors for the given n -
 a finite-sample estimate is never required to equal its generating parameter.
 The uncertainty arithmetic is verified *exactly* against independent formulas
 (std/sqrt(n) within group; sqrt(var_a/n_a + var_b/n_b) for contrasts), and the
@@ -265,7 +265,7 @@ def test_case_8_post_treatment_subgroup_variable_is_refused():
 
 
 def test_case_9_subgroup_with_insufficient_treated_rows_is_unavailable_not_fabricated():
-    # Group B is tiny with exactly 2 treated rows — below the per-arm minimum —
+    # Group B is tiny with exactly 2 treated rows - below the per-arm minimum -
     # while group A and the cross-fitting folds (2 splits) are comfortably
     # populated. g affects only the outcome, so adjusting for {x1, x2} is valid.
     rng = np.random.default_rng(7)

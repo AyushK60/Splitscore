@@ -1,5 +1,5 @@
 /**
- * View B — Covariate Balance.
+ * View B - Covariate Balance.
  *
  * One large Love plot: standardized mean differences before adjustment, and
  * after weighting only when the selected estimator actually applied weights.
@@ -109,7 +109,7 @@ export function BalanceView({
   const exportMeta: FigureExportMeta = {
     figureId: 's9b_covariate_balance',
     title: 'Standardized mean differences before and after weighting',
-    settings: `${estimatorName} · ${weightedApplied ? 'unweighted vs Hájek-weighted' : 'unweighted only — this estimator applies no weights'} · ${allRows.length} covariate comparisons · ${result.sample_size ?? '—'} analysed rows`,
+    settings: `${estimatorName} · ${weightedApplied ? 'unweighted vs Hájek-weighted' : 'unweighted only - this estimator applies no weights'} · ${allRows.length} covariate comparisons · ${result.sample_size ?? '—'} analysed rows`,
     note:
       'Standardized mean differences (treated minus control) computed on the analysed cohort. The 0.1 guide is a conventional heuristic, not a test: balance on measured covariates cannot establish exchangeability or the absence of unmeasured confounding.',
     provenance,
@@ -197,7 +197,7 @@ export function BalanceView({
                 <strong>No post-weighting values are shown.</strong> Regression adjustment predicts
                 potential outcomes from an outcome model and applies no propensity weights, so the
                 backend reports no weighted SMDs for it. Selecting an IPW or AIPW result shows their
-                weighted balance instead — that is a different estimator's diagnostics, never an
+                weighted balance instead - that is a different estimator's diagnostics, never an
                 estimate for this one.
               </p>
             ) : null}

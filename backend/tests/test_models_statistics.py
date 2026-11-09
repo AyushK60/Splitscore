@@ -1,10 +1,10 @@
-"""Numerical oracles for the S6 statistical engine.
+"""Numerical oracles for the statistical engine.
 
 Expectations here are computed independently of the production implementation:
 
 * OLS coefficients are solved from the normal equations with numpy, and the
   standard errors, intervals and p-values are computed from the textbook
-  formula with scipy's t distribution — not read back from statsmodels.
+  formula with scipy's t distribution - not read back from statsmodels.
 * Logistic coefficients and standard errors are compared with a direct
   statsmodels ``Logit`` fit written in the test, which is the trusted
   reference implementation for maximum likelihood.

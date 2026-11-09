@@ -3,7 +3,7 @@
 A manifest is the difference between "we audited a file called data.csv" and
 "we audited these bytes, with this schema, under these declared roles". It
 therefore records identity, not permission: no raw rows, no cell values, no
-secrets — only the fingerprint of the source bytes, a deterministic schema hash
+secrets - only the fingerprint of the source bytes, a deterministic schema hash
 and the declarations that shaped the analysis.
 
 Re-import is deliberately conservative. A manifest whose dataset hash does not

@@ -1,7 +1,7 @@
 """The shipped synthetic demos.
 
 Expected numbers come from the committed manifest, which is produced by the
-generators using independent pandas/NumPy operations — never by the audit engine
+generators using independent pandas/NumPy operations - never by the audit engine
 under test. The comparison is therefore a real check of the engine against
 independently computed ground truth.
 """
@@ -283,7 +283,7 @@ def test_audit_config_for_demos_only_enables_near_duplicates_where_documented():
 
 
 def test_causal_effect_demo_has_a_binary_treatment_and_documented_true_effect():
-    """The S9B demonstration must be estimable and must document its own DGP."""
+    """The estimation UI demonstration must be estimable and must document its own DGP."""
     loaded = get_demo("causal_effect")
     dataset = loaded.load(settings=DEMO_SETTINGS)
     frame = dataset.frame

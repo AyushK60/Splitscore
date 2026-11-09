@@ -111,7 +111,7 @@ function dossier(): DossierReport {
     schema_version: '1.0.0',
     generated_at_utc: '2026-11-04T10:00:00+00:00',
     app: { name: 'SplitScope', version: '1.0.0' },
-    title: 'Evidence dossier — panel.csv',
+    title: 'Evidence dossier - panel.csv',
     dataset: {
       dataset_id: 'ds-test',
       name: 'panel.csv',
@@ -186,7 +186,7 @@ describe('dossier preview', () => {
   })
 })
 
-describe('dossier preview — S10-B causal sections', () => {
+describe('dossier preview - dossier causal sections', () => {
   const causalSections: Record<string, DossierSection> = {
     causal_graph: section('causal_graph', 'Causal graph specification', {
       graph_id: 'cgraph-1',
@@ -267,7 +267,7 @@ describe('dossier preview — S10-B causal sections', () => {
       presentation: 'concise',
       paragraphs: [
         { title: 'Data source and sample', text: "The analysis used 'panel.csv'." },
-        { title: 'Causal identification and estimation', text: 'Not evaluated — no qualifying analysis run was included in this dossier.' },
+        { title: 'Causal identification and estimation', text: 'Not evaluated - no qualifying analysis run was included in this dossier.' },
       ],
       sources: {},
       scope_note: 'Missing inputs are marked explicitly.',
@@ -317,6 +317,6 @@ describe('dossier preview — S10-B causal sections', () => {
     render(<ReportPreview report={causalDossier()} />)
     expect(screen.getByRole('heading', { name: 'Methodology' })).toBeInTheDocument()
     expect(screen.getByText("The analysis used 'panel.csv'.")).toBeInTheDocument()
-    expect(screen.getByText('Not evaluated — no qualifying analysis run was included in this dossier.')).toBeInTheDocument()
+    expect(screen.getByText('Not evaluated - no qualifying analysis run was included in this dossier.')).toBeInTheDocument()
   })
 })

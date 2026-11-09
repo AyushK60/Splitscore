@@ -3,9 +3,9 @@
  * run".
  *
  * Three short steps, in the order a person actually needs them:
- *   1. Where does the split come from — the file, or a split created now?
+ *   1. Where does the split come from - the file, or a split created now?
  *   2. (created splits) which strategy, with its eligibility spelled out.
- *   3. What does each column mean — the guided role questions, the confirmation
+ *   3. What does each column mean - the guided role questions, the confirmation
  *      of any guess, and one run gate whose blockers name the action that
  *      clears them.
  *
@@ -60,7 +60,7 @@ const STRATEGIES: StrategyOption[] = [
     kind: 'group',
     label: 'Group holdout',
     needs: 'entity',
-    what: 'All rows of one person, device or item land on the same side — repetition of an entity never straddles the split.',
+    what: 'All rows of one person, device or item land on the same side - repetition of an entity never straddles the split.',
   },
   {
     kind: 'chronological',
@@ -208,7 +208,7 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
   return (
     <div className="stack">
       {!demo ? (
-        <Callout tone="info" title="Uploaded file — treated as untrusted data">
+        <Callout tone="info" title="Uploaded file - treated as untrusted data">
           Every cell is rendered as text and escaped wherever it appears. The SHA-256 fingerprint
           identifies this exact input for reproducibility; it is not anonymization.
         </Callout>
@@ -314,7 +314,7 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
         <Callout tone="synthetic" title={`Synthetic demo: ${demo.title}`}>
           <p style={{ marginTop: 0 }}>{demo.teaching_point}</p>
           <p className="small muted" style={{ marginBottom: 0 }}>
-            Generated teaching data — not real people or events. Seed {demo.seed}.
+            Generated teaching data - not real people or events. Seed {demo.seed}.
           </p>
           <details className="disclosure" style={{ marginBottom: 0 }}>
             <summary>How this demo was generated</summary>
@@ -325,13 +325,13 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
         </Callout>
       ) : null}
 
-      {/* Step 1 — the entry question, collapsed to a summary once answered. */}
-      <Card title="Step 1 — Does your file already say which rows are training and testing?">
+      {/* Step 1 - the entry question, collapsed to a summary once answered. */}
+      <Card title="Step 1 - Does your file already say which rows are training and testing?">
         {splitMode === null ? (
           <>
             <p className="small muted" style={{ marginTop: 0 }}>
               Every audit compares a training side against a testing side. Tell SplitScope where
-              those sides come from — you can change this answer at any time, and the file itself is
+              those sides come from - you can change this answer at any time, and the file itself is
               never modified either way.
             </p>
             <div className="grid-2 entry-grid">
@@ -342,12 +342,12 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
                   className="btn btn--primary"
                   onClick={() => setSplitMode('existing')}
                 >
-                  Yes — check my existing split.
+                  Yes - check my existing split.
                 </button>
                 <p className="small" style={{ margin: '8px 0 0' }}>
-                  Pick the column that holds the labels — for example{' '}
+                  Pick the column that holds the labels - for example{' '}
                   <span className="mono">split</span> with values{' '}
-                  <span className="mono">train</span> / <span className="mono">test</span> — and map
+                  <span className="mono">train</span> / <span className="mono">test</span> - and map
                   its two values. SplitScope then audits exactly the split the file describes.
                 </p>
               </div>
@@ -358,12 +358,12 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
                   className="btn"
                   onClick={() => setSplitMode('generate')}
                 >
-                  No — help me create a split.
+                  No - help me create a split.
                 </button>
                 <p className="small" style={{ margin: '8px 0 0' }}>
                   Choose random, stratified, group or chronological. The strategy, the seed and every
                   row's side are recorded in the report and downloadable as a CSV. The audit then
-                  assesses this proposed split — your file is not edited.
+                  assesses this proposed split - your file is not edited.
                 </p>
               </div>
             </div>
@@ -390,9 +390,9 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
         )}
       </Card>
 
-      {/* Step 2 — generated splits only: the strategy and its eligibility. */}
+      {/* Step 2 - generated splits only: the strategy and its eligibility. */}
       {splitMode === 'generate' ? (
-        <Card title="Step 2 — Choose how to split the rows">
+        <Card title="Step 2 - Choose how to split the rows">
           <p className="small muted" style={{ marginTop: 0 }}>
             The split is generated when the audit runs and stored beside it: the same strategy, seed
             and settings reproduce the same rows on each side. Your CSV is never edited.
@@ -422,9 +422,9 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
                       <span className="hint">
                         {available
                           ? option.needs
-                            ? `Available — uses the ${option.needs} column you chose.`
+                            ? `Available - uses the ${option.needs} column you chose.`
                             : 'Available for any file.'
-                          : `Unavailable — this strategy needs the ${option.needs} column; choose one in step ${questionsStep} below.`}
+                          : `Unavailable - this strategy needs the ${option.needs} column; choose one in step ${questionsStep} below.`}
                       </span>
                     </span>
                   </label>
@@ -479,7 +479,7 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
 
       {/* The guided questions, the confirmation of any guess, and the run gate. */}
       <Card
-        title={`Step ${questionsStep} — Answer a few questions about your columns`}
+        title={`Step ${questionsStep} - Answer a few questions about your columns`}
         actions={
           <button
             type="button"
@@ -503,7 +503,7 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
           <strong>split</strong> says which rows are training and which are testing.{' '}
           {dataset.suggested_roles_confidence === 'recommended'
             ? 'These suggestions come from the demo’s own manifest. Check them, then run the audit.'
-            : 'Check every question below — the audit only ever uses roles you can see here.'}
+            : 'Check every question below - the audit only ever uses roles you can see here.'}
         </p>
         <RoleEditor
           loaded={dataset}
@@ -519,7 +519,7 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
           <Callout tone="info" title="Confirm the suggested column roles">
             <p style={{ marginTop: 0 }}>
               {hasSuggestions
-                ? 'The selections above are a name- and type-based guess about this file. Look through each question, correct anything the guess got wrong, then confirm — nothing runs on a guess.'
+                ? 'The selections above are a name- and type-based guess about this file. Look through each question, correct anything the guess got wrong, then confirm - nothing runs on a guess.'
                 : 'No column roles could be guessed for this file, so nothing is pre-selected. Answer what you can, use “not applicable / I don’t know” for the rest, then confirm.'}
             </p>
             <p style={{ marginBottom: 0 }}>
@@ -664,7 +664,7 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
 
         {!preview ? (
           <p className="small muted">
-            No rows fetched yet — the preview is fetched on demand, so a large dataset is never sent
+            No rows fetched yet - the preview is fetched on demand, so a large dataset is never sent
             to the browser unnecessarily.
           </p>
         ) : (
@@ -776,7 +776,7 @@ export function DatasetView({ onNavigate }: { onNavigate: (view: ViewId) => void
         <p className="small muted" style={{ marginTop: 0 }}>
           Every threshold below is recorded in the report, so a finding can always be traced back to
           the configuration that produced it. Changing a threshold changes what is reported, never
-          what the data is. The defaults work well — you do not need this section for a first run.
+          what the data is. The defaults work well - you do not need this section for a first run.
         </p>
         <AuditConfigEditor
           config={config}

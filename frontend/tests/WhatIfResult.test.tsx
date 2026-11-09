@@ -1,5 +1,5 @@
 /**
- * S9C-C What-If view: two-arm prediction bars, contrast, disclosed profile,
+ * what-if What-If view: two-arm prediction bars, contrast, disclosed profile,
  * and the model-based (not observed) framing.
  */
 import { render, screen, within } from '@testing-library/react'

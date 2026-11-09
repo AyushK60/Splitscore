@@ -1,13 +1,13 @@
 /**
- * S8B — Causal Lab journey against the real backend.
+ * graph editor - Causal Lab journey against the real backend.
  *
- * The full authoring loop runs against the live S8A endpoints (no mocks):
+ * The full authoring loop runs against the live graph endpoints (no mocks):
  * dataset selection → Causal Lab → create graph → add variables → draw
  * directed edges → set analysis scope → document an assumption → validate →
  * save → reload (positions restored) → export. A second journey proves the
  * backend refuses an invalid structure and the draft survives the rejection.
  *
- * Screenshots at 1440/768/390 are captured to docs/screenshots/s8/.
+ * Screenshots at 1440/768/390 are captured to test-results/shots/s8/.
  */
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
@@ -18,7 +18,7 @@ import type { Page } from '@playwright/test'
 import { expect, loadDemoFromEntry, test } from './fixtures'
 
 const DEMO = 'Repeated-entity subscription panel'
-const SHOTS = fileURLToPath(new URL('../../docs/screenshots/s8', import.meta.url))
+const SHOTS = fileURLToPath(new URL('../test-results/shots/s8', import.meta.url))
 
 test.use({ viewport: { width: 1440, height: 900 } })
 test.setTimeout(180_000)
@@ -41,9 +41,9 @@ async function addColumn(page: Page, column: string): Promise<void> {
   await expect(page.getByTestId('node-inspector')).toBeVisible()
 }
 
-test('S8B: create, validate, save, reload and export a causal graph', async ({ page }) => {
+test('graph editor: create, validate, save, reload and export a causal graph', async ({ page }) => {
   // Loading a teaching example dirties the draft, so "New graph" asks before
-  // discarding it — accept.
+  // discarding it - accept.
   page.on('dialog', (dialog) => void dialog.accept())
   await loadDemoFromEntry(page, DEMO)
 
@@ -61,7 +61,7 @@ test('S8B: create, validate, save, reload and export a causal graph', async ({ p
   // (description + assumption source); the graph name confirms it in the
   // graph inspector.
   await page.getByRole('button', { name: 'Graph settings' }).click()
-  await expect(page.getByRole('textbox', { name: 'Graph name' })).toHaveValue(/Teaching example — fork/)
+  await expect(page.getByRole('textbox', { name: 'Graph name' })).toHaveValue(/Teaching example - fork/)
   await expect(page.getByRole('textbox', { name: 'Graph description' })).toHaveValue(/Synthetic teaching example/)
 
   // --- start a real graph and add observed variables ----------------------- //
@@ -119,7 +119,7 @@ test('S8B: create, validate, save, reload and export a causal graph', async ({ p
   await screenshot(page, 's8_populated_dag.png')
   await page.getByRole('button', { name: /Save changes/ }).click()
   await expect(page.getByText(/Saved revision/)).toBeVisible({ timeout: 15_000 })
-  await expect(page.getByRole('button', { name: 'Saved — no unsaved changes' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Saved - no unsaved changes' })).toBeDisabled()
 
   // --- validate: the backend is the only validator --------------------------- //
   await page.getByRole('button', { name: 'Validate' }).click()
@@ -164,18 +164,18 @@ test('S8B: create, validate, save, reload and export a causal graph', async ({ p
   await expect(page.locator('.cnode')).toHaveCount(3)
   await expect(page.locator('.react-flow__edge')).toHaveCount(2)
   await expect(page.getByText(/revision/)).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Saved — no unsaved changes' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Saved - no unsaved changes' })).toBeDisabled()
   // The dragged graph-space position came back from the backend's layout.
   expect(await transformOf()).toEqual(transformDragged)
 
   // --- export the versioned JSON -------------------------------------------- //
   const downloadPromise = page.waitForEvent('download')
-  await page.getByRole('button', { name: 'Export', exact: true }).click() // S10-C added 'Export figure'
+  await page.getByRole('button', { name: 'Export', exact: true }).click() // figure added 'Export figure'
   const download = await downloadPromise
   expect(download.suggestedFilename()).toMatch(/^splitscope-causal-graph-cgraph-/)
 })
 
-test('S8B: the backend refuses an invalid structure and the draft survives', async ({
+test('graph editor: the backend refuses an invalid structure and the draft survives', async ({
   page,
   allowFailure,
 }) => {
@@ -225,7 +225,7 @@ test('S8B: the backend refuses an invalid structure and the draft survives', asy
   await expect(page.locator('.react-flow__edge')).toHaveCount(3)
   await expect(page.getByRole('button', { name: /Save changes/ })).toBeEnabled()
 
-  // Fix the cycle by deleting the node that closes it — the inspector's
+  // Fix the cycle by deleting the node that closes it - the inspector's
   // confirmation warns that connected edges go with it.
   await page.keyboard.press('Escape')
   await page.locator('.cnode[data-node-id="customer_id"]').click()
@@ -239,7 +239,7 @@ test('S8B: the backend refuses an invalid structure and the draft survives', asy
   await expect(page.getByText(/Saved revision/)).toBeVisible({ timeout: 15_000 })
 })
 
-test('S8B: tablet and mobile layouts stay usable', async ({ page }) => {
+test('graph editor: tablet and mobile layouts stay usable', async ({ page }) => {
   await loadDemoFromEntry(page, DEMO)
   await goTo(page, 'Causal Lab')
   await page.getByRole('button', { name: 'Fork example' }).click()

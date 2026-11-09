@@ -1,7 +1,7 @@
-"""S9A independent numerical audit harness.
+"""estimation independent numerical audit harness.
 
 This module re-implements the estimators from their mathematical definitions
-using numpy and statsmodels only — it never calls the production estimator
+using numpy and statsmodels only - it never calls the production estimator
 helpers to produce a reference value. Production output is compared against
 these references on controlled data-generating processes with known answers.
 
@@ -35,7 +35,7 @@ def ref_gcomp_ols(t: np.ndarray, y: np.ndarray, covariates: dict[str, np.ndarray
     """G-computation with OLS via explicit design matrices and lstsq.
 
     Fits m(t, x) = b0 + b_t*t + x'b_x, then averages m(1, X) - m(0, X) over
-    the empirical population — the definition, not a shortcut (the result
+    the empirical population - the definition, not a shortcut (the result
     equals b_t for this model family, which is itself a check).
     """
     n = len(t)
@@ -63,7 +63,7 @@ def ref_aipw_crossfit(
     splits: int,
     seed: int,
 ) -> tuple[float, float]:
-    """Cross-fitted AIPW with statsmodels nuisances — independent pipeline.
+    """Cross-fitted AIPW with statsmodels nuisances - independent pipeline.
 
     Same fold construction (shuffled KFold, same seed) but completely
     different fitting code: GLM Binomial IRLS for the propensity, OLS for
@@ -269,14 +269,14 @@ def test_a5_categorical_confounder_matches_independent_encoding():
 
 
 # --------------------------------------------------------------------------- #
-# A6: small deterministic example — exact arithmetic, all three estimators
+# A6: small deterministic example - exact arithmetic, all three estimators
 # --------------------------------------------------------------------------- #
 
 
 def test_a6_small_deterministic_example_exact():
     """24 rows, perfectly balanced randomized t, y = 2t + v where the noise v
     has exactly zero mean in each arm by construction (continuous, so the
-    outcome is not misread as binary — a binary outcome would legitimately be
+    outcome is not misread as binary - a binary outcome would legitimately be
     reported as a probability difference, not 2.0).
 
     With e = 0.5 (intercept-only propensity on an exactly balanced design),

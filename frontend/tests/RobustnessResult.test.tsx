@@ -1,5 +1,5 @@
 /**
- * S9C-B Robustness view: distribution figure, original reference, honest
+ * robustness Robustness view: distribution figure, original reference, honest
  * failure list, sensitivity grid shading.
  */
 import { render, screen, within } from '@testing-library/react'

@@ -1,7 +1,7 @@
 """The synthetic evaluation runner.
 
 Executes each :class:`~app.evaluation.cases.EvalCase` through the **public**
-audit interfaces — :func:`app.audit.service.audit_existing_split` for cases
+audit interfaces - :func:`app.audit.service.audit_existing_split` for cases
 that audit the split column present in the fixture, and the strategy +
 :func:`app.audit.engine.run_audit` composition (the same one
 :mod:`app.splits.comparison` uses) for cases that evaluate a generated
@@ -18,9 +18,9 @@ pair from the manifest must appear among the candidate pairs.
 
 Exit-status contract used by the CLI and the tests:
 
-* ``0`` — every case passed;
-* ``1`` — at least one case failed an expectation (a real mismatch);
-* ``2`` — a case could not be evaluated at all (invalid fixture, missing
+* ``0`` - every case passed;
+* ``1`` - at least one case failed an expectation (a real mismatch);
+* ``2`` - a case could not be evaluated at all (invalid fixture, missing
   dataset file, unexpected runtime error). This is deliberately distinct from
   a failing expectation so automation can tell "the engine disagrees" from
   "the harness broke".

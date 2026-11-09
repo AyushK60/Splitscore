@@ -1,5 +1,5 @@
 /**
- * S10-A Research history view: typed run projection, filters, staleness
+ * history Research history view: typed run projection, filters, staleness
  * honesty and manifest export. The API boundary is mocked with payloads
  * mirroring the backend contract (tests/test_s10_history.py is the live
  * counterpart); the view, filters, staleness banner and parameter expansion
@@ -116,7 +116,7 @@ function historyFixture(overrides: Partial<HistoryResponse> = {}): HistoryRespon
   }
 }
 
-describe('HistoryView (S10-A)', () => {
+describe('HistoryView', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })

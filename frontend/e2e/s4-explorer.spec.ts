@@ -1,5 +1,5 @@
 /**
- * S4 Scientific Visual Explorer — end-to-end journey.
+ * Scientific Visual Explorer - end-to-end journey.
  *
  * Runs against the real backend (fresh process via webServer) with the
  * bundled repeated-entity demo. The journey is behavioural, not presence

@@ -1,8 +1,8 @@
 /**
- * View D — Weights & Reliability.
+ * View D - Weights & Reliability.
  *
  * One chart (raw versus Kish effective sample size per arm) and one compact
- * diagnostic table. The S9A payload reports weight *summaries* only, so this
+ * diagnostic table. The estimation payload reports weight *summaries* only, so this
  * view plots summaries only: no invented per-row weight distribution.
  */
 
@@ -147,7 +147,7 @@ export function WeightsView({
             <p className="estfig__note">
               The effective sample size is the number of equally weighted observations that would
               carry the same information as these weights: (Σw)² / Σw², computed per arm. It is a
-              property of the weighting scheme, not a defect in the data or the software — a small
+              property of the weighting scheme, not a defect in the data or the software - a small
               value means the estimate leans on fewer rows than its row count suggests.
             </p>
             {truncation ? (
@@ -266,7 +266,7 @@ export function WeightsView({
           <div className="esttable-block__head">
             <h3>Weight summary</h3>
             <p className="esttable-block__note">
-              The S9A diagnostics report weight summaries for the whole cohort, not per-row weights,
+              The estimation diagnostics report weight summaries for the whole cohort, not per-row weights,
               so no individual weight can be inspected or reconstructed here.
             </p>
           </div>
@@ -369,7 +369,7 @@ export function WeightsView({
               by itself.
             </li>
             <li>
-              Truncation reduces the influence of extreme weights but shifts the estimand — the two
+              Truncation reduces the influence of extreme weights but shifts the estimand - the two
               effects are reported together on purpose.
             </li>
             <li>

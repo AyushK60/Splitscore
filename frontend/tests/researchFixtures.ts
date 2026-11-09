@@ -1,5 +1,5 @@
 /**
- * S9C research fixtures: hand-written payloads matching the backend contract,
+ * estimation research fixtures: hand-written payloads matching the backend contract,
  * with independently specified expectations (never derived from the code
  * under test). Derived from the estimationFixtures study so ResearchView can
  * build its request from a real-shape reproducibility block.
@@ -242,7 +242,7 @@ export function whatIfPayload(overrides: Partial<WhatIfRunPayload> = {}): WhatIf
       contrast: 1.59,
       note: 'The same model averaged over the whole analysis cohort.',
     },
-    warnings: ['Model-based conditional predictions — not observed outcomes.'],
+    warnings: ['Model-based conditional predictions - not observed outcomes.'],
     reproducibility: runPayload().reproducibility,
     scope_note: 'Scope note for what-if scenarios.',
     run_id: WHATIF_RUN_ID,

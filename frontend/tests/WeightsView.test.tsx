@@ -1,5 +1,5 @@
 /**
- * View D — Weights & Reliability.
+ * View D - Weights & Reliability.
  *
  * Pins raw vs Kish effective sample size, retained fractions, the truncation
  * disclosure and the not-applicable state for an estimator that applies no
